@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
+import Swal from 'sweetalert2'
 
 // Fix default marker icon issue in Leaflet
 // delete L.Icon.Default.prototype._getIconUrl
@@ -11,7 +12,7 @@ import L from 'leaflet'
 //   iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
 //   iconUrl: require('leaflet/dist/images/marker-icon.png'),
 //   shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
-// })
+// });
 
 
 // Component for picking location on map
@@ -51,10 +52,10 @@ const Register = () => {
     farmTotalArea: '',
     farmSoilType: ''
   })
-  const [location, setLocation] = useState({ lat: "", lng: "" }) // default Sri Lanka
+  const [location, setLocation] = useState({ lat: null, lng: null }) // default Sri Lanka
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const { register } = useAuth()
+  const { register, logout } = useAuth()
   const navigate = useNavigate()
 
   const handleChange = (e) => {
@@ -89,7 +90,17 @@ const Register = () => {
     const result = await register(dataToSend)
 
     if (result.success) {
-      navigate('/dashboard')
+      //alert('Registration successful! Please log in.')
+      logout()
+      Swal.fire({
+        title: 'Success!',
+        text: 'Registration successful! Please log in.',
+        icon: 'success',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#648bdfff',
+        background: '#f8f9fa'
+      });
+      navigate('/login')
     } else {
       setError(result.error || 'Registration failed')
     }

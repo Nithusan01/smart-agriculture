@@ -15,7 +15,7 @@ const protect = async (req, res, next) => {
 
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      const user = await User.findByPk(decoded.userId);
+      const user = await User.findByPk(decoded.id);
 
       if (!user || !user.isActive) {
         return res.status(401).json({ message: 'Not authorized, user not found' });
@@ -33,8 +33,8 @@ const protect = async (req, res, next) => {
   }
 };
 
-const generateToken = (userId) => {
-  return jwt.sign({ userId }, process.env.JWT_SECRET, {
+const generateToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRE,
   });
 };

@@ -1,9 +1,8 @@
 const express = require('express');
 const cors = require('cors');
-const authRoutes = require('./routes/auth');
 const { sequelize } = require('./models/index');
 require('dotenv').config();
-const { protect } = require('./middlewares/auth');
+const {protect} = require('./middlewares/auth')
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -12,8 +11,14 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
+// define 
+const authRoutes = require('./routes/auth');
+const cultivationPlanRoutes = require('./routes/cultivationPlan')
+
+
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/cultivationPlan', cultivationPlanRoutes);
 
 // Protected route example
 app.get('/api/profile', protect, (req, res) => {
@@ -21,7 +26,7 @@ app.get('/api/profile', protect, (req, res) => {
 });
 
 // Basic route
-app.get('/', (req, res) => {
+app.get('/a', (req, res) => {
   res.json({ message: 'Smart Agriculture API is running!' });
 });
 
@@ -36,7 +41,7 @@ const testConnection = async () => {
 };
 const db = require('./models');
 
-db.sequelize.sync({ alter: true }) // creates the table if it doesn't exist
+ db.sequelize.sync({ alter: true ,force:true }) // creates the table if it doesn't exist
   .then(() => console.log('Database & tables synced'))
   .catch(err => console.error('Sync error:', err));
 

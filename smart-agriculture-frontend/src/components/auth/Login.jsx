@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import Swal from 'sweetalert2'
+
 
 const Login = () => {
   const [credentials, setCredentials] = useState({
@@ -29,8 +31,18 @@ const Login = () => {
     
     if (result.success) {
       navigate('/dashboard')
-    } else {
+    }
+     else {
       setError(result.error)
+      Swal.fire({
+        title: 'Error!',
+        text: result.error,
+        icon: 'error',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#648bdfff',
+        background: '#f8f9fa'
+
+      });
     }
     
     setIsLoading(false)
@@ -39,14 +51,14 @@ const Login = () => {
   return (
     <div className="auth-container">
       <div className="auth-form">
-        <h2>Login to Your Farm Account</h2>
-        {error && <div className="alert alert-danger">{error}</div>}
+        <h2 className='text-green-700 text-xl'>Login to Your Farm Account</h2>
+        {error && <div className="bg-red-100 border-red-200 text-yellow-800 py-1 pl-2 mb-3">{error}</div>}
         
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="username">Username or Email</label>
             <input
-              type="text"
+              type="text" 
               id="username"
               name="username"
               value={credentials.username}
@@ -77,7 +89,7 @@ const Login = () => {
         </form>
         
         <p className="auth-link">
-          Don't have an account? <Link to="/register">Sign up</Link>
+          Don't have an account? <Link to="/register" className='text-[#0e46bfff] font-semibold hover:text-[#648bdfff]'>Sign up</Link>
         </p>
       </div>
     </div>

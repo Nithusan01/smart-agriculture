@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 
 module.exports = (sequelize) => {
   const User = sequelize.define('User', {
-    userId: {
+    id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
@@ -46,21 +46,25 @@ module.exports = (sequelize) => {
     },
     farmName: {
       type: DataTypes.STRING(255),
-      allowNull: false,
+      allowNull: true,
       field: 'farm_name'
     },
 
     farmLat: {
-  type: DataTypes.DECIMAL(10, 6),
-  allowNull: true
-},
-farmLng: {
-  type: DataTypes.DECIMAL(10, 6),
-  allowNull: true
-},
+      type: DataTypes.DECIMAL(10, 6),
+      allowNull: true
+
+    },
+  
+    farmLng: {
+      type: DataTypes.DECIMAL(10, 6),
+      allowNull: true
+    },
     farmTotalArea: {
       type: DataTypes.STRING(100),
-      field: 'farm_total_area'
+      field: 'farm_total_area',
+      allowNull:true
+      
     },
     farmSoilType: {
       type: DataTypes.STRING(50),
@@ -99,6 +103,16 @@ farmLng: {
       }
     }
   });
+
+  // Association (User hasMany CultivationPlans)
+  User.associate = (models) => {
+    User.hasMany(models.CultivationPlan, {
+      foreignKey: 'userId',
+      as: 'plans',
+      onDelete: 'CASCADE'
+    });
+  };
+
 
   User.prototype.validatePassword = async function (password) {
     return await bcrypt.compare(password, this.passwordHash);

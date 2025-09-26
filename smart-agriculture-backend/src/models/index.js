@@ -1,6 +1,7 @@
 const { Sequelize, DataTypes } = require('sequelize'); // Add DataTypes here
 const config = require('../config/config.js');
 const UserModel = require('./User'); // Make sure this is lowercase 'user'
+const CultivationPlanModel = require('./cultivationPlan')
 
 const env = process.env.NODE_ENV || 'development';
 const dbConfig = config[env];
@@ -21,9 +22,11 @@ const sequelize = new Sequelize(
 
 // Pass both sequelize AND DataTypes to your User model
 const User = UserModel(sequelize, DataTypes);
+const CultivationPlan = CultivationPlanModel(sequelize, DataTypes);
 
 const models = {
   User,
+  CultivationPlan,
   sequelize,
   Sequelize
 };

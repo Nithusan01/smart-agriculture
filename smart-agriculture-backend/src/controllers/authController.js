@@ -1,11 +1,11 @@
 const { User } = require('../models');
 const { generateToken } = require('../middlewares/auth');
-const { Op } = require('sequelize'); // CORRECT IMPORT
+const { Op } = require('sequelize');
 
 // Register user
 const register = async (req, res) => {
   try {
-    const { username, email, password, firstName, lastName, phoneNumber, farmName, farmTotalArea, farmSoilType,farmLat,farmLng } = req.body;
+    const { username, email, password, firstName, lastName, phoneNumber, farmName, farmTotalArea, farmSoilType, farmLat, farmLng } = req.body;
 
     // Check if user already exists
     const existingUser = await User.findOne({
@@ -15,9 +15,9 @@ const register = async (req, res) => {
     });
 
     if (existingUser) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        message: 'User already exists' 
+        message: 'User already exists'
       });
     }
 
@@ -34,20 +34,22 @@ const register = async (req, res) => {
       farmSoilType,
       farmLat,
       farmLng
+
     });
 
     // Generate token
-    const token = generateToken(user.userId);
+    const token = generateToken(user.id);
 
     // Update last login
     await user.update({ lastLogin: new Date() });
+
 
     res.status(201).json({
       success: true,
       message: 'User created successfully',
       token,
       user: {
-        userId: user.userId,
+        id: user.id,
         username: user.username,
         email: user.email,
         firstName: user.firstName,
@@ -58,7 +60,7 @@ const register = async (req, res) => {
     });
   } catch (error) {
     console.error('Registration error:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
       message: 'Server error during registration'
     });
@@ -80,24 +82,26 @@ const login = async (req, res) => {
       }
     });
 
-    // Check if user exists and password is correct
-    if (!user || !(await user.validatePassword(password))) {
-      return res.status(401).json({ 
+    // Check if user exists
+    if (!user) {
+      return res.status(401).json({
         success: false,
-        message: 'Invalid credentials' 
+        message: 'Incorrect username or email'  // user not found
       });
     }
 
-    // Check if user is active
-    if (!user.isActive) {
-      return res.status(401).json({ 
+    // Check if password is correct
+    const isPasswordValid = await user.validatePassword(password);
+    if (!isPasswordValid) {
+      return res.status(401).json({
         success: false,
-        message: 'Account is deactivated' 
+        message: 'Incorrect password'  // wrong password
       });
     }
+
 
     // Generate token
-    const token = generateToken(user.userId);
+    const token = generateToken(user.id);
 
     // Update last login
     await user.update({ lastLogin: new Date() });
@@ -107,7 +111,7 @@ const login = async (req, res) => {
       message: 'Login successful',
       token,
       user: {
-        userId: user.userId,
+        id: user.id,
         username: user.username,
         email: user.email,
         firstName: user.firstName,
@@ -118,9 +122,9 @@ const login = async (req, res) => {
     });
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      message: 'Server error during login' 
+      message: 'Server error during login'
     });
   }
 };

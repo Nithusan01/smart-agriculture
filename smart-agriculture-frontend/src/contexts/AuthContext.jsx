@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const token = localStorage.getItem('token')
-    
+
     if (token) {
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`
       fetchUser()
@@ -39,16 +39,16 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await api.post('/auth/login', credentials)
       const { token, user } = response.data
-      
+
       localStorage.setItem('token', token)
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`
       setCurrentUser(user)
-      
+
       return { success: true }
     } catch (error) {
-      return { 
-        success: false, 
-        error: error.response?.data?.message || 'Login failed' 
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Login failed server error'
       }
     }
   }
@@ -57,16 +57,17 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await api.post('/auth/register', userData)
       const { token, user } = response.data
-      
+
       localStorage.setItem('token', token)
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`
       setCurrentUser(user)
-      
+
+
       return { success: true }
     } catch (error) {
-      return { 
-        success: false, 
-        error: error.response?.data?.message || 'Registration failed' 
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Registration failed'
       }
     }
   }
@@ -76,6 +77,7 @@ export const AuthProvider = ({ children }) => {
     delete api.defaults.headers.common['Authorization']
     setCurrentUser(null)
   }
+
 
   const value = {
     currentUser,
