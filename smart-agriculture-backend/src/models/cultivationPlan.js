@@ -1,5 +1,4 @@
-const { DataTypes, Association, DECIMAL } = require('sequelize');
-const { FOREIGNKEYS } = require('sequelize/lib/query-types');
+const { DataTypes} = require('sequelize');
 
 module.exports = (sequelize) => {
     const CultivationPlan = sequelize.define('CultivationPlan',

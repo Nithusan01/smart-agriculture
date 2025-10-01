@@ -10,6 +10,7 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
+  
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -21,6 +22,7 @@ export const AuthProvider = ({ children }) => {
       setIsLoading(false)
     }
   }, [])
+  
 
   const fetchUser = async () => {
     try {
@@ -34,6 +36,7 @@ export const AuthProvider = ({ children }) => {
       setIsLoading(false)
     }
   }
+  
 
   const login = async (credentials) => {
     try {
@@ -76,11 +79,13 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('token')
     delete api.defaults.headers.common['Authorization']
     setCurrentUser(null)
+    
   }
 
 
   const value = {
     currentUser,
+    fetchUser,
     isLoading,
     login,
     register,

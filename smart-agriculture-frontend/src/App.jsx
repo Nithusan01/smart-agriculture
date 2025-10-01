@@ -7,6 +7,8 @@ import Header from './components/layout/Header'
 import Login from './components/auth/Login'
 import Register from './components/auth/Register'
 import Dashboard from './components/dashboard/Dashboard'
+import { WeatherProvider } from './contexts/WeatherContext';
+
 
 import './index.css'
 import Footer from './components/layout/Footer'
@@ -16,6 +18,7 @@ import Planning from './components/planning/planning'
 function App() {
   return (
     <AuthProvider>
+      <WeatherProvider>
       <CultivationPlanProvider>
       <Router>
         <div className="App">
@@ -26,7 +29,6 @@ function App() {
               {/* <Route path="/dashboard"  element={<Navigate to="/dashboard" replace />} />  */}
               <Route path="/login" element={<Login /> } />
               <Route path="/register" element={<Register />} />
-              <Route path="/planning"  element={<Planning />} />
               
               <Route 
                 path="/dashboard" 
@@ -37,12 +39,22 @@ function App() {
                 } 
               />
               
+              <Route 
+                path="/planning" 
+                element={
+                  <PrivateRoute>
+                    <Planning />
+                  </PrivateRoute>
+                } 
+              />
+
             </Routes>
           </main>
           <Footer/>
         </div>
       </Router>
         </CultivationPlanProvider>
+        </WeatherProvider>
     </AuthProvider>
   )
 }

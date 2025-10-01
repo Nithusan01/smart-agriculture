@@ -1,5 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom'
+import Dashboard from '../dashboard/Dashboard';
+import Planning from '../planning/planning';
 
 
 const AgriSmartSection = () => {
@@ -74,9 +76,7 @@ const AgriSmartSection = () => {
           </div>
         </div>
       </section>
-      
     </div>
-
   );
 };
 

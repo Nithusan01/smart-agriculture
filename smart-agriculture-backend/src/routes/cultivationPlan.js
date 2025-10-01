@@ -1,11 +1,14 @@
 const express = require('express')
-const { createCultivationPlan } = require('../controllers/cultivationPlanController');
+const { createCultivationPlan,getPlans,updatePlan } = require('../controllers/cultivationPlanController');
 const { protect } = require('../middlewares/auth');
 const { body } = require("express-validator");
 
 
 const router = express.Router();
 
-router.post('/plan',protect,createCultivationPlan);
+router.post('/',protect,createCultivationPlan);
+router.get('/',protect,getPlans);
+router.put('/:id',protect,updatePlan)
+
 
 module.exports = router;

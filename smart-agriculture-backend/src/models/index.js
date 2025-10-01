@@ -1,11 +1,10 @@
-const { Sequelize, DataTypes } = require('sequelize'); // Add DataTypes here
+const { Sequelize, DataTypes } = require('sequelize'); 
 const config = require('../config/config.js');
-const UserModel = require('./User'); // Make sure this is lowercase 'user'
-const CultivationPlanModel = require('./cultivationPlan')
+const UserModel = require('./User');
+const CultivationPlanModel = require('./cultivationPlan');
 
 const env = process.env.NODE_ENV || 'development';
 const dbConfig = config[env];
-
 
 const sequelize = new Sequelize(
   dbConfig.database,
@@ -20,9 +19,13 @@ const sequelize = new Sequelize(
   }
 );
 
-// Pass both sequelize AND DataTypes to your User model
+// Initialize models
 const User = UserModel(sequelize, DataTypes);
 const CultivationPlan = CultivationPlanModel(sequelize, DataTypes);
+
+// Set up associations
+User.hasMany(CultivationPlan, { foreignKey: 'userId', as: 'plans', onDelete: 'CASCADE' });
+CultivationPlan.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 
 const models = {
   User,
@@ -31,7 +34,6 @@ const models = {
   Sequelize
 };
 
-// Also export Op for easy access
 models.Op = Sequelize.Op;
 
 module.exports = models;
