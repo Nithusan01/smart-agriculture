@@ -1,14 +1,17 @@
-import React, { useState } from 'react'
+import React, { useState,useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faUserCircle, faSignOutAlt, faBars, faTimes } from '@fortawesome/free-solid-svg-icons'
+import UserMenu from './UserMenu';
 
 const Header = () => {
   const { currentUser, logout } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false);
+
 
   const handleLogout = () => {
     logout()
@@ -17,106 +20,114 @@ const Header = () => {
   }
 
   const isActive = (path) => {
-    return location.pathname === path ? 'bg-white bg-opacity-10' : ''
+    return location.pathname === path ? 'border-b-2 border-yellow-400' : ''
   }
 
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false)
   }
+  // Track scroll position for header background
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+      
+      let current = "Home";
+      navItems.forEach((id) => {
+        const element = document.getElementById(id);
+        if (element && window.scrollY >= element.offsetTop - 100) {
+          current = id;
+        }
+      });
+      setActiveSection(current);
+    };
+    
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+
+
 
   return (
-    <header className="bg-gradient-to-r from-[#2e7d32] to-[#4caf50] text-white shadow-md z-50 py-4">
+    // <header className="bg-gradient-to-r from-green-700 to-lime-600 text-white shadow-lg z-50 py-4">
+      <header className={`fixed top-0 left-0 w-full z-50 py-4 transition-all text-green-700 duration-500 ease-out ${
+  isScrolled 
+    ? 'bg-white/50  backdrop-blur-3xl shadow-2xl shadow-black/5 border-b border-gray-100/80   ' 
+    : 'bg-transparent  '
+} ${isScrolled ? 'animate-fade-in-down' : ''}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center relative">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 text-xl font-bold text-white z-10">
-            <i className="fas fa-leaf text-2xl"></i>
-            <span className="text-xl sm:text-2xl">AgriSmart IoT</span>
+            <i className="fas fa-leaf text-yellow-400 text-5xl"></i>
+            <span className='text-3xl text-green-700 '>AgriSmart</span>
           </Link>
           
-          {/* Desktop Navigation - Absolutely Centered */}
-          <nav className="hidden md:flex items-center absolute left-1/2 transform -translate-x-1/2">
+          {/* Desktop Navigation */}
+          <nav className="hidden  md:flex items-center absolute left-1/2 transform -translate-x-1/2">
             {currentUser ? (
-              <>
-                {/* Navigation Links */}
-                <div className="flex gap-5 font-bold">
-                  <Link 
-                    to="/dashboard" 
-                    className={`text-white px-4 py-2 rounded transition-colors duration-300 ${isActive('/dashboard')}`}
-                  >
-                    Dashboard
-                  </Link>
-                  <Link 
-                    to="/planning" 
-                    className={`text-white px-4 py-2 rounded transition-colors duration-300 ${isActive('/planning')}`}
-                  >
-                    Planning
-                  </Link>
-                  <Link 
-                    to="/disease" 
-                    className={`text-white px-4 py-2 rounded transition-colors duration-300 ${isActive('/disease')}`}
-                  >
-                    Disease Management
-                  </Link>
-
-                  <Link 
-                  to="/" 
-                  className={`text-white px-4 py-2 rounded transition-colors duration-300 ${isActive('/')}`}
+              <div className="flex  gap-6 font-bold text-xl">
+                <Link 
+                  to="/dashboard" 
+                  className={`px-4 py-2 rounded-xl transition-colors duration-300 hover:bg-green-700/40 rounded ${isActive('/dashboard')}`}
                 >
-                  About Us
+                  Dashboard
                 </Link>
-
-                </div>
-              </>
-            ) : (
-              /* Navigation Links for non-logged in users */
-              <div className="flex gap-5 font-bold">
-               
+                <Link 
+                  to="/planning" 
+                  className={`px-4 py-2 rounded-xl transition-colors duration-300 hover:bg-green-700/40 rounded ${isActive('/planning')}`}
+                >
+                  Planning
+                </Link>
+                <Link 
+                  to="/disease" 
+                  className={`px-4 py-2 rounded-xl transition-colors duration-300 hover:bg-green-700/40 rounded ${isActive('/disease')}`}
+                >
+                  Disease Mgmt
+                </Link>
                 <Link 
                   to="/" 
-                  className={`text-white px-4 py-2 rounded transition-colors duration-300 ${isActive('/')}`}
+                  className={`px-4 py-2 rounded-xl transition-colors duration-300 hover:bg-green-700/40 rounded ${isActive('/')}`}
                 >
                   About Us
                 </Link>
-
+              </div>
+            ) : (
+              <div className="flex gap-6 font-bold">
+                <Link 
+                  to="/" 
+                  className={`px-4 py-2 rounded-xl transition-colors duration-300 hover:bg-green-700/40 rounded ${isActive('/')}`}
+                >
+                  About Us
+                </Link>
               </div>
             )}
           </nav>
 
-          {/* Right Side - User Menu or Auth Links */}
+          {/* Right Side */}
           <div className="hidden md:flex items-center z-10">
             {currentUser ? (
-              /* User Menu */
               <div className="flex items-center gap-4">
-                {/* User Info */}
-                <div className="flex items-center gap-2">
-                  <FontAwesomeIcon 
-                    icon={faUserCircle} 
-                    className="text-white text-2xl" 
-                  />
-                </div>
-                
-                {/* Logout Button */}
-                <button 
+                <UserMenu />
+                {/* <button 
                   onClick={handleLogout} 
-                  className="flex items-center gap-2 text-white hover:bg-white hover:bg-opacity-10 px-4 py-2 rounded transition-colors duration-300"
+                  className="flex items-center gap-2 text-white hover:bg-green-700/40 px-4 py-2 rounded transition-colors duration-300"
                 >
                   <FontAwesomeIcon icon={faSignOutAlt} />
                   <span>Logout</span>
-                </button>
+                </button> */}
               </div>
             ) : (
-              /* Auth Links for non-logged in users */
               <div className="flex gap-3">
                 <Link 
                   to="/login" 
-                  className="border border-white font-bold text-white hover:bg-white hover:bg-opacity-10 px-6 py-2 rounded transition-colors duration-300"
+                  className="bg-green-700 border rounded-xl border-white font-bold text-white hover:bg-green-500/40 px-6 py-2 rounded transition-colors duration-300"
                 >
                   Login
                 </Link>
                 <Link 
                   to="/register" 
-                  className="bg-[#ffa000] font-bold hover:bg-yellow-600 text-white px-6 py-2 rounded transition-colors duration-300"
+                  className="bg-yellow-400 rounded-xl font-bold hover:bg-yellow-600 text-white px-6 py-2 rounded transition-colors duration-300"
                 >
                   Sign Up
                 </Link>
@@ -138,93 +149,22 @@ const Header = () => {
           <div className="md:hidden mt-4 pb-4 border-t border-white border-opacity-20 pt-4">
             {currentUser ? (
               <div className="flex flex-col space-y-4">
-                {/* Mobile Navigation Links */}
                 <div className="flex flex-col space-y-3 font-bold">
-                  <Link 
-                    to="/dashboard" 
-                    className={`text-white px-3 py-2 rounded transition-colors duration-300 ${isActive('/dashboard')}`}
-                    onClick={closeMobileMenu}
-                  >
-                    Dashboard
-                  </Link>
-                  <Link 
-                    to="/planning" 
-                    className={`text-white px-3 py-2 rounded transition-colors duration-300 ${isActive('/planning')}`}
-                    onClick={closeMobileMenu}
-                  >
-                    Planning
-                  </Link>
-                  <Link 
-                    to="/disease" 
-                    className={`text-white px-3 py-2 rounded transition-colors duration-300 ${isActive('/disease')}`}
-                    onClick={closeMobileMenu}
-                  >
-                    Disease Management
-                  </Link>
+                  <Link to="/dashboard" className={`px-3 py-2 hover:bg-green-700/40 rounded ${isActive('/dashboard')}`} onClick={closeMobileMenu}>Dashboard</Link>
+                  <Link to="/planning" className={`px-3 py-2 hover:bg-green-700/40 rounded ${isActive('/planning')}`} onClick={closeMobileMenu}>Planning</Link>
+                  <Link to="/disease" className={`px-3 py-2 hover:bg-green-700/40 rounded ${isActive('/disease')}`} onClick={closeMobileMenu}>Disease Mgmt</Link>
                 </div>
-
-                {/* Mobile User Menu */}
                 <div className="flex flex-col space-y-3 border-t border-white border-opacity-20 pt-4">
-                  <div className="flex items-center gap-2 px-3 py-2">
-                    <FontAwesomeIcon icon={faUserCircle} className="text-white text-2xl" />
-                    <span>User Menu</span>
-                  </div>
-                  
-                  <button 
-                    onClick={handleLogout} 
-                    className="flex items-center gap-2 text-white hover:bg-white hover:bg-opacity-10 px-3 py-2 rounded transition-colors duration-300 text-left"
-                  >
+                  <button onClick={handleLogout} className="flex items-center gap-2 hover:bg-green-700/40 px-3 py-2 rounded">
                     <FontAwesomeIcon icon={faSignOutAlt} />
                     <span>Logout</span>
                   </button>
                 </div>
               </div>
             ) : (
-              /* Mobile Auth Links */
               <div className="flex flex-col space-y-4">
-                {/* Mobile Navigation Links for non-logged in */}
-                <div className="flex flex-col space-y-3 font-bold">
-                  <Link 
-                    to="/" 
-                    className={`text-white px-3 py-2 rounded transition-colors duration-300 ${isActive('/')}`}
-                    onClick={closeMobileMenu}
-                  >
-                    Home
-                  </Link>
-
-                  <Link 
-                    to="/" 
-                    className={`text-white px-3 py-2 rounded transition-colors duration-300 ${isActive('/')}`}
-                    onClick={closeMobileMenu}
-                  >
-                    About
-                  </Link>
-
-                  <Link 
-                    to="/features" 
-                    className={`text-white px-3 py-2 rounded transition-colors duration-300 ${isActive('/features')}`}
-                    onClick={closeMobileMenu}
-                  >
-                    Features
-                  </Link>
-                </div>
-                
-                <div className="flex flex-col space-y-3 border-t border-white border-opacity-20 pt-4">
-                  <Link 
-                    to="/login" 
-                    className="border border-white text-white hover:bg-white hover:bg-opacity-10 px-4 py-3 rounded transition-colors duration-300 text-center"
-                    onClick={closeMobileMenu}
-                  >
-                    Login
-                  </Link>
-                  <Link 
-                    to="/register" 
-                    className="bg-[#ffa000] hover:bg-yellow-600 text-white px-4 py-3 rounded transition-colors duration-300 text-center"
-                    onClick={closeMobileMenu}
-                  >
-                    Sign Up
-                  </Link>
-                </div>
+                <Link to="/login" className="border border-white text-white hover:bg-green-700/40 px-4 py-3 rounded text-center" onClick={closeMobileMenu}>Login</Link>
+                <Link to="/register" className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-3 rounded text-center" onClick={closeMobileMenu}>Sign Up</Link>
               </div>
             )}
           </div>

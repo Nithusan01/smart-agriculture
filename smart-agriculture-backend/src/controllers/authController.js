@@ -5,7 +5,7 @@ const { Op } = require('sequelize');
 // Register user
 const register = async (req, res) => {
   try {
-    const { username, email, password, firstName, lastName, phoneNumber, farmName, farmTotalArea, farmSoilType, farmLat, farmLng } = req.body;
+    const { username, email, password, firstName, lastName, farmName, farmTotalArea,role } = req.body;
 
     // Check if user already exists
     const existingUser = await User.findOne({
@@ -28,12 +28,10 @@ const register = async (req, res) => {
       passwordHash: password,
       firstName,
       lastName,
-      phoneNumber,
       farmName,
       farmTotalArea: parseFloat(farmTotalArea) || null,
-      farmSoilType,
-      farmLat,
-      farmLng
+      role
+      
 
     });
 
@@ -55,7 +53,8 @@ const register = async (req, res) => {
         firstName: user.firstName,
         lastName: user.lastName,
         farmName: user.farmName,
-        role: user.role
+        role: user.role,
+        farmTotalArea: user.farmTotalArea,
       }
     });
   } catch (error) {
@@ -117,7 +116,8 @@ const login = async (req, res) => {
         firstName: user.firstName,
         lastName: user.lastName,
         farmName: user.farmName,
-        role: user.role
+        role: user.role,
+        createdAt:user.createdAt
       }
     });
   } catch (error) {

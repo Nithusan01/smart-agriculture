@@ -50,10 +50,8 @@ const Register = () => {
     confirmPassword: '',
     firstName: '',
     lastName: '',
-    phoneNumber: '',
     farmName: '',
     farmTotalArea: '',
-    farmSoilType: ''
   })
   const [location, setLocation] = useState({ lat: null, lng: null }) // default Sri Lanka
   const [error, setError] = useState('')
@@ -75,22 +73,14 @@ const Register = () => {
       return
     }
 
-    if (!location.lat || !location.lng) {
-      setError('Please select your farm location on the map')
-      return
-    }
 
     setIsLoading(true)
     setError('')
 
     const { confirmPassword, ...userData } = formData
-    const dataToSend = {
-      ...userData,
-      farmLat: location.lat,
-      farmLng: location.lng
-    }
+    
 
-    const result = await register(dataToSend)
+    const result = await register(formData)
 
     if (result.success) {
       //alert('Registration successful! Please log in.')
@@ -112,160 +102,166 @@ const Register = () => {
   }
 
   return (
-    <div className="auth-container">
-      <div className="auth-form">
-        <h2>Create Your Farm Account</h2>
+    <div className=" bg-gradient-to-br from-emerald-50 via-green-50 to-lime-50 min-h-screen flex items-center justify-center mt-0 pt-12">
+      <div className=" bg-white rounded  items-center justify-center py-6  px-10 mt-14 mb-10 shadow-md w-full max-w-lg z-10">
+        <h2 className='py-5 text-center text-green-700'>Create Your Farm Account</h2>
         {error && <div className="alert alert-danger">{error}</div>}
 
-        <form onSubmit={handleSubmit}>
-          {/* Name */}
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="firstName">First Name</label>
-              <input
-                type="text"
-                id="firstName"
-                name="firstName"
-                value={formData.firstName}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="lastName">Last Name</label>
-              <input
-                type="text"
-                id="lastName"
-                name="lastName"
-                value={formData.lastName}
-                onChange={handleChange}
-                required
-              />
-            </div>
-          </div>
+        <form onSubmit={handleSubmit} className="space-y-8">
+  {/* Header */}
+  <div className="text-center mb-8">
+    <h2 className="text-3xl font-bold text-gray-900 mb-2">Join AgriSmart</h2>
+    <p className="text-gray-600">Create your smart farming account</p>
+  </div>
 
-          {/* Username & Email */}
-          <div className="form-group">
-            <label htmlFor="username">Username</label>
-            <input
-              type="text"
-              id="username"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-              required
-            />
-          </div>
+  {/* Name Row */}
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="space-y-2">
+      <label htmlFor="firstName" className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+        <span>👤</span>
+        First Name
+      </label>
+      <input
+        type="text"
+        id="firstName"
+        name="firstName"
+        value={formData.firstName}
+        onChange={handleChange}
+        required
+        placeholder="John"
+        className="w-full px-4 py-4 bg-white border-2 border-gray-200 rounded-2xl focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-300 shadow-sm hover:shadow-md"
+      />
+    </div>
 
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
-          </div>
+    <div className="space-y-2">
+      <label htmlFor="lastName" className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+        <span>👥</span>
+        Last Name
+      </label>
+      <input
+        type="text"
+        id="lastName"
+        name="lastName"
+        value={formData.lastName}
+        onChange={handleChange}
+        required
+        placeholder="Doe"
+        className="w-full px-4 py-4 bg-white border-2 border-gray-200 rounded-2xl focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-300 shadow-sm hover:shadow-md"
+      />
+    </div>
+  </div>
 
-          {/* Password */}
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="password">Password</label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="confirmPassword">Confirm Password</label>
-              <input
-                type="password"
-                id="confirmPassword"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                required
-              />
-            </div>
-          </div>
+  {/* Username & Email */}
+  <div className="space-y-6">
+    <div className="space-y-2">
+      <label htmlFor="username" className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+        <span>🔐</span>
+        Username
+      </label>
+      <input
+        type="text"
+        id="username"
+        name="username"
+        value={formData.username}
+        onChange={handleChange}
+        required
+        placeholder="john_doe_farm"
+        className="w-full px-4 py-4 bg-white border-2 border-gray-200 rounded-2xl focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-300 shadow-sm hover:shadow-md"
+      />
+    </div>
 
-          {/* Phone & Farm Name */}
-          <div className="form-group">
-            <label htmlFor="phoneNumber">Phone Number</label>
-            <input
-              type="tel"
-              id="phoneNumber"
-              name="phoneNumber"
-              value={formData.phoneNumber}
-              onChange={handleChange}
-            />
-          </div>
+    <div className="space-y-2">
+      <label htmlFor="email" className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+        <span>📧</span>
+        Email Address
+      </label>
+      <input
+        type="email"
+        id="email"
+        name="email"
+        value={formData.email}
+        onChange={handleChange}
+        required
+        placeholder="john@greenvalleyfarm.com"
+        className="w-full px-4 py-4 bg-white border-2 border-gray-200 rounded-2xl focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-300 shadow-sm hover:shadow-md"
+      />
+    </div>
+  </div>
 
-          <div className="form-group">
-            <label htmlFor="farmName">Farm Name</label>
-            <input
-              type="text"
-              id="farmName"
-              name="farmName"
-              value={formData.farmName}
-              onChange={handleChange}
-              required
-            />
-          </div>
+  {/* Password Row */}
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="space-y-2">
+      <label htmlFor="password" className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+        <span>🔒</span>
+        Password
+      </label>
+      <input
+        type="password"
+        id="password"
+        name="password"
+        value={formData.password}
+        onChange={handleChange}
+        required
+        placeholder="Create strong password"
+        className="w-full px-4 py-4 bg-white border-2 border-gray-200 rounded-2xl focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-300 shadow-sm hover:shadow-md"
+      />
+    </div>
 
-          {/* Farm Location Picker */}
-          <div className="form-group">
-            <label>Farm Location</label>
-            <LocationPicker location={location} setLocation={setLocation} />
-            {location.lat && location.lng && (
-              <p>
-                Selected: Latitude {location.lat}, Longitude {location.lng}
-              </p>
-            )}
-          </div>
+    <div className="space-y-2">
+      <label htmlFor="confirmPassword" className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+        <span>✅</span>
+        Confirm Password
+      </label>
+      <input
+        type="password"
+        id="confirmPassword"
+        name="confirmPassword"
+        value={formData.confirmPassword}
+        onChange={handleChange}
+        required
+        placeholder="Repeat your password"
+        className="w-full px-4 py-4 bg-white border-2 border-gray-200 rounded-2xl focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-300 shadow-sm hover:shadow-md"
+      />
+    </div>
+  </div>
 
-          {/* Farm Area & Soil Type */}
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="farmTotalArea">Farm Area (hectares)</label>
-              <input
-                type="number"
-                id="farmTotalArea"
-                name="farmTotalArea"
-                value={formData.farmTotalArea}
-                onChange={handleChange}
-                step="0.01"
-              />
-            </div>
+  {/* Farm Name */}
+  <div className="space-y-2">
+    <label htmlFor="farmName" className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+      <span>🌾</span>
+      Farm Name
+    </label>
+    <input
+      type="text"
+      id="farmName"
+      name="farmName"
+      value={formData.farmName}
+      onChange={handleChange}
+      required
+      placeholder="Green Valley Organic Farm"
+      className="w-full px-4 py-4 bg-white border-2 border-gray-200 rounded-2xl focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-300 shadow-sm hover:shadow-md"
+    />
+  </div>
 
-            <div className="form-group">
-              <label htmlFor="farmSoilType">Soil Type</label>
-              <select
-                id="farmSoilType"
-                name="farmSoilType"
-                value={formData.farmSoilType}
-                onChange={handleChange}
-              >
-                <option value="">Select Soil Type</option>
-                <option value="loamy">Loamy</option>
-                <option value="sandy">Sandy</option>
-                <option value="clay">Clay</option>
-                <option value="silt">Silt</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Submit Button */}
-          <button type="submit" disabled={isLoading} className="btn btn-primary btn-block">
-            {isLoading ? 'Creating Account...' : 'Create Account'}
-          </button>
-        </form>
+  {/* Submit Button */}
+  <button 
+    type="submit" 
+    disabled={isLoading}
+    className="w-full group bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-5 px-6 rounded-2xl transition-all duration-300 transform hover:scale-[1.02] shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+  >
+    {isLoading ? (
+      <div className="flex items-center justify-center space-x-3">
+        <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+        <span className="text-lg">Setting up your farm...</span>
+      </div>
+    ) : (
+      <div className="flex items-center justify-center space-x-3">
+        <span className="text-lg">Start Smart Farming</span>
+        <span className="group-hover:translate-x-1 transition-transform">🚜</span>
+      </div>
+    )}
+  </button>
+</form>
 
         <p className="auth-link">
           Already have an account? <Link to="/login">Sign in</Link>

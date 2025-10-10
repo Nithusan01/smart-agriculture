@@ -1,7 +1,8 @@
 // src/contexts/CultivationPlanContext.js
 import { createContext, useState, useContext } from "react";
 import { useEffect } from "react";
-import { createPlan,getPlans} from "../services/planApi";
+import { createPlan,getPlans,updatePlan,removePlan} from "../services/planApi";
+import { useAuth } from "./AuthContext";
 
 const CultivationPlanContext = createContext();
 
@@ -11,6 +12,7 @@ export const CultivationPlanProvider = ({ children }) => {
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
+  const {currentUser} = useAuth();
   
 
   // ✅ Create new plan
@@ -23,7 +25,7 @@ export const CultivationPlanProvider = ({ children }) => {
     } catch (error) {
        return {
         success: false,
-        error: error.res?.data?.message || 'plan add failed server error'
+        error: error.response?.data?.message || 'plan add failed server error'
       }
     }
   };
@@ -31,31 +33,47 @@ export const CultivationPlanProvider = ({ children }) => {
 
   // ✅ Fetch plans from backend
      useEffect( () => {
+      const abortController = new AbortController();
 
       const fetchPlans = async () => {
     try {
       setLoading(true);
-      const res = await getPlans();
+      const res = await getPlans({ signal: abortController.signal });
+      if(!abortController.signal.aborted){
       setPlans(res.data.data); // ensure backend returns array in data
+      }
     } catch (error) {
-       return {
-        success: false,
-        error: error.res?.data?.message || 'fetch plan failed server error'
+      if (!abortController.signal.aborted) {
+        console.error('Fetch plan failed:', error);
+        setPlans([]);
       }
     } finally {
-      setLoading(false);
-    } 
+         if (!abortController.signal.aborted) {
+        setLoading(false);
+      }    } 
       };
-      fetchPlans();
 
- },[status]);
+     // Reset plans when no user or fetch when user exists
+  if (!currentUser) {
+    setPlans([]);
+    setLoading(false);
+  } else {
+    fetchPlans();
+  }
+
+      return () => {
+        abortController.abort();
+      };
+
+ },[currentUser,plans.length,plans.status]);
+
 
 // In your CultivationPlanContext.jsx
 const editPlan = async (id, updates) => {
   try {
-    const res = await  updatedPlan(id,updates)
+    const res = await  updatePlan(id,updates)
     setPlans((prev) =>
-      prev.map((p) => (p.id === id ? res : p.data.data))
+      prev.map((p) => (p.id === id ? res.data : p))
     );
     setStatus("Plan updated successfully!");
     return { success: true };
@@ -69,6 +87,26 @@ const editPlan = async (id, updates) => {
   }
 };
 
+const deletePlan = async(id) => {
+  try {
+    
+    const res = await removePlan(id)
+    setPlans([])
+    setStatus("Plan deleted successfully!");
+    return { success: true };
+  } catch (error) {
+
+    const errorMessage = error.response?.data?.message || 'Failed to delete plan';
+    setStatus(errorMessage);
+    return {
+      success: false,
+      error: errorMessage
+    };
+    
+  }
+}
+
+
  
 
 
@@ -80,7 +118,8 @@ const editPlan = async (id, updates) => {
         status,
         setStatus,
         addPlan,
-        editPlan
+        editPlan,
+       deletePlan,
       }}
     >
       {children}

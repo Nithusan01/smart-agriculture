@@ -29,7 +29,7 @@ function App() {
               {/* <Route path="/dashboard"  element={<Navigate to="/dashboard" replace />} />  */}
               <Route path="/login" element={<Login /> } />
               <Route path="/register" element={<Register />} />
-              
+
               <Route 
                 path="/dashboard" 
                 element={

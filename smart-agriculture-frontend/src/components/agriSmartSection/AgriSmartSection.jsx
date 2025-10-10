@@ -2,9 +2,12 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom'
 import Dashboard from '../dashboard/Dashboard';
 import Planning from '../planning/planning';
+import { useAuth } from '../../contexts/AuthContext';
 
 
 const AgriSmartSection = () => {
+  const navigate = useNavigate();
+  const {currentUser} = useAuth();
   const features = [
     {
       icon: 'fas fa-temperature-high',
@@ -30,33 +33,36 @@ const AgriSmartSection = () => {
 
   return (
 
-    <div className="font-sans">
+    <div className="font-sans ">
+
       {/* Hero Section */}
-      <section className="relative py-16">
+      <section className="relative  min-h-[500px] flex items-center ">
         {/* Background image with overlay */}
         <div 
           className="absolute inset-0 bg-cover bg-center"
           style={{
-            backgroundImage: `url('https://images.unsplash.com/photo-1625246333195-78d9c38ad449?ixlib=rb-4.0.3')`
+            backgroundImage: "url('/agri.jpg')"
           }}
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-green-700/80 to-green-500/80"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-green-500/60 via-green-500/70 to-green-300/90"></div>
         </div>
         
         {/* Hero content */}
-        <div className="container mx-auto px-4 relative z-10">
+        <div className="container mx-auto px-4  relative ">
           <div className="max-w-3xl mx-auto text-center text-white">
             <h1 className="text-4xl md:text-5xl font-bold mb-6">IoT-Powered Smart Agriculture</h1>
             <p className="text-xl mb-8">Monitor your farm in real-time with sensor technology and AI-powered analytics</p>
-            <button className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-8 rounded-lg transition duration-300">
+            {currentUser? <button onClick={()=> navigate('/dashboard')} className="bg-yellow-400 hover:bg-yellow-600 text-white font-semibold py-3 px-8 rounded-lg transition duration-300">
               View Live Data
-            </button>
+            </button> : <button onClick={() => navigate('/login')} className="bg-yellow-400 hover:bg-yellow-600 text-white font-semibold py-3 px-8 rounded-lg transition duration-300">
+              Get Started
+            </button>}
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16  bg-gradient-to-br from-emerald-50 via-green-50 to-lime-50">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-center text-green-700 mb-12">IoT-Enhanced Features</h2>
           

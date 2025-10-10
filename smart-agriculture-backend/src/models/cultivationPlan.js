@@ -26,11 +26,7 @@ module.exports = (sequelize) => {
             sectorName: {
                 type: DataTypes.STRING(100),
                 allowNull: false,
-                field: 'sector_name',
-                validate: {
-                    len: [1],
-                    notEmpty: true
-                }
+                field: 'sector_name'
 
             },
             cropName: {

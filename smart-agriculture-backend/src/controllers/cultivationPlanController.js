@@ -48,7 +48,7 @@ const createCultivationPlan = async (req, res) => {
 
     catch (error) {
         console.error('Error creating cultivation plan:', error);
-        res.status(500).json({success:false, message: 'Server error'});
+        res.status(500).json({success:false, message: 'Server error during create plan' });
     }
 };
 
@@ -91,12 +91,53 @@ const updatePlan = async (req, res) => {
   }
 };
 
+const deletePlan = async (req, res) => {
+    try {
+        const plan = await CultivationPlan.findOne({
+            where: { id: req.params.id, userId: req.user.id }
+        });
+        
+        if (!plan) {
+            return res.status(404).json({ success: false, message: 'Plan not found' });
+        }
 
+        // ✅ Correct method: use destroy() instead of delete()
+        await plan.destroy();
+        
+        res.status(200).json({ 
+            success: true, 
+            message: 'Plan deleted successfully' 
+        });
+
+    } catch (error) {
+        console.error('Delete plan error:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Server error' 
+        });
+    }
+};
+const getPlanById = async (req, res) => {
+    try {
+        const plan = await CultivationPlan.findOne({
+            where: { id: req.params.id, userId: req.user.id }
+        });
+        if (!plan) {
+            return res.status(404).json({ success: false, message: 'Plan not found' });
+        }
+        res.status(200).json({ success: true, data: plan });
+    } catch (error) {
+        console.error('Get plan by ID error:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+}; 
  
 
 module.exports = {
     createCultivationPlan,
     getPlans,
-    updatePlan
+    updatePlan,
+    deletePlan,
+    getPlanById
 
 };

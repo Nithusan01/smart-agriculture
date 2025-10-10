@@ -40,36 +40,13 @@ module.exports = (sequelize) => {
       allowNull: false,
       field: 'last_name'
     },
-    phoneNumber: {
-      type: DataTypes.STRING(20),
-      field: 'phone_number'
-    },
+    
     farmName: {
       type: DataTypes.STRING(255),
       allowNull: true,
       field: 'farm_name'
     },
 
-    farmLat: {
-      type: DataTypes.DECIMAL(10, 6),
-      allowNull: true
-
-    },
-  
-    farmLng: {
-      type: DataTypes.DECIMAL(10, 6),
-      allowNull: true
-    },
-    farmTotalArea: {
-      type: DataTypes.STRING(100),
-      field: 'farm_total_area',
-      allowNull:true
-      
-    },
-    farmSoilType: {
-      type: DataTypes.STRING(50),
-      field: 'farm_soil_type'
-    },
     role: {
       type: DataTypes.ENUM('admin', 'farmer'),
       defaultValue: 'farmer'
