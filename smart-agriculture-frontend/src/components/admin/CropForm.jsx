@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { createCrop } from "../../services/cropApi.js";
+import { useCrops } from "../../contexts/CropContext.jsx";
 
 const CropForm = () => {
+
+  const {addCrop} = useCrops();
   const [formData, setFormData] = useState({
     cropName: "",
     cropType: "",
@@ -10,39 +13,7 @@ const CropForm = () => {
     recommendedSoil: "",
   });
 
-  const addCrop = async (crop) => {
-    // Basic validation
-    if (!crop?.cropName?.trim()) {
-        return {
-            success: false,
-            error: "Crop name is required"
-        };
-    }
-    
-    try {
-        const res = await createCrop(crop);
-        return { 
-            success: true, 
-            message: "Crop added successfully!",
-            data: res.data // Optional: include response data
-        };
-    } catch (error) {
-        // Comprehensive error handling
-        let errorMessage = "Failed to add crop";
-        
-        if (error.response) {
-            errorMessage = error.response.data?.message || 
-                          `Server error: ${error.response.status}`;
-        } else if (error.request) {
-            errorMessage = "No response from server. Check your connection.";
-        }
-        
-        return {
-            success: false,
-            error: errorMessage
-        };
-    }
-};
+  
   const handleChange = (e) => {
     setFormData({
       ...formData,

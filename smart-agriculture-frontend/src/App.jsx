@@ -10,6 +10,7 @@ import Dashboard from './components/dashboard/Dashboard'
 import { WeatherProvider } from './contexts/WeatherContext';
 import AdminPage from './components/admin/AdminPage'
 import ProtectedAdminRoute from './components/auth/ProtectedAdminRoute'
+import { CropProvider } from './contexts/CropContext'
 
 
 import './index.css'
@@ -19,9 +20,10 @@ import Planning from './components/planning/planning'
 
 function App() {
   return (
-    <CropProvider>
 
-      <AuthProvider>
+    <AuthProvider>
+      <CropProvider>
+
         <WeatherProvider>
           <CultivationPlanProvider>
             <Router>
@@ -69,8 +71,9 @@ function App() {
             </Router>
           </CultivationPlanProvider>
         </WeatherProvider>
-      </AuthProvider>
-    </CropProvider>
+      </CropProvider>
+
+    </AuthProvider>
 
   )
 }

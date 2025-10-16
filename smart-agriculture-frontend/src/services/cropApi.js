@@ -36,14 +36,28 @@ export const getCropByName = async(cropName) => {
     }
 }      
 
-export const updateCrop = async(id,data) => {
+export const updateCrop = async (id, data) => {
     try {
-        const res = await api.put(`crop/${id}`,data)
-        return res
+        if (!id) {
+            throw new Error('Crop ID is required');
+        }
+
+        const res = await api.put(`crop/${id}`, data);
+        return res;
     } catch (error) {
-        throw error
+        console.error('Update crop API error:', error);
+        
+        // Enhance the error with more context
+        const enhancedError = new Error(
+            error.response?.data?.message 
+            || error.message 
+            || 'Failed to update crop'
+        );
+        enhancedError.status = error.response?.status;
+        throw enhancedError;
     }
-}
+};
+
 export const removeCrop = async (id) => {
     if (!id) {
         throw new Error('Crop ID is required');

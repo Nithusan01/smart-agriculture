@@ -12,6 +12,7 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true)
   const [users,setUsers] = useState([]);
   const [usersLoading, setUsersLoading] = useState(false)
+  
 
 
   
@@ -83,6 +84,8 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('token')
     delete api.defaults.headers.common['Authorization']
     setCurrentUser(null)
+  
+    
     
   }
 

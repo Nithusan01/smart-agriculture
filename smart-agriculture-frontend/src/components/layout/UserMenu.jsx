@@ -240,15 +240,16 @@ const UserMenu = () => {
           <div className="p-4 border-t border-green-200/50 bg-white/50 rounded-b-2xl">
             <button
               onClick={handleLogout}
-              className="w-full flex items-center justify-center space-x-2 px-4 py-3 
-                       bg-gradient-to-r from-amber-500 to-orange-500 text-white 
+              className="w-full flex items-center justify-center space-x-2 px-2 py-3 
+                       bg-yellow-500 text-white 
                        rounded-xl font-semibold shadow-lg hover:shadow-xl 
-                       transform transition-all duration-200 hover:scale-105 
-                       active:scale-95 focus:outline-none focus:ring-4 focus:ring-amber-200
-                       border border-amber-400"
+                       transform transition-all duration-200 hover:scale-105"
             >
-              <span>🚜</span>
-              <span>Leave Farm</span>
+              <span></span>
+              {currentUser.role === 'admin' ? 
+              <span> 🧑‍💼 Logout admin  </span>
+              : <span>🚜 Leave farm </span>
+              }
             </button>
             
             {/* Farm Stats */}

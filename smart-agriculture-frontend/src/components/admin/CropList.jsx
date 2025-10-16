@@ -1,14 +1,11 @@
 import { useEffect, useState, useMemo } from 'react';
-import { removeCrop, getCrops } from '../../services/cropApi.js';
 import { useAuth } from '../../contexts/AuthContext.jsx';
 import LoadingSpinner from "../common/LoadingSpinner.jsx"
+import { useCrops } from '../../contexts/CropContext.jsx';
 
 const CropList = () => {
-    const [crops, setCrops] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
-    const [deletingId, setDeletingId] = useState(null);
     const { currentUser } = useAuth();
+    const { crops, setError, loading, error, handleDelete, deletingId, editCrop } = useCrops();
 
     // Advanced search states
     const [filters, setFilters] = useState({
@@ -22,30 +19,16 @@ const CropList = () => {
     })
 
     const [debouncedSearch, setDebouncedSearch] = useState("");
-
-    const fetchCrops = async () => {
-        try {
-            setLoading(true);
-            setError(null);
-            const response = await getCrops();
-            setCrops(response?.data?.data || []);
-        } catch (error) {
-            console.error('Error fetching crops:', error);
-            setError('Failed to fetch crops');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchCrops();
-        const handleCropsUpdate = () => fetchCrops();
-        window.addEventListener('cropsUpdated', handleCropsUpdate);
-        
-        return () => {
-            window.removeEventListener('cropsUpdated', handleCropsUpdate);
-        }
-    }, []);
+    const [editingCrop, setEditingCrop] = useState(null);
+    const [editFormData, setEditFormData] = useState({
+        cropName: "",
+        cropType: "",
+        season: "",
+        durationDays: "",
+        waterRequirement: "",
+        recommendedSoil: ""
+    });
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Debounce search input
     useEffect(() => {
@@ -127,21 +110,69 @@ const CropList = () => {
         return filtered;
     }, [crops, debouncedSearch, filters.cropType, filters.season, filters.waterRequirement, filters.soilType, filters.sortBy, filters.sortOrder]);
 
-    const handleDelete = async (cropId) => {
-        if (!window.confirm('Are you sure you want to delete this crop?')) {
+    // Edit functions
+    const handleEditClick = (crop) => {
+        setEditingCrop(crop.id);
+        setEditFormData({
+            cropName: crop.cropName || "",
+            cropType: crop.cropType || "",
+            season: crop.season || "",
+            durationDays: crop.durationDays || "",
+            waterRequirement: crop.waterRequirement || "",
+            recommendedSoil: crop.recommendedSoil || ""
+        });
+    };
+
+    const handleCancelEdit = () => {
+        setEditingCrop(null);
+        setEditFormData({
+            cropName: "",
+            cropType: "",
+            season: "",
+            durationDays: "",
+            waterRequirement: "",
+            recommendedSoil: ""
+        });
+        setIsSubmitting(false);
+    };
+
+    const handleEditInputChange = (e) => {
+        const { name, value } = e.target;
+        setEditFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handleEditSubmit = async (cropId) => {
+        if (!editFormData.cropName.trim()) {
+            setError("Crop name is required");
             return;
         }
-        
+
+        setIsSubmitting(true);
         try {
-            setDeletingId(cropId);
-            setError(null);
-            await removeCrop(cropId);
-            setCrops((prevCrops) => prevCrops.filter((crop) => crop.id !== cropId));
+            
+            const result = await editCrop(cropId, editFormData);
+            if (result.success) {
+                setEditingCrop(null);
+                setEditFormData({
+                    cropName: "",
+                    cropType: "",
+                    season: "",
+                    durationDays: "",
+                    waterRequirement: "",
+                    recommendedSoil: ""
+                });
+            } else {
+                
+                setError(result.error || "Failed to update crop");
+            }
         } catch (error) {
-            console.error('Failed to delete crop:', error);
-            setError('Failed to delete crop');
+            console.error('Failed to update crop',error)
+            setError("Failed to update crop");
         } finally {
-            setDeletingId(null);
+            setIsSubmitting(false);
         }
     };
 
@@ -316,6 +347,7 @@ const CropList = () => {
                 <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
                     <div className="flex justify-between items-center">
                         <span>{error}</span>
+                        
                         <button 
                             onClick={() => setError(null)}
                             className="font-bold text-red-800 hover:text-red-900"
@@ -387,59 +419,170 @@ const CropList = () => {
                                         className={index % 2 === 0 ? 'bg-white hover:bg-gray-50' : 'bg-gray-50 hover:bg-gray-100'}
                                     >
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm font-medium text-gray-900">
-                                                {crop.cropName}
-                                            </div>
+                                            {editingCrop === crop.id ? (
+                                                <input
+                                                    type="text"
+                                                    name="cropName"
+                                                    value={editFormData.cropName}
+                                                    onChange={handleEditInputChange}
+                                                    className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+                                                    required
+                                                />
+                                            ) : (
+                                                <div className="text-sm font-medium text-gray-900">
+                                                    {crop.cropName}
+                                                </div>
+                                            )}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {crop.cropType}
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            {editingCrop === crop.id ? (
+                                                <select
+                                                    name="cropType"
+                                                    value={editFormData.cropType}
+                                                    onChange={handleEditInputChange}
+                                                    className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+                                                >
+                                                    <option value="Seasonal">Seasonal</option>
+                                                    <option value="Perennial">Perennial</option>
+                                                    
+                                                </select>
+                                            ) : (
+                                                <div className="text-sm text-gray-900">
+                                                    {crop.cropType}
+                                                </div>
+                                            )}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                                crop.season === 'Yala' 
-                                                    ? 'bg-yellow-100 text-yellow-800' 
-                                                    : crop.season === 'Maha'
-                                                    ? 'bg-blue-100 text-blue-800'
-                                                    : 'bg-gray-100 text-gray-800'
-                                            }`}>
-                                                {crop.season}
-                                            </span>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            {editingCrop === crop.id ? (
+                                                <select
+                                                    name="season"
+                                                    value={editFormData.season}
+                                                    onChange={handleEditInputChange}
+                                                    className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+                                                >
+                                                    <option value="Yala">Yala</option>
+                                                    <option value="Maha">Maha</option>
+                                                    <option value="Both">Both</option>
+                                                </select>
+                                            ) : (
+                                                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                                    crop.season === 'Yala' 
+                                                        ? 'bg-yellow-100 text-yellow-800' 
+                                                        : crop.season === 'Maha'
+                                                        ? 'bg-blue-100 text-blue-800'
+                                                        : 'bg-gray-100 text-gray-800'
+                                                }`}>
+                                                    {crop.season}
+                                                </span>
+                                            )}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {crop.durationDays} days
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            {editingCrop === crop.id ? (
+                                                <input
+                                                    type="number"
+                                                    name="durationDays"
+                                                    value={editFormData.durationDays}
+                                                    onChange={handleEditInputChange}
+                                                    className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+                                                    min="1"
+                                                />
+                                            ) : (
+                                                <div className="text-sm text-gray-900">
+                                                    {crop.durationDays} days
+                                                </div>
+                                            )}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                                crop.waterRequirement === 'Low' 
-                                                    ? 'bg-green-100 text-green-800' 
-                                                    : crop.waterRequirement === 'Medium'
-                                                    ? 'bg-yellow-100 text-yellow-800'
-                                                    : 'bg-red-100 text-red-800'
-                                            }`}>
-                                                {crop.waterRequirement}
-                                            </span>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            {editingCrop === crop.id ? (
+                                                <select
+                                                    name="waterRequirement"
+                                                    value={editFormData.waterRequirement}
+                                                    onChange={handleEditInputChange}
+                                                    className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+                                                >
+                                                    <option value="Low">Low</option>
+                                                    <option value="Medium">Medium</option>
+                                                    <option value="High">High</option>
+                                                </select>
+                                            ) : (
+                                                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                                    crop.waterRequirement === 'Low' 
+                                                        ? 'bg-green-100 text-green-800' 
+                                                        : crop.waterRequirement === 'Medium'
+                                                        ? 'bg-yellow-100 text-yellow-800'
+                                                        : 'bg-red-100 text-red-800'
+                                                }`}>
+                                                    {crop.waterRequirement}
+                                                </span>
+                                            )}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {crop.recommendedSoil}
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            {editingCrop === crop.id ? (
+                                                <select
+                                                    name="recommendedSoil"
+                                                    value={editFormData.recommendedSoil}
+                                                    onChange={handleEditInputChange}
+                                                    className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+                                                >
+                                                    <option value="Clay">Clay</option>
+                                                    <option value="Sandy">Sandy</option>
+                                                    <option value="Loamy">Loamy</option>
+                                                    <option value="Silty">Silty</option>
+                                                    <option value="Peaty">Peaty</option>
+                                                    <option value="Chalky">Chalky</option>
+                                                </select>
+                                            ) : (
+                                                <div className="text-sm text-gray-900">
+                                                    {crop.recommendedSoil}
+                                                </div>
+                                            )}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                            <button
-                                                onClick={() => handleDelete(crop.id)}
-                                                disabled={deletingId === crop.id}
-                                                className="text-red-600 hover:text-red-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                            >
-                                                {deletingId === crop.id ? (
-                                                    <span className="flex items-center">
-                                                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                                        </svg>
-                                                        Deleting
-                                                    </span>
+                                            <div className="flex space-x-2">
+                                                {editingCrop === crop.id ? (
+                                                    <>
+                                                        <button
+                                                            onClick={() => handleEditSubmit(crop.id)}
+                                                            disabled={isSubmitting}
+                                                            className="text-green-600 hover:text-green-800 transition-colors disabled:opacity-50"
+                                                        >
+                                                            {isSubmitting ? 'Saving...' : 'Save'}
+                                                        </button>
+                                                        <button
+                                                            onClick={handleCancelEdit}
+                                                            className="text-gray-600 hover:text-gray-800 transition-colors"
+                                                        >
+                                                            Cancel
+                                                        </button>
+                                                    </>
                                                 ) : (
-                                                    'Delete'
+                                                    <>
+                                                        <button
+                                                            onClick={() => handleEditClick(crop)}
+                                                            className="text-blue-600 hover:text-blue-800 transition-colors"
+                                                        >
+                                                            Edit
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDelete(crop.id)}
+                                                            disabled={deletingId === crop.id}
+                                                            className="text-red-600 hover:text-red-800 transition-colors disabled:opacity-50"
+                                                        >
+                                                            {deletingId === crop.id ? (
+                                                                <span className="flex items-center">
+                                                                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                                    </svg>
+                                                                    Deleting
+                                                                </span>
+                                                            ) : (
+                                                                'Delete'
+                                                            )}
+                                                        </button>
+                                                    </>
                                                 )}
-                                            </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}

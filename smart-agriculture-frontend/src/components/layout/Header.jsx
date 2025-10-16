@@ -8,13 +8,13 @@ import UserMenu from './UserMenu';
 const Header = () => {
   const { currentUser, logout } = useAuth()
   const location = useLocation()
-  const navigate = useNavigate()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false);
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     logout()
-    navigate('/')
+   navigate("/login")
     setIsMobileMenuOpen(false)
   }
 
