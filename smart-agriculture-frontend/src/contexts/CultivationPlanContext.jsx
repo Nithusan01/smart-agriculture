@@ -91,7 +91,7 @@ const deletePlan = async(id) => {
   try {
     
     const res = await removePlan(id)
-    setPlans([])
+    setPlans(prev => prev.filter(p => p.id !== id))
     setStatus("Plan deleted successfully!");
     return { success: true };
   } catch (error) {

@@ -1,5 +1,4 @@
-const { where, Model } = require('sequelize');
-const { User, CultivationPlan } = require('../models');
+const { User, CultivationPlan } = require('../models/index');
 
 // Create a new cultivation plan
 const createCultivationPlan = async (req, res) => {

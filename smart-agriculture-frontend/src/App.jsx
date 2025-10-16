@@ -8,6 +8,8 @@ import Login from './components/auth/Login'
 import Register from './components/auth/Register'
 import Dashboard from './components/dashboard/Dashboard'
 import { WeatherProvider } from './contexts/WeatherContext';
+import AdminPage from './components/admin/AdminPage'
+import ProtectedAdminRoute from './components/auth/ProtectedAdminRoute'
 
 
 import './index.css'
@@ -17,45 +19,59 @@ import Planning from './components/planning/planning'
 
 function App() {
   return (
-    <AuthProvider>
-      <WeatherProvider>
-      <CultivationPlanProvider>
-      <Router>
-        <div className="App">
-          <Header />  
-          <main className="main-content">
-            <Routes>
-              <Route path="/" element={<AgriSmartSection />} />
-              {/* <Route path="/dashboard"  element={<Navigate to="/dashboard" replace />} />  */}
-              <Route path="/login" element={<Login /> } />
-              <Route path="/register" element={<Register />} />
+    <CropProvider>
 
-              <Route 
-                path="/dashboard" 
-                element={
-                  <PrivateRoute>
-                    <Dashboard />
-                  </PrivateRoute>
-                } 
-              />
-              
-              <Route 
-                path="/planning" 
-                element={
-                  <PrivateRoute>
-                    <Planning />
-                  </PrivateRoute>
-                } 
-              />
+      <AuthProvider>
+        <WeatherProvider>
+          <CultivationPlanProvider>
+            <Router>
+              <div className="App">
+                <Header />
+                <main className="main-content">
+                  <Routes>
+                    <Route path="/" element={<AgriSmartSection />} />
+                    {/* <Route path="/dashboard"  element={<Navigate to="/dashboard" replace />} />  */}
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
 
-            </Routes>
-          </main>
-          <Footer/>
-        </div>
-      </Router>
-        </CultivationPlanProvider>
+                    <Route
+                      path="/dashboard"
+                      element={
+                        <PrivateRoute>
+                          <Dashboard />
+                        </PrivateRoute>
+                      }
+                    />
+
+
+                    <Route
+                      path="/admin"
+                      element={
+                        <ProtectedAdminRoute>
+                          <AdminPage />
+                        </ProtectedAdminRoute>
+                      }
+                    />
+
+                    <Route
+                      path="/planning"
+                      element={
+                        <PrivateRoute>
+                          <Planning />
+                        </PrivateRoute>
+                      }
+                    />
+
+                  </Routes>
+                </main>
+                <Footer />
+              </div>
+            </Router>
+          </CultivationPlanProvider>
         </WeatherProvider>
-    </AuthProvider>
+      </AuthProvider>
+    </CropProvider>
+
   )
 }
 

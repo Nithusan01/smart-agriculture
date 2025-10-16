@@ -1,4 +1,4 @@
-const { User } = require('../models');
+const { User } = require('../models/index');
 const { generateToken } = require('../middlewares/auth');
 const { Op } = require('sequelize');
 
@@ -141,8 +141,57 @@ const getMe = async (req, res) => {
   }
 };
 
+//get all user
+ const getAllUsers = async (req,res) => {
+
+  //check user is admin
+  if(req.user.role !== 'admin'){
+    res.status(403),json({succes:false,message:'access denied'})
+  }
+
+    try {
+      const users = await User.findAll();
+      res.status(200).json({success:true,data:users});
+      
+    } catch (error) {
+
+     console.error("error fetch users ",error)
+     res.status(500).json({succes:false,message:"server error during fetch user "})
+      
+    }
+
+ }
+
+ const deleteUser = async (req,res) => {
+
+  //check user is admin
+  if(req.user.role !== 'admin'){
+    res.status(403),json({succes:false,message:'access denied'})
+  }
+
+  try {
+    const userId = req.params.id
+    const user = await User.findOne({where:{id:userId}})
+    if(!user){
+        res.status(404).json({succes:false,message:'user not found'});
+
+    }
+    await user.destroy();
+    res.status(200).json({succes:true,message:'delete user successfully'});
+    
+  } catch (error) {
+     console.error('delete user error',error)
+        res.status(500).json({success:false,message:'server error during delete'});
+  }
+
+   
+ }
+
+
 module.exports = {
   register,
   login,
-  getMe
+  getMe,
+  getAllUsers,
+  deleteUser
 };

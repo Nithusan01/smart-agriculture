@@ -84,10 +84,10 @@ const Register = () => {
 
     if (result.success) {
       //alert('Registration successful! Please log in.')
-      logout()
+      navigate('/dashboard')
       Swal.fire({
         title: 'Success!',
-        text: 'Registration successful! Please log in.',
+        text: 'Registration successful!.',
         icon: 'success',
         confirmButtonText: 'OK',
         confirmButtonColor: '#648bdfff',

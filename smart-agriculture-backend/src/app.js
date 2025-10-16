@@ -3,6 +3,7 @@ const cors = require('cors');
 const {protect} = require('./middlewares/auth');
 const authRoutes = require('./routes/auth');
 const cultivationPlanRoutes = require('./routes/cultivationPlan');
+const cropRoutes = require('./routes/crop')
 
 const app = express();
 
@@ -14,6 +15,7 @@ app.use(express.json());
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/cultivationPlan', cultivationPlanRoutes);
+app.use('/api/crop',cropRoutes)
 
 
 // Protected route example

@@ -347,35 +347,23 @@ const Planning = () => {
             <FontAwesomeIcon icon={faSeedling} className="text-white text-lg" />
           </div>
           <div>
-            Crop Type
+            Crop Type 
             <span className="block text-sm font-normal text-gray-500 mt-1">Select primary crop for this sector</span>
           </div>
         </label>
         <select
-          name="cropName"
-          value={formData.cropName}
-          onChange={handleInputChange}
-          className="relative w-full p-4 bg-white/50 border-2 border-green-100 rounded-xl focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-100/50 transition-all duration-300 text-lg text-gray-800 appearance-none cursor-pointer"
-          required
-        >
-          <option value="" className="text-gray-400">Choose crop type...</option>
-          <option value="wheat" className="text-gray-700">
-            <FontAwesomeIcon icon={faWheatAwn} className="mr-2 w-4 h-4" />
-            Wheat - Grain cereal
-          </option>
-          <option value="corn" className="text-gray-700">
-            <FontAwesomeIcon icon={faSeedling} className="mr-2 w-4 h-4" />
-            Corn - Maize crop
-          </option>
-          <option value="rice" className="text-gray-700">
-            <FontAwesomeIcon icon={faLeaf} className="mr-2 w-4 h-4" />
-            Rice - Paddy crop
-          </option>
-          <option value="soybean" className="text-gray-700">
-            <FontAwesomeIcon icon={faSeedling} className="mr-2 w-4 h-4" />
-            Soybean - Legume crop
-          </option>
-        </select>
+  name="cropName"
+  value={formData.cropName}
+  onChange={handleInputChange}
+  className="relative w-full p-4 bg-white/50 border-2 border-green-100 rounded-xl focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-100/50 transition-all duration-300 text-lg text-gray-800 appearance-none cursor-pointer"
+  required
+>
+  <option value="">Choose crop type...</option>
+  <option value="wheat">🌾 Wheat - Grain cereal</option>
+  <option value="corn">🌽 Corn - Maize crop</option>
+  <option value="rice">🍚 Rice - Paddy crop</option>
+  <option value="soybean">🫘 Soybean - Legume crop</option>
+</select>
       </div>
 
       {/* Area Input */}

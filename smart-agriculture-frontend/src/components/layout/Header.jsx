@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -11,7 +11,6 @@ const Header = () => {
   const navigate = useNavigate()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false);
-
 
   const handleLogout = () => {
     logout()
@@ -26,82 +25,160 @@ const Header = () => {
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false)
   }
+
   // Track scroll position for header background
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
-      
-      let current = "Home";
-      navItems.forEach((id) => {
-        const element = document.getElementById(id);
-        if (element && window.scrollY >= element.offsetTop - 100) {
-          current = id;
-        }
-      });
-      setActiveSection(current);
     };
     
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Navigation items based on user role
+  const getNavigationItems = () => {
+    if (currentUser?.role === "admin") {
+      // Admin only sees Admin and About Us
+      return (
+        <div className="flex gap-6 font-bold text-xl">
+          <Link 
+            to="/admin" 
+            className={`px-4 py-2 rounded-xl transition-colors duration-300 hover:bg-green-700/40 rounded ${isActive('/admin')}`}
+          >
+            Admin Dashboard
+          </Link>
+          <Link 
+            to="/" 
+            className={`px-4 py-2 rounded-xl transition-colors duration-300 hover:bg-green-700/40 rounded ${isActive('/')}`}
+          >
+            About Us
+          </Link>
+        </div>
+      )
+    } else if (currentUser) {
+      // Regular user navigation
+      return (
+        <div className="flex gap-6 font-bold text-xl">
+          <Link 
+            to="/dashboard" 
+            className={`px-4 py-2 rounded-xl transition-colors duration-300 hover:bg-green-700/40 rounded ${isActive('/dashboard')}`}
+          >
+            Dashboard
+          </Link>
+          <Link 
+            to="/planning" 
+            className={`px-4 py-2 rounded-xl transition-colors duration-300 hover:bg-green-700/40 rounded ${isActive('/planning')}`}
+          >
+            Planning
+          </Link>
+          <Link 
+            to="/disease" 
+            className={`px-4 py-2 rounded-xl transition-colors duration-300 hover:bg-green-700/40 rounded ${isActive('/disease')}`}
+          >
+            Disease Mgmt
+          </Link>
+          <Link 
+            to="/" 
+            className={`px-4 py-2 rounded-xl transition-colors duration-300 hover:bg-green-700/40 rounded ${isActive('/')}`}
+          >
+            About Us
+          </Link>
+        </div>
+      )
+    } else {
+      // Not logged in
+      return (
+        <div className="flex gap-6 font-bold">
+          <Link 
+            to="/" 
+            className={`px-4 py-2 rounded-xl transition-colors duration-300 hover:bg-green-700/40 rounded ${isActive('/')}`}
+          >
+            About Us
+          </Link>
+        </div>
+      )
+    }
+  }
 
-
+  // Mobile navigation items based on user role
+  const getMobileNavigationItems = () => {
+    if (currentUser?.role === "admin") {
+      return (
+        <div className="flex flex-col space-y-4">
+          <div className="flex flex-col space-y-3 font-bold">
+            <Link to="/admin" className={`px-3 py-2 hover:bg-green-700/40 rounded ${isActive('/admin')}`} onClick={closeMobileMenu}>
+              Admin Dashboard
+            </Link>
+            <Link to="/" className={`px-3 py-2 hover:bg-green-700/40 rounded ${isActive('/')}`} onClick={closeMobileMenu}>
+              About Us
+            </Link>
+          </div>
+          <div className="flex flex-col space-y-3 border-t border-white border-opacity-20 pt-4">
+            <button onClick={handleLogout} className="flex items-center gap-2 hover:bg-green-700/40 px-3 py-2 rounded">
+              <FontAwesomeIcon icon={faSignOutAlt} />
+              <span>Logout</span>
+            </button>
+          </div>
+        </div>
+      )
+    } else if (currentUser) {
+      return (
+        <div className="flex flex-col space-y-4">
+          <div className="flex flex-col space-y-3 font-bold">
+            <Link to="/dashboard" className={`px-3 py-2 hover:bg-green-700/40 rounded ${isActive('/dashboard')}`} onClick={closeMobileMenu}>
+              Dashboard
+            </Link>
+            <Link to="/planning" className={`px-3 py-2 hover:bg-green-700/40 rounded ${isActive('/planning')}`} onClick={closeMobileMenu}>
+              Planning
+            </Link>
+            <Link to="/disease" className={`px-3 py-2 hover:bg-green-700/40 rounded ${isActive('/disease')}`} onClick={closeMobileMenu}>
+              Disease Mgmt
+            </Link>
+            <Link to="/" className={`px-3 py-2 hover:bg-green-700/40 rounded ${isActive('/')}`} onClick={closeMobileMenu}>
+              About Us
+            </Link>
+          </div>
+          <div className="flex flex-col space-y-3 border-t border-white border-opacity-20 pt-4">
+            <button onClick={handleLogout} className="flex items-center gap-2 hover:bg-green-700/40 px-3 py-2 rounded">
+              <FontAwesomeIcon icon={faSignOutAlt} />
+              <span>Logout</span>
+            </button>
+          </div>
+        </div>
+      )
+    } else {
+      return (
+        <div className="flex flex-col space-y-4">
+          <Link to="/login" className="border border-white text-white hover:bg-green-700/40 px-4 py-3 rounded text-center" onClick={closeMobileMenu}>
+            Login
+          </Link>
+          <Link to="/register" className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-3 rounded text-center" onClick={closeMobileMenu}>
+            Sign Up
+          </Link>
+        </div>
+      )
+    }
+  }
 
   return (
-    // <header className="bg-gradient-to-r from-green-700 to-lime-600 text-white shadow-lg z-50 py-4">
-      <header className={`fixed top-0 left-0 w-full z-50 py-4 transition-all text-green-700 duration-500 ease-out ${
-  isScrolled 
-    ? 'bg-white/50  backdrop-blur-3xl shadow-2xl shadow-black/5 border-b border-gray-100/80   ' 
-    : 'bg-transparent  '
-} ${isScrolled ? 'animate-fade-in-down' : ''}`}>
+    <header className={`fixed top-0 left-0 w-full z-50 py-4 transition-all text-green-700 duration-500 ease-out ${
+      isScrolled 
+        ? 'bg-white/50 backdrop-blur-3xl shadow-2xl shadow-black/5 border-b border-gray-100/80' 
+        : 'bg-transparent'
+    } ${isScrolled ? 'animate-fade-in-down' : ''}`}>
+      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center relative">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 text-xl font-bold text-white z-10">
             <i className="fas fa-leaf text-yellow-400 text-5xl"></i>
-            <span className='text-3xl text-green-700 '>AgriSmart</span>
+            <span className='text-3xl text-green-700'>AgriSmart</span>
           </Link>
           
           {/* Desktop Navigation */}
-          <nav className="hidden  md:flex items-center absolute left-1/2 transform -translate-x-1/2">
-            {currentUser ? (
-              <div className="flex  gap-6 font-bold text-xl">
-                <Link 
-                  to="/dashboard" 
-                  className={`px-4 py-2 rounded-xl transition-colors duration-300 hover:bg-green-700/40 rounded ${isActive('/dashboard')}`}
-                >
-                  Dashboard
-                </Link>
-                <Link 
-                  to="/planning" 
-                  className={`px-4 py-2 rounded-xl transition-colors duration-300 hover:bg-green-700/40 rounded ${isActive('/planning')}`}
-                >
-                  Planning
-                </Link>
-                <Link 
-                  to="/disease" 
-                  className={`px-4 py-2 rounded-xl transition-colors duration-300 hover:bg-green-700/40 rounded ${isActive('/disease')}`}
-                >
-                  Disease Mgmt
-                </Link>
-                <Link 
-                  to="/" 
-                  className={`px-4 py-2 rounded-xl transition-colors duration-300 hover:bg-green-700/40 rounded ${isActive('/')}`}
-                >
-                  About Us
-                </Link>
-              </div>
-            ) : (
-              <div className="flex gap-6 font-bold">
-                <Link 
-                  to="/" 
-                  className={`px-4 py-2 rounded-xl transition-colors duration-300 hover:bg-green-700/40 rounded ${isActive('/')}`}
-                >
-                  About Us
-                </Link>
-              </div>
-            )}
+          <nav className="hidden md:flex items-center absolute left-1/2 transform -translate-x-1/2">
+            {getNavigationItems()}
           </nav>
 
           {/* Right Side */}
@@ -109,13 +186,6 @@ const Header = () => {
             {currentUser ? (
               <div className="flex items-center gap-4">
                 <UserMenu />
-                {/* <button 
-                  onClick={handleLogout} 
-                  className="flex items-center gap-2 text-white hover:bg-green-700/40 px-4 py-2 rounded transition-colors duration-300"
-                >
-                  <FontAwesomeIcon icon={faSignOutAlt} />
-                  <span>Logout</span>
-                </button> */}
               </div>
             ) : (
               <div className="flex gap-3">
@@ -137,7 +207,7 @@ const Header = () => {
 
           {/* Mobile Menu Button */}
           <button 
-            className="md:hidden text-white text-2xl z-10"
+            className="md:hidden text-green-700 text-2xl z-10"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
             <FontAwesomeIcon icon={isMobileMenuOpen ? faTimes : faBars} />
@@ -146,27 +216,8 @@ const Header = () => {
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden mt-4 pb-4 border-t border-white border-opacity-20 pt-4">
-            {currentUser ? (
-              <div className="flex flex-col space-y-4">
-                <div className="flex flex-col space-y-3 font-bold">
-                  <Link to="/dashboard" className={`px-3 py-2 hover:bg-green-700/40 rounded ${isActive('/dashboard')}`} onClick={closeMobileMenu}>Dashboard</Link>
-                  <Link to="/planning" className={`px-3 py-2 hover:bg-green-700/40 rounded ${isActive('/planning')}`} onClick={closeMobileMenu}>Planning</Link>
-                  <Link to="/disease" className={`px-3 py-2 hover:bg-green-700/40 rounded ${isActive('/disease')}`} onClick={closeMobileMenu}>Disease Mgmt</Link>
-                </div>
-                <div className="flex flex-col space-y-3 border-t border-white border-opacity-20 pt-4">
-                  <button onClick={handleLogout} className="flex items-center gap-2 hover:bg-green-700/40 px-3 py-2 rounded">
-                    <FontAwesomeIcon icon={faSignOutAlt} />
-                    <span>Logout</span>
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-col space-y-4">
-                <Link to="/login" className="border border-white text-white hover:bg-green-700/40 px-4 py-3 rounded text-center" onClick={closeMobileMenu}>Login</Link>
-                <Link to="/register" className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-3 rounded text-center" onClick={closeMobileMenu}>Sign Up</Link>
-              </div>
-            )}
+          <div className="md:hidden mt-4 pb-4 border-t border-green-700 border-opacity-20 pt-4">
+            {getMobileNavigationItems()}
           </div>
         )}
       </div>

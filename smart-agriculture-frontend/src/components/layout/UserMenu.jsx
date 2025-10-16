@@ -3,12 +3,15 @@ import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import { usePlanStatistics } from "../hooks/usePlanStatistics";
+
 
 const UserMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef(null);
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
+   const planStats = usePlanStatistics();
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -170,17 +173,15 @@ const UserMenu = () => {
                 <p className="text-sm text-green-700 truncate">
                   {currentUser?.email || 'farmer@example.com'}
                 </p>
-                 <p className="text-sm text-green-700 truncate">
-                  {currentUser?.role || 'farmer@example.com'}
-                </p>
+      
                 <div className="flex items-center mt-1">
                   <div className="w-2 h-2 bg-green-500 rounded-full mr-2 shadow-sm"></div>
-                  <span className="text-xs text-green-600 font-medium">Active Farmer</span>
+                  <span className="text-xs text-green-600 font-medium"> {currentUser.role}</span>
                 </div>
               </div>
             </div>
           </div>
-
+          { currentUser.role === "farmer" ? (<div> 
           {/* Menu Items with Farm Icons */}
           <div className="p-2">
             <FarmMenuItem 
@@ -211,8 +212,8 @@ const UserMenu = () => {
                 setIsOpen(false);
                 // Navigate to fields
               }}
-            /> */}
-            {/* <FarmMenuItem 
+            />
+            <FarmMenuItem 
               icon="📊" 
               label="Farm Analytics" 
               description="Crop performance & insights"
@@ -220,9 +221,9 @@ const UserMenu = () => {
                 setIsOpen(false);
                 // Navigate to analytics
               }}
-            /> */}
+            />
 
-            {/* <FarmMenuItem 
+            <FarmMenuItem 
               icon="⚙️" 
               label="Farm Settings" 
               description="Configure your farm preferences"
@@ -231,8 +232,10 @@ const UserMenu = () => {
                 // Navigate to settings
               }}
             /> */}
-          </div>
 
+          </div>
+          </div>
+): null }
           {/* Footer with Logout */}
           <div className="p-4 border-t border-green-200/50 bg-white/50 rounded-b-2xl">
             <button
@@ -251,7 +254,7 @@ const UserMenu = () => {
             {/* Farm Stats */}
             <div className="flex justify-between mt-3 text-xs text-green-600">
               <span>🌱 Season: Spring 2025</span>
-              <span>✅ Active Plans: 3</span>
+              <span>✅ Active Plans: {planStats.planted} </span>
             </div>
           </div>
         </div>

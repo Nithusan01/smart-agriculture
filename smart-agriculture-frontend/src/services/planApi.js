@@ -16,18 +16,34 @@ export const createPlan = async (data) =>{
 
 export const getPlans = async() => {
     try {
+     const res = await api.get("cultivationPlan/")
+     return res
         
-    } catch (cmd) {
+    } catch (error) {
+        throw error
+
+    }
+}
+
+export const updatePlan = async(id,data) => {
+    try {
+        const res = await api.put(`cultivationPlan/${id}`,data)
+        return res
         
     }
-    const res = await api.get("cultivationPlan/")
-    return res
+     catch (error) {
+        throw error
+        
+    }
 }
-export const updatePlan = async(id,data) => {
-    const res = await api.put(`cultivationPlan/${id}`,data)
-    return res
-}
+   
 export const removePlan = async(id) => {
-    const res = await api.delete(`cultivationPlan/${id}`)
-    return res
+    try {
+        const res = await api.delete(`cultivationPlan/${id}`)
+        return res
+        
+    } catch (error) {
+        throw error
+    }
+    
 }

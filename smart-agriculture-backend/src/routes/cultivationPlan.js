@@ -12,5 +12,4 @@ router.put('/:id',protect,updatePlan)
 router.delete('/:id',protect,deletePlan)
 router.get('/:id',protect,getPlanById);
 
-
 module.exports = router;

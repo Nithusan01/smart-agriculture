@@ -300,7 +300,7 @@ const PlanCard = ({
         {/* Weather Alerts */}
         {showAlerts && weather && plan.status !== "harvested" && (
           <div className="space-y-3">
-            {weather.main.temp > 15 && (plan.status === 'planted' || (plan.status === 'planned' && isDateWithinDays(plan.plantingDate, 1))) && (
+            {weather.main.temp > 35 && (plan.status === 'planted' || (plan.status === 'planned' && isDateWithinDays(plan.plantingDate, 1))) && (
               <div className="bg-gradient-to-r from-orange-50/80 to-amber-50/80 backdrop-blur-sm border border-orange-200 rounded-2xl p-4 shadow-lg">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-orange-500 rounded-xl flex items-center justify-center">
