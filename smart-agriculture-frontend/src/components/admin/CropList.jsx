@@ -214,6 +214,21 @@ const CropList = () => {
         );
     }
 
+    // Show error
+    if (error) {
+        return (
+            <div className="p-4">
+                <div className="text-red-600">Error: {error}</div>
+                <button
+                    onClick={() => window.location.reload()}
+                    className="mt-2 px-4 py-2 bg-blue-500 text-white rounded"
+                >
+                    Retry
+                </button>
+            </div>
+        )
+    }
+
     return (
         <div className="p-4">
             {/* Header with Search and Filters */}

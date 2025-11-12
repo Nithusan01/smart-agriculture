@@ -11,19 +11,21 @@ import { WeatherProvider } from './contexts/WeatherContext';
 import AdminPage from './components/admin/AdminPage'
 import ProtectedAdminRoute from './components/auth/ProtectedAdminRoute'
 import { CropProvider } from './contexts/CropContext'
+import { DiseaseProvider } from './contexts/DiseaseContext'
 
 
 import './index.css'
 import Footer from './components/layout/Footer'
 import AgriSmartSection from './components/agriSmartSection/AgriSmartSection'
 import Planning from './components/planning/planning'
+import DiseaseManagement from './components/diseaseManagement/DiseaseManagement'
 
 function App() {
   return (
 
     <AuthProvider>
       <CropProvider>
-
+        <DiseaseProvider>
         <WeatherProvider>
           <CultivationPlanProvider>
             <Router>
@@ -31,10 +33,11 @@ function App() {
                 <Header />
                 <main className="main-content">
                   <Routes>
-                    <Route path="/" element={<AgriSmartSection />} />
+                   
                     {/* <Route path="/dashboard"  element={<Navigate to="/dashboard" replace />} />  */}
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
+                     <Route path="/" element={<AgriSmartSection />} />
 
                     <Route
                       path="/dashboard"
@@ -63,6 +66,14 @@ function App() {
                         </PrivateRoute>
                       }
                     />
+                    <Route
+                      path="/chatbot"
+                      element={
+                        <PrivateRoute>
+                          <DiseaseManagement/>
+                        </PrivateRoute>
+                      }
+                    />
 
                   </Routes>
                 </main>
@@ -71,6 +82,7 @@ function App() {
             </Router>
           </CultivationPlanProvider>
         </WeatherProvider>
+        </DiseaseProvider>
       </CropProvider>
 
     </AuthProvider>

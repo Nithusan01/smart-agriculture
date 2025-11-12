@@ -17,15 +17,16 @@ export const getCrops = async() => {
     }   
 }
 
-export const getCropById = async(id) => {
+export const getCropById = async (id) => {
     try {
-        const res = await api.get(`crop/${id}`) 
-        return res
-    }   
-    catch (error) {
-        throw error
+        const res = await api.get(`crop/${id}`);
+        return res;
+    } catch (error) {
+        console.error('Error fetching crop by ID:', error);
+        throw error;
     }
 }
+
 
 export const getCropByName = async(cropName) => {
     try {

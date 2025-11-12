@@ -81,16 +81,6 @@ module.exports = (sequelize) => {
     }
   });
 
-  // Association (User hasMany CultivationPlans)
-  User.associate = (models) => {
-    User.hasMany(models.CultivationPlan, {
-      foreignKey: 'userId',
-      as: 'plans',
-      onDelete: 'CASCADE'
-    });
-  };
-
-
   User.prototype.validatePassword = async function (password) {
     return await bcrypt.compare(password, this.passwordHash);
   };

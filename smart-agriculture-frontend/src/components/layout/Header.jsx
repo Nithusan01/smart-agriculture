@@ -44,16 +44,9 @@ const Header = () => {
         <div className="flex gap-6 font-bold text-xl">
           <Link 
             to="/admin" 
-            className={`px-4 py-2 rounded-xl transition-colors duration-300 hover:bg-green-700/40 rounded ${isActive('/admin')}`}
           >
-            Admin Dashboard
           </Link>
-          <Link 
-            to="/" 
-            className={`px-4 py-2 rounded-xl transition-colors duration-300 hover:bg-green-700/40 rounded ${isActive('/')}`}
-          >
-            About Us
-          </Link>
+          
         </div>
       )
     } else if (currentUser) {
@@ -73,8 +66,8 @@ const Header = () => {
             Planning
           </Link>
           <Link 
-            to="/disease" 
-            className={`px-4 py-2 rounded-xl transition-colors duration-300 hover:bg-green-700/40 rounded ${isActive('/disease')}`}
+            to="/chatbot" 
+            className={`px-4 py-2 rounded-xl transition-colors duration-300 hover:bg-green-700/40 rounded ${isActive('/chatbot')}`}
           >
             Disease Mgmt
           </Link>
@@ -82,7 +75,7 @@ const Header = () => {
             to="/" 
             className={`px-4 py-2 rounded-xl transition-colors duration-300 hover:bg-green-700/40 rounded ${isActive('/')}`}
           >
-            About Us
+            About 
           </Link>
         </div>
       )
@@ -91,10 +84,7 @@ const Header = () => {
       return (
         <div className="flex gap-6 font-bold">
           <Link 
-            to="/" 
-            className={`px-4 py-2 rounded-xl transition-colors duration-300 hover:bg-green-700/40 rounded ${isActive('/')}`}
-          >
-            About Us
+            to="/"           >
           </Link>
         </div>
       )
@@ -132,11 +122,11 @@ const Header = () => {
             <Link to="/planning" className={`px-3 py-2 hover:bg-green-700/40 rounded ${isActive('/planning')}`} onClick={closeMobileMenu}>
               Planning
             </Link>
-            <Link to="/disease" className={`px-3 py-2 hover:bg-green-700/40 rounded ${isActive('/disease')}`} onClick={closeMobileMenu}>
+            <Link to="/chatbot" className={`px-3 py-2 hover:bg-green-700/40 rounded ${isActive('/chatbot')}`} onClick={closeMobileMenu}>
               Disease Mgmt
             </Link>
             <Link to="/" className={`px-3 py-2 hover:bg-green-700/40 rounded ${isActive('/')}`} onClick={closeMobileMenu}>
-              About Us
+              About
             </Link>
           </div>
           <div className="flex flex-col space-y-3 border-t border-white border-opacity-20 pt-4">
@@ -162,18 +152,19 @@ const Header = () => {
   }
 
   return (
-    <header className={`fixed top-0 left-0 w-full z-50 py-4 transition-all text-green-700 duration-500 ease-out ${
-      isScrolled 
-        ? 'bg-white/50 backdrop-blur-3xl shadow-2xl shadow-black/5 border-b border-gray-100/80' 
+    <header className={`fixed top-0 left-0 w-full z-50 py-4 transition-all text-green-600 duration-500 ease-out ${
+      isScrolled || isMobileMenuOpen || isActive('/') || currentUser?.role === "admin"|| isActive('/login') || isActive('/register') || isActive('/dashboard') || isActive('/planning')
+        ? 'bg-white/80 backdrop-blur-3xl shadow-2xl shadow-black/5 border-b border-gray-100/80' 
         : 'bg-transparent'
     } ${isScrolled ? 'animate-fade-in-down' : ''}`}>
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center relative">
           {/* Logo */}
+          
           <Link to="/" className="flex items-center gap-2 text-xl font-bold text-white z-10">
             <i className="fas fa-leaf text-yellow-400 text-5xl"></i>
-            <span className='text-3xl text-green-700'>AgriSmart</span>
+            <span className='text-3xl text-green-600'>AgriSmart</span>
           </Link>
           
           {/* Desktop Navigation */}
@@ -182,25 +173,28 @@ const Header = () => {
           </nav>
 
           {/* Right Side */}
-          <div className="hidden md:flex items-center z-10">
+          <div className="hidden md:flex items-center z-10 ">
             {currentUser ? (
               <div className="flex items-center gap-4">
                 <UserMenu />
-              </div>
-            ) : (
+              </div> 
+            ) : ( 
               <div className="flex gap-3">
+                {isActive('/register') ? (
                 <Link 
                   to="/login" 
-                  className="bg-green-700 border rounded-xl border-white font-bold text-white hover:bg-green-500/40 px-6 py-2 rounded transition-colors duration-300"
+                  className="bg-green-600 border-2 border-transparent hover:border-green-600  rounded-lg  font-bold text-white hover:bg-white hover:text-green-600  px-6 py-2 rounded transition-colors duration-300"
                 >
                   Login
                 </Link>
+                ):(
                 <Link 
                   to="/register" 
-                  className="bg-yellow-400 rounded-xl font-bold hover:bg-yellow-600 text-white px-6 py-2 rounded transition-colors duration-300"
+                  className="bg-yellow-400  border-2 border-transparent hover:border-yellow-400 rounded-lg font-bold hover:bg-white hover:text-yellow-400 text-white px-6 py-2 rounded transition-colors duration-300"
                 >
                   Sign Up
                 </Link>
+                )}
               </div>
             )}
           </div>

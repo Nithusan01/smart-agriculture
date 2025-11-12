@@ -93,7 +93,7 @@ const Register = () => {
         confirmButtonColor: '#648bdfff',
         background: '#f8f9fa'
       });
-      navigate('/login')
+      
     } else {
       setError(result.error || 'Registration failed')
     }
@@ -102,172 +102,246 @@ const Register = () => {
   }
 
   return (
-    <div className=" bg-gradient-to-br from-emerald-50 via-green-50 to-lime-50 min-h-screen flex items-center justify-center mt-0 pt-12">
-      <div className=" bg-white rounded  items-center justify-center py-6  px-10 mt-14 mb-10 shadow-md w-full max-w-lg z-10">
-        <h2 className='py-5 text-center text-green-700'>Create Your Farm Account</h2>
-        {error && <div className="alert alert-danger">{error}</div>}
+    <div className="relative bg-[url('/agri.jpg')] bg-cover bg-center min-h-screen flex items-center justify-center pt-12">
+  {/* Gradient + Blur Overlay */}
+  <div className="absolute inset-0 bg-gradient-to-t from-green-600/50 to-green-600/50 "></div>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
-  {/* Header */}
-  <div className="text-center mb-8">
-    <h2 className="text-3xl font-bold text-gray-900 mb-2">Join AgriSmart</h2>
-    <p className="text-gray-600">Create your smart farming account</p>
-  </div>
+  {/* Form Container */}
+  <div className="relative z-10 rounded-3xl bg-white/30 backdrop-blur-lg shadow-2xl py-3 px-10 w-full max-w-lg">
+    <h2 className="py-3 pb-4 text-center font-bold text-white text-2xl">
+      Create Your Farm Account
+    </h2>
+    {error && <div className="alert alert-danger">{error}</div>}
 
-  {/* Name Row */}
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <div className="space-y-2">
-      <label htmlFor="firstName" className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-        <span>👤</span>
-        First Name
-      </label>
-      <input
-        type="text"
-        id="firstName"
-        name="firstName"
-        value={formData.firstName}
-        onChange={handleChange}
-        required
-        placeholder="John"
-        className="w-full px-4 py-4 bg-white border-2 border-gray-200 rounded-2xl focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-300 shadow-sm hover:shadow-md"
-      />
-    </div>
+    <form onSubmit={handleSubmit} className="space-y-8">
 
-    <div className="space-y-2">
-      <label htmlFor="lastName" className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-        <span>👥</span>
-        Last Name
-      </label>
-      <input
-        type="text"
-        id="lastName"
-        name="lastName"
-        value={formData.lastName}
-        onChange={handleChange}
-        required
-        placeholder="Doe"
-        className="w-full px-4 py-4 bg-white border-2 border-gray-200 rounded-2xl focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-300 shadow-sm hover:shadow-md"
-      />
-    </div>
-  </div>
+      {/* Name Row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* First Name */}
+        <div className="relative">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth="1.5"
+            stroke="gray"
+            className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M15.75 7.5a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.5 20.25a8.25 8.25 0 0 1 15 0"
+            />
+          </svg>
+          <input
+            type="text"
+            id="firstName"
+            name="firstName"
+            value={formData.firstName}
+            onChange={handleChange}
+            required
+            placeholder="First Name"
+            className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-200 rounded-2xl focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-300 shadow-sm hover:shadow-md"
+          />
+        </div>
 
-  {/* Username & Email */}
-  <div className="space-y-6">
-    <div className="space-y-2">
-      <label htmlFor="username" className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-        <span>🔐</span>
-        Username
-      </label>
-      <input
-        type="text"
-        id="username"
-        name="username"
-        value={formData.username}
-        onChange={handleChange}
-        required
-        placeholder="john_doe_farm"
-        className="w-full px-4 py-4 bg-white border-2 border-gray-200 rounded-2xl focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-300 shadow-sm hover:shadow-md"
-      />
-    </div>
-
-    <div className="space-y-2">
-      <label htmlFor="email" className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-        <span>📧</span>
-        Email Address
-      </label>
-      <input
-        type="email"
-        id="email"
-        name="email"
-        value={formData.email}
-        onChange={handleChange}
-        required
-        placeholder="john@greenvalleyfarm.com"
-        className="w-full px-4 py-4 bg-white border-2 border-gray-200 rounded-2xl focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-300 shadow-sm hover:shadow-md"
-      />
-    </div>
-  </div>
-
-  {/* Password Row */}
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <div className="space-y-2">
-      <label htmlFor="password" className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-        <span>🔒</span>
-        Password
-      </label>
-      <input
-        type="password"
-        id="password"
-        name="password"
-        value={formData.password}
-        onChange={handleChange}
-        required
-        placeholder="Create strong password"
-        className="w-full px-4 py-4 bg-white border-2 border-gray-200 rounded-2xl focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-300 shadow-sm hover:shadow-md"
-      />
-    </div>
-
-    <div className="space-y-2">
-      <label htmlFor="confirmPassword" className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-        <span>✅</span>
-        Confirm Password
-      </label>
-      <input
-        type="password"
-        id="confirmPassword"
-        name="confirmPassword"
-        value={formData.confirmPassword}
-        onChange={handleChange}
-        required
-        placeholder="Repeat your password"
-        className="w-full px-4 py-4 bg-white border-2 border-gray-200 rounded-2xl focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-300 shadow-sm hover:shadow-md"
-      />
-    </div>
-  </div>
-
-  {/* Farm Name */}
-  <div className="space-y-2">
-    <label htmlFor="farmName" className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-      <span>🌾</span>
-      Farm Name
-    </label>
-    <input
-      type="text"
-      id="farmName"
-      name="farmName"
-      value={formData.farmName}
-      onChange={handleChange}
-      required
-      placeholder="Green Valley Organic Farm"
-      className="w-full px-4 py-4 bg-white border-2 border-gray-200 rounded-2xl focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-300 shadow-sm hover:shadow-md"
-    />
-  </div>
-
-  {/* Submit Button */}
-  <button 
-    type="submit" 
-    disabled={isLoading}
-    className="w-full group bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-5 px-6 rounded-2xl transition-all duration-300 transform hover:scale-[1.02] shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-  >
-    {isLoading ? (
-      <div className="flex items-center justify-center space-x-3">
-        <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-        <span className="text-lg">Setting up your farm...</span>
+        {/* Last Name */}
+        <div className="relative">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth="1.5"
+            stroke="gray"
+            className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M15.75 7.5a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.5 20.25a8.25 8.25 0 0 1 15 0"
+            />
+          </svg>
+          <input
+            type="text"
+            id="lastName"
+            name="lastName"
+            value={formData.lastName}
+            onChange={handleChange}
+            required
+            placeholder="Last Name"
+            className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-200 rounded-2xl focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-300 shadow-sm hover:shadow-md"
+          />
+        </div>
       </div>
-    ) : (
-      <div className="flex items-center justify-center space-x-3">
-        <span className="text-lg">Start Smart Farming</span>
-        <span className="group-hover:translate-x-1 transition-transform">🚜</span>
-      </div>
-    )}
-  </button>
-</form>
 
-        <p className="auth-link">
-          Already have an account? <Link to="/login">Sign in</Link>
-        </p>
+      {/* Username */}
+      <div className="relative">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth="1.5"
+          stroke="gray"
+          className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M15.232 5.232a4 4 0 1 1 5.536 5.536M4.5 19.5l7.5-7.5 3 3 7.5-7.5"
+          />
+        </svg>
+        <input
+          type="text"
+          id="username"
+          name="username"
+          value={formData.username}
+          onChange={handleChange}
+          required
+          placeholder="Username"
+          className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-200 rounded-2xl focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-300 shadow-sm hover:shadow-md"
+        />
       </div>
-    </div>
+
+      {/* Email */}
+      <div className="relative">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth="1.5"
+          stroke="gray"
+          className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25H4.5A2.25 2.25 0 0 1 2.25 17.25V6.75A2.25 2.25 0 0 1 4.5 4.5h15a2.25 2.25 0 0 1 2.25 2.25ZM3 6.75l9 6.75 9-6.75"
+          />
+        </svg>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          value={formData.email}
+          onChange={handleChange}
+          required
+          placeholder="Email Address"
+          className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-200 rounded-2xl focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-300 shadow-sm hover:shadow-md"
+        />
+      </div>
+
+      {/* Password Row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Password */}
+        <div className="relative">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth="1.5"
+            stroke="gray"
+            className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M16.5 10.5V7.5a4.5 4.5 0 0 0-9 0v3m-3 0h15v10.5H4.5V10.5Z"
+            />
+          </svg>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+            placeholder="Create Password"
+            className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-200 rounded-2xl focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-300 shadow-sm hover:shadow-md"
+          />
+        </div>
+
+        {/* Confirm Password */}
+        <div className="relative">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth="1.5"
+            stroke="gray"
+            className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M16.5 10.5V7.5a4.5 4.5 0 0 0-9 0v3m-3 0h15v10.5H4.5V10.5Z"
+            />
+          </svg>
+          <input
+            type="password"
+            id="confirmPassword"
+            name="confirmPassword"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            required
+            placeholder="Confirm Password"
+            className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-200 rounded-2xl focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-300 shadow-sm hover:shadow-md"
+          />
+        </div>
+      </div>
+
+      {/* Farm Name */}
+      <div className="relative">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth="1.5"
+          stroke="gray"
+          className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M3 11l9-9 9 9M4 10v10h16V10" />
+        </svg>
+        <input
+          type="text"
+          id="farmName"
+          name="farmName"
+          value={formData.farmName}
+          onChange={handleChange}
+          required
+          placeholder="Farm Name"
+          className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-200 rounded-2xl focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-300 shadow-sm hover:shadow-md"
+        />
+      </div>
+
+      {/* Submit Button */}
+      <button
+        type="submit"
+        disabled={isLoading}
+        className="w-full group bg-yellow-600 text-white font-bold py-4 px-3 rounded-2xl transition-all duration-300 shadow-lg hover:bg-yellow-600/80 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {isLoading ? (
+          <div className="flex items-center justify-center space-x-3">
+            <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            <span className="text-lg">Setting up your farm...</span>
+          </div>
+        ) : (
+          <div className="flex items-center justify-center space-x-2">
+            <span className="text-lg">Start Smart Farming</span>
+            <span className="group-hover:translate-x-1 transition-transform">🚜</span>
+          </div>
+        )}
+      </button>
+    </form>
+
+    <p className="flex items-center justify-center px-4 py-4 ">
+      Already have an account?{"  "}
+      <Link to="/login" className="text-blue-600 hover:text-blue-400">
+        Sign in
+      </Link>
+    </p>
+  </div>
+</div>
+
   )
 }
 

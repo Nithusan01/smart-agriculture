@@ -75,7 +75,7 @@ const UserList = () => {
         // Status filter based on last login
         if (filters.status !== "all") {
             const now = new Date()
-            const thirtyDaysAgo = new Date(now.setDate(now.getDate() - 30))
+            const thirtyDaysAgo = new Date(now.setDate(now.getDate() - 7))
             
             filtered = filtered.filter(user => {
                 if (filters.status === "active") {
@@ -245,7 +245,7 @@ const UserList = () => {
                             className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                         >
                             <option value="all">All Status</option>
-                            <option value="active">Active (Last 30 days)</option>
+                            <option value="active">Active (Last 7 days)</option>
                             <option value="inactive">Inactive</option>
                         </select>
 

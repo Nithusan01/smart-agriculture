@@ -1,14 +1,16 @@
-import React from 'react'
+import React from "react";
+import { Leaf } from "lucide-react";
 
 const LoadingSpinner = () => {
   return (
-   <div className="relative flex items-center justify-center">
-  <span className="absolute inline-flex size-[50%] bg-green-400 rounded-full opacity-75 animate-ping"></span>
-  <span className="relative inline-flex size-3 bg-green-500 rounded-full"></span>
-</div>
+    <div className="relative flex items-center justify-center">
+      {/* Rotating ring */}
+      <div className="w-20 h-20 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
 
+      {/* Leaf icon in the center */}
+      <Leaf className="absolute text-green-600 w-10 h-10" />
+    </div>
+  );
+};
 
-  )
-}
-
-export default LoadingSpinner
+export default LoadingSpinner;

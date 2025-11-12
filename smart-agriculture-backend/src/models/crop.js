@@ -45,12 +45,5 @@ module.exports = (sequelize) => {
     timestamps: false,
   });
 
-  Crop.associate = (models) => {
-    Crop.hasMany(models.CultivationPlan, {
-      foreignKey: 'cropId',
-      as: 'plans',
-    });
-  };
-
   return Crop;
 };

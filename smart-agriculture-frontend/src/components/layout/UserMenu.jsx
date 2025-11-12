@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { usePlanStatistics } from "../hooks/usePlanStatistics";
+import {  ChevronDown} from 'lucide-react';
 
 
 const UserMenu = () => {
@@ -124,143 +125,119 @@ const UserMenu = () => {
   };
 
   return (
-    <div className="relative" ref={menuRef}>
-      {/* Farm-Themed Avatar Button */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className={`
-          relative flex items-center justify-center w-10 h-10 rounded-full 
-          ${getFarmColor(currentUser?.name)} text-white font-semibold
-          shadow-lg hover:shadow-xl transform transition-all duration-200 
-          hover:scale-105 active:scale-95 border-2 border-white/30
-          focus:outline-none focus:ring-4 focus:ring-green-200
-          ring-2 ring-green-100
-        `}
-      >
-        <span className="text-sm drop-shadow-md">
-          {getInitials(currentUser?.firstName)}
-        </span>
-        
-        {/* Online Status Indicator */}
-        <div className="absolute -bottom-1 -right-1">
-          <div className="w-3 h-3 bg-green-500 border-2 border-white rounded-full shadow-sm"></div>
-        </div>
-      </button>
-
-      {/* Floating Farm Menu */}
-      {isOpen && (
-        <div className="absolute right-0 top-12 w-80 bg-green-50/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-green-200/50 z-50 animate-fade-in">
-          {/* Header with Farm-themed Background */}
-          <div className="relative p-6 border-b border-green-200/50 bg-gradient-to-r from-green-400/20 to-emerald-400/20 rounded-t-2xl">
-            {/* Decorative farm elements */}
-            <div className="absolute top-2 right-2 text-2xl opacity-20">
-              {getFarmIcon(currentUser?.firstName)}
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              <div className={`
-                flex items-center justify-center w-14 h-14 rounded-full 
-                ${getFarmColor(currentUser?.firstName)} text-white font-bold text-lg
-                shadow-lg border-2 border-white/40
-              `}>
-                {getInitials(currentUser?.firstName)}
-              </div>
-              
-              <div className="flex-1 min-w-0">
-                <h3 className="text-lg font-semibold text-gray-800 truncate">
-                  {currentUser?.firstName || 'Farmer'}
-                </h3>
-                <p className="text-sm text-green-700 truncate">
-                  {currentUser?.email || 'farmer@example.com'}
-                </p>
+ <div className="relative" ref={menuRef}>
+  {/* Farm-Themed Avatar Button - Updated Design */}
+  <button
+    onClick={() => setIsOpen(!isOpen)}
+    className={`
+      flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer
+      focus:outline-none focus:ring-4 focus:ring-green-200
+    `}
+  >
+    <div className="w-8 h-8 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center shadow-lg">
+      <span className="text-white text-sm font-semibold drop-shadow-md">
+        {getInitials(currentUser?.firstName)}
+      </span>
       
-                <div className="flex items-center mt-1">
-                  <div className="w-2 h-2 bg-green-500 rounded-full mr-2 shadow-sm"></div>
-                  <span className="text-xs text-green-600 font-medium"> {currentUser.role}</span>
-                </div>
-              </div>
+      {/* Online Status Indicator
+      <div className="absolute -bottom-1 -right-1">
+        <div className="w-3 h-3 bg-green-500 border-2 border-white rounded-full shadow-sm"></div>
+      </div> */}
+    </div>
+    
+    <div className="flex items-center gap-1 text-sm drop-shadow-md">
+      <span className="font-semibold text-lg text-gray-900">{currentUser?.role}</span>
+      {/* <ChevronDown size={16} className="text-gray-500" /> */}
+    </div>
+  </button>
+
+  {/* Floating Farm Menu */}
+  {isOpen && (
+    <div className="absolute right-0 top-12 w-80 bg-green-50/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-green-200/50 z-50 animate-fade-in">
+      {/* Header with Farm-themed Background */}
+      <div className="relative p-6 border-b border-green-200/50 bg-gradient-to-r from-green-400/20 to-emerald-400/20 rounded-t-2xl">
+        {/* Decorative farm elements */}
+        <div className="absolute top-2 right-2 text-2xl opacity-20">
+          {getFarmIcon(currentUser?.firstName)}
+        </div>
+        
+        <div className="flex items-center space-x-4">
+          <div className={`
+            flex items-center justify-center w-14 h-14 rounded-full 
+            ${getFarmColor(currentUser?.firstName)} text-white font-bold text-lg
+            shadow-lg border-2 border-white/40
+          `}>
+            {getInitials(currentUser?.firstName)}
+          </div>
+          
+          <div className="flex-1 min-w-0">
+            <h3 className="text-lg font-semibold text-gray-800 truncate">
+              {currentUser?.firstName || 'Farmer'}
+            </h3>
+            <p className="text-sm text-green-700 truncate">
+              {currentUser?.email || 'farmer@example.com'}
+            </p>
+  
+            <div className="flex items-center mt-1">
+              <div className="w-2 h-2 bg-green-500 rounded-full mr-2 shadow-sm"></div>
+              <span className="text-xs text-green-600 font-medium"> {currentUser?.role}</span>
             </div>
           </div>
-          { currentUser.role === "farmer" ? (<div> 
+        </div>
+      </div>
+      
+      {currentUser?.role === "farmer" ? (
+        <div> 
           {/* Menu Items with Farm Icons */}
           <div className="p-2">
             <FarmMenuItem 
               icon="👨‍🌾" 
               label="My Farm Profile" 
               description="View and edit your farm details"
-              onClick={() => {navigate('/dashboard');
+              onClick={() => {
+                navigate('/dashboard');
                 setIsOpen(false);
-              
-                // Navigate to profile
               }}
             />
             <FarmMenuItem 
               icon="🌾" 
               label="Crop Plans" 
               description="Manage your cultivation plans"
-              onClick={() => {navigate('/planning');
+              onClick={() => {
+                navigate('/planning');
                 setIsOpen(false);
-                // Navigate to planning
-                
               }}
             />
-            {/* <FarmMenuItem 
-              icon="🏞️" 
-              label="My Fields" 
-              description="View all your farming sectors"
-              onClick={() => {
-                setIsOpen(false);
-                // Navigate to fields
-              }}
-            />
-            <FarmMenuItem 
-              icon="📊" 
-              label="Farm Analytics" 
-              description="Crop performance & insights"
-              onClick={() => {
-                setIsOpen(false);
-                // Navigate to analytics
-              }}
-            />
-
-            <FarmMenuItem 
-              icon="⚙️" 
-              label="Farm Settings" 
-              description="Configure your farm preferences"
-              onClick={() => {
-                setIsOpen(false);
-                // Navigate to settings
-              }}
-            /> */}
-
-          </div>
-          </div>
-): null }
-          {/* Footer with Logout */}
-          <div className="p-4 border-t border-green-200/50 bg-white/50 rounded-b-2xl">
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center justify-center space-x-2 px-2 py-3 
-                       bg-yellow-500 text-white 
-                       rounded-xl font-semibold shadow-lg hover:shadow-xl 
-                       transform transition-all duration-200 hover:scale-105"
-            >
-              <span></span>
-              {currentUser.role === 'admin' ? 
-              <span> 🧑‍💼 Logout admin  </span>
-              : <span>🚜 Leave farm </span>
-              }
-            </button>
-            
-            {/* Farm Stats */}
-            <div className="flex justify-between mt-3 text-xs text-green-600">
-              <span>🌱 Season: Spring 2025</span>
-              <span>✅ Active Plans: {planStats.planted} </span>
-            </div>
+            {/* Additional menu items can be added here */}
           </div>
         </div>
-      )}
+      ) : null}
+      
+      {/* Footer with Logout */}
+      <div className="p-4 border-t border-green-200/50 bg-white/50 rounded-b-2xl">
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center justify-center space-x-2 px-2 py-3 
+                   bg-yellow-500 text-white 
+                   rounded-xl font-semibold shadow-lg hover:shadow-xl 
+                   transform transition-all duration-200 hover:scale-105"
+        >
+          <span></span>
+          {currentUser?.role === 'admin' ? 
+            <span> 🧑‍💼 Logout admin  </span>
+            : <span>🚜 Leave farm </span>
+          }
+        </button>
+        
+        {/* Farm Stats */}
+        <div className="flex justify-between mt-3 text-xs text-green-600">
+          <span>🌱 Season: Spring 2025</span>
+          <span>✅ Active Plans: {planStats?.planted || 0} </span>
+        </div>
+      </div>
     </div>
+  )}
+</div>
   );
 };
 

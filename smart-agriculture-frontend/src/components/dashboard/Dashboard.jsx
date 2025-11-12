@@ -21,8 +21,17 @@ import {
   faSeedling,
   faCalendarPlus,
   faCalendarAlt,
-  faArrowRight
+  faArrowRight,
+  faExpand,
+  faCompress
 } from "@fortawesome/free-solid-svg-icons";
+
+import { 
+  Bell,
+  ChevronRight,
+  TrendingUp,
+  TrendingDown
+} from 'lucide-react';
 import { usePlanWeather } from "../hooks/usePlanWeather";
 import { useWeather } from "../../contexts/WeatherContext";
 import { usePlanAlerts } from "../hooks/usePlanAlerts";
@@ -48,18 +57,18 @@ const Dashboard = () => {
   const [playedAlerts, setPlayedAlerts] = useState(new Set());
   const [userInteracted, setUserInteracted] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [expandedView, setExpandedView] = useState(false);
 
   const handleActivityClick = (activity) => {
-    // Navigate to the plan details page with the plan ID
     navigate('/planning');
-  }
+  };
+
   const alertAudioRef = useRef(null);
 
   // User interaction detection and audio preloading
   useEffect(() => {
     const enableSound = () => {
       setUserInteracted(true);
-      // Preload audio on first interaction
       if (!alertAudioRef.current) {
         try {
           alertAudioRef.current = new Audio("/alert.mp3");
@@ -189,51 +198,75 @@ const Dashboard = () => {
     localStorage.removeItem('playedAlerts');
   };
 
+  // Enhanced StatCard Component
+  const StatCard = ({ title, value, unit, icon, trend, gradient, onClick }) => (
+    <div 
+      className={`relative overflow-hidden rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer ${gradient} backdrop-blur-sm border border-gray-200/60`}
+      onClick={onClick}
+    >
+      <div className="flex flex-col h-full">
+        {/* Header with title and icon */}
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide truncate">
+              {title}
+            </p>
+          </div>
+          <div className="flex-shrink-0 ml-3">
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-green-50 border border-green-200">
+              <div className="text-lg text-green-600">
+                {icon}
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Main value */}
+        <div className="mb-2">
+          <p className="text-3xl font-bold text-gray-900 truncate">
+            {value}
+          </p>
+        </div>
+        
+        {/* Unit and trend */}
+        <div className="mt-auto">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-gray-600 font-medium truncate">
+              {unit}
+            </p>
+            {trend && (
+              <div className="flex items-center gap-1">
+                {trend.direction === 'up' ? (
+                  <TrendingUp className="w-4 h-4 text-green-600" />
+                ) : (
+                  <TrendingDown className="w-4 h-4 text-red-600" />
+                )}
+                <span className={`text-xs font-semibold px-2 py-1 rounded-full ${trend.color} flex-shrink-0 ml-1`}>
+                  {trend.text}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+      
+      {/* Subtle background accent */}
+      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-green-400 to-emerald-400 opacity-60"></div>
+    </div>
+  );
+
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-[24rem]">
+      <div className="flex justify-center items-center min-h-[24rem] py-20">
         <LoadingSpinner />
       </div>
     );
   }
 
-  const StatCard = ({ title, value, unit, icon, color, trend, gradient }) => (
-    <div className={`relative overflow-hidden rounded-3xl p-6 shadow-2xl hover:shadow-3xl transition-all duration-500 transform hover:-translate-y-2 ${gradient} backdrop-blur-sm border border-white/20`}>
-      {/* Animated background overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-50"></div>
-      
-      <div className="relative z-10">
-        <div className="flex items-center justify-between">
-          <div className="flex-1">
-            <p className="text-sm font-semibold text-white/80 uppercase tracking-wider mb-2">
-              {title}
-            </p>
-            <p className="text-4xl font-black text-white mb-2">
-              {value}
-            </p>
-            <p className="text-xs font-medium text-white/70">
-              {unit}
-            </p>
-          </div>
-          <div className={`w-16 h-16 rounded-2xl flex items-center justify-center bg-white/20 backdrop-blur-md border border-white/30`}>
-            <div className="text-2xl text-white">
-              {icon}
-            </div>
-          </div>
-        </div>
-        {trend && (
-          <div className="mt-4 flex items-center">
-            <span className={`text-xs font-semibold px-3 py-1.5 rounded-full backdrop-blur-md border border-white/20 ${trend.color}`}>
-              {trend.text}
-            </span>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-lime-50 relative overflow-hidden">
+    <div className="bg-[url('/agri.jpg')] bg-cover bg-center min-h-screen bg-fixed relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-t from-green-600/50 to-green-600/50"></div>
+      
       {/* Background decorative elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-green-200/30 rounded-full blur-3xl"></div>
@@ -244,38 +277,50 @@ const Dashboard = () => {
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,black,transparent)]"></div>
       </div>
 
-      <div className="relative z-10 py-14 px-4 sm:px-6 lg:px-8">
+      <div className="relative z-10 mt-12 py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="mb-12 text-center">
-      
-            <h1 className="text-5xl font-black pt-8 text-gray-900 mb-4">
-              Farm Intelligence
-            </h1>
-            <p className="text-xl text-gray-700 max-w-2xl mx-auto">
-              Welcome back,{" "}
-              <span className="font-bold text-green-700 bg-green-100 px-3 py-1 rounded-full">
-                {currentUser?.farmName || "Your Farm"}
-              </span>
-            </p>
+          <div className="mb-8">
+            <div className="text-center mb-6">
+              <h1 className="text-4xl md:text-5xl font-black text-white mb-4 drop-shadow-lg">
+                Farm Intelligence Dashboard
+              </h1>
+              {/* <p className="text-lg text-white/90 max-w-2xl mx-auto drop-shadow">
+                Welcome back,{" "}
+                <span className="font-bold text-white bg-green-600/30 px-3 py-1 rounded-full backdrop-blur-sm">
+                  {currentUser?.farmName || "Your Farm"}
+                </span>
+              </p> */}
+            </div>
             
             {/* Status Bar */}
-            <div className="mt-8 inline-flex items-center gap-6 bg-white/80 backdrop-blur-md rounded-2xl px-6 py-4 shadow-lg border border-white/50">
-              <div className="flex items-center gap-3">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white/90 backdrop-blur-md rounded-2xl px-6 py-4 shadow-lg border border-white/50 mb-6">
+              <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
                   <span className="text-sm font-semibold text-gray-700">Live Updates</span>
                 </div>
                 {!userInteracted && (
-                  <span className="text-xs text-amber-700 bg-amber-100 px-3 py-1 rounded-full animate-pulse">
+                  <span className="text-xs text-amber-700 bg-amber-100 px-2 py-1 rounded-full animate-pulse">
                     👆 Click to enable sounds
                   </span>
                 )}
               </div>
               
-              <div className="w-px h-6 bg-gray-300"></div>
-              
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => setExpandedView(!expandedView)}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-gray-200 hover:border-green-300 transition-colors"
+                >
+                  <FontAwesomeIcon 
+                    icon={expandedView ? faCompress : faExpand} 
+                    className="text-green-600" 
+                  />
+                  <span className="text-sm font-medium text-gray-700">
+                    {expandedView ? 'Compact View' : 'Expanded View'}
+                  </span>
+                </button>
+
                 <button 
                   onClick={() => setSoundEnabled(!soundEnabled)}
                   className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-gray-200 hover:border-green-300 transition-colors"
@@ -293,282 +338,340 @@ const Dashboard = () => {
                   onClick={clearPlayedAlerts}
                   className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-200 hover:border-blue-300 transition-colors"
                 >
-                  <span className="text-sm font-medium text-blue-700">
-                    🔔 {planAlerts?.alerts?.filter(alert => !playedAlerts.has(alert.id)).length} new
+                  <Bell className="text-blue-600" size={18} />
+                  <span className="text-sm font-medium text-gray-700">
+                    {planAlerts?.alerts?.filter(alert => !playedAlerts.has(alert.id)).length} new
                   </span>
                 </button>
               </div>
             </div>
           </div>
 
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
-            <StatCard
-              title="Active Cultivation Area"
-              value={`${planStats?.totalArea || 0}`}
-              unit="Hectares in use"
-              icon={<FontAwesomeIcon icon={faLeaf} />}
-              gradient="bg-gradient-to-br from-green-500 to-emerald-600"
-              trend={{ 
-                text: `${Math.round((planStats?.totalArea / (currentUser?.farmTotalArea || 2*planStats?.totalArea)) * 100)}% utilized`, 
-                color: "bg-white/20 text-white" 
-              }}
-            />
-            
-            <StatCard
-              title="Urgent Alerts"
-              value={planAlerts?.alerts?.length || 0}
-              unit="Requires attention"
-              icon={<FontAwesomeIcon icon={faExclamationTriangle} />}
-              gradient="bg-gradient-to-br from-orange-500 to-red-500"
-              trend={{ 
-                text: planAlerts?.alerts?.length > 0 ? "Needs action" : "All clear", 
-                color: "bg-white/20 text-white" 
-              }}
-            />
+          {/* Primary Stats Grid */}
+          <div className="mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 auto-rows-fr">
+              <StatCard
+                title="Active Cultivation Area"
+                value={`${planStats?.totalArea || 0}`}
+                unit="Hectares in use"
+                icon={<FontAwesomeIcon icon={faLeaf} />}
+                gradient="bg-white"
+                trend={{ 
+                  text: `${Math.round((planStats?.totalArea / (currentUser?.farmTotalArea || 2*planStats?.totalArea)) * 100)}% utilized`, 
+                  color: "bg-yellow-100 text-yellow-800",
+                  direction: 'up'
+                }}
+                onClick={() => navigate('/planning')}
+              />
+              
+              <StatCard
+                title="Urgent Alerts"
+                value={planAlerts?.alerts?.length || 0}
+                unit="Requires attention"
+                icon={<FontAwesomeIcon icon={faExclamationTriangle} />}
+                gradient="bg-white"
+                trend={{ 
+                  text: planAlerts?.alerts?.length > 0 ? "Needs action" : "All clear", 
+                  color: planAlerts?.alerts?.length > 0 ? "bg-red-100 text-red-800" : "bg-green-100 text-green-800",
+                  direction: planAlerts?.alerts?.length > 0 ? 'up' : 'down'
+                }}
+                onClick={() => document.getElementById('alerts-section')?.scrollIntoView({ behavior: 'smooth' })}
+              />
+              
+              <StatCard
+                title="Upcoming Activities"
+                value={planAlerts.activities.length}
+                unit="Scheduled events"
+                icon={<FontAwesomeIcon icon={faCalendarCheck} />}
+                gradient="bg-white"
+                trend={{ 
+                  text: `${planAlerts.activities.length} scheduled`, 
+                  color: "bg-blue-100 text-blue-800",
+                  direction: 'up'
+                }}
+                onClick={() => document.getElementById('activities-section')?.scrollIntoView({ behavior: 'smooth' })}
+              />
 
-            <StatCard
-              title="Growing Crops"
-              value={planStats?.planted || 0}
-              unit="Active plantations"
-              icon={<FontAwesomeIcon icon={faSeedling} />}
-              gradient="bg-gradient-to-br from-emerald-500 to-green-500"
-              trend={{ 
-                text: `${planStats?.plantedPercentage || 0}% planted`, 
-                color: "bg-white/20 text-white" 
-              }}
-            />
-
-            <StatCard
-              title="Harvested Crops"
-              value={planStats?.completed || 0}
-              unit="Successfully completed"
-              icon={<FontAwesomeIcon icon={faCheckCircle} />}
-              gradient="bg-gradient-to-br from-blue-500 to-cyan-500"
-              trend={{ 
-                text: `${planStats?.completionRate || 0}% success rate`, 
-                color: "bg-white/20 text-white" 
-              }}
-            />
-
-            <StatCard
-              title="Planned Crops"
-              value={planStats?.planned || 0}
-              unit="Scheduled for planting"
-              icon={<FontAwesomeIcon icon={faClipboardList} />}
-              gradient="bg-gradient-to-br from-purple-500 to-pink-500"
-              trend={{ 
-                text: "Ready to plant", 
-                color: "bg-white/20 text-white" 
-              }}
-            />
-
-            <StatCard
-              title="Cancelled Plans"
-              value={planStats?.cancelled || 0}
-              unit="Plans cancelled"
-              icon={<FontAwesomeIcon icon={faTimesCircle} />}
-              gradient="bg-gradient-to-br from-rose-500 to-red-400"
-              trend={{ 
-                text: `${Math.round((planStats?.cancelled / (planStats?.total || 1)) * 100)}% cancellation`, 
-                color: "bg-white/20 text-white" 
-              }}
-            />
-
-            <StatCard
-              title="Growth Progress"
-              value={`${planStats?.plantedPercentage || 0}%`}
-              unit="Of total capacity"
-              icon={<FontAwesomeIcon icon={faChartLine} />}
-              gradient="bg-gradient-to-br from-teal-500 to-cyan-400"
-              trend={{ 
-                text: "Planted ratio", 
-                color: "bg-white/20 text-white" 
-              }}
-            />
-
-            <StatCard
-              title="Completion Rate"
-              value={`${planStats?.completionRate || 0}%`}
-              unit="Overall success rate"
-              icon={<FontAwesomeIcon icon={faTachometerAlt} />}
-              gradient="bg-gradient-to-br from-indigo-500 to-purple-500"
-              trend={{ 
-                text: "Performance metric", 
-                color: "bg-white/20 text-white" 
-              }}
-            />
-
-
-          <StatCard
-            title="Upcoming Activities"
-            value={planAlerts.activities.length}
-            unit="Scheduled events"
-            icon={<FontAwesomeIcon icon={faCalendarCheck} />}
-            gradient="bg-gradient-to-br from-lime-500 to-emerald-500"
-            trend={{ 
-              text: `${planAlerts.activities.length} scheduled`, 
-              color: "bg-white/20 text-white" 
-            }}
-          />
-        </div>
-
-       {/* Alerts & Activities Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Urgent Alerts */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                <FontAwesomeIcon icon={faExclamationTriangle} className="text-red-500" />
-                Urgent Alerts
-                {planAlerts.alerts.length > 0 && (
-                  <span className="bg-red-100 text-red-800 text-xs font-medium px-2 py-1 rounded-full animate-pulse">
-                    {planAlerts.alerts.length} alerts
-                  </span>
-                )}
-              </h3>
+              <StatCard
+                title="Growing Crops"
+                value={planStats?.planted || 0}
+                unit="Active plantations"
+                icon={<FontAwesomeIcon icon={faSeedling} />}
+                gradient="bg-white"
+                trend={{ 
+                  text: `${planStats?.plantedPercentage || 0}% planted`, 
+                  color: "bg-green-100 text-green-800",
+                  direction: 'up'
+                }}
+                onClick={() => navigate('/planning')}
+              />
             </div>
-
-            {planAlerts.alerts.length > 0 ? (
-              <div className="space-y-4">
-                {planAlerts.alerts.map(alert => (
-                  <div
-                    key={alert.id}
-                    className={`flex items-start p-4 rounded-xl border-l-4 transition-all duration-300 hover:shadow-md ${
-                      alert.type === 'high-temp' 
-                        ? 'border-l-orange-500 bg-orange-50' 
-                        : alert.type === 'rain'
-                        ? 'border-l-blue-500 bg-blue-50'
-                        : 'border-l-yellow-500 bg-yellow-50'
-                    }`}
-                  >
-                    <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
-                      alert.type === 'high-temp' ? 'bg-orange-100' : 
-                      alert.type === 'rain' ? 'bg-blue-100' : 
-                      'bg-yellow-100'
-                    } mr-4`}>
-                      <FontAwesomeIcon 
-                        icon={
-                          alert.type === 'high-temp' ? faTemperatureHigh :
-                          alert.type === 'rain' ? faCloudRain :
-                          faTint
-                        }
-                        className={
-                          alert.type === 'high-temp' ? 'text-orange-600' :
-                          alert.type === 'rain' ? 'text-blue-600' :
-                          'text-yellow-600'
-                        }
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <h4 className={`font-semibold ${
-                        alert.type === 'high-temp' ? 'text-orange-800' :
-                        alert.type === 'rain' ? 'text-blue-800' :
-                        'text-yellow-800'
-                      }`}>
-                        {alert.type === 'high-temp' ? '🌡️ Temperature Alert' :
-                         alert.type === 'rain' ? '🌧️ Rain Alert' :
-                         '💧 Humidity Alert'}
-                      </h4>
-                      <p className={`text-sm mt-1 ${
-                        alert.type === 'high-temp' ? 'text-orange-700' :
-                        alert.type === 'rain' ? 'text-blue-700' :
-                        'text-yellow-700'
-                      }`}>
-                        {alert.message}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <FontAwesomeIcon icon={faCheckCircle} className="text-2xl text-green-600" />
-                </div>
-                <p className="text-gray-600 font-medium">No urgent alerts</p>
-                <p className="text-gray-500 text-sm mt-1">All systems are operating normally</p>
-              </div>
-            )}
           </div>
 
-          {/* Upcoming Activities */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                <FontAwesomeIcon icon={faCalendarCheck} className="text-green-500" />
-                Upcoming Activities
-              </h3>
-              <span className="bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full">
-                {planAlerts.activities.length} scheduled
-              </span>
+          {/* Secondary Stats Grid - Conditionally rendered */}
+          {expandedView && (
+            <div className="mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 auto-rows-fr">
+                <StatCard
+                  title="Harvested Crops"
+                  value={planStats?.completed || 0}
+                  unit="Successfully completed"
+                  icon={<FontAwesomeIcon icon={faCheckCircle} />}
+                  gradient="bg-white"
+                  trend={{ 
+                    text: `${planStats?.completionRate || 0}% success rate`, 
+                    color: "bg-emerald-100 text-emerald-800",
+                    direction: 'up'
+                  }}
+                />
+
+                <StatCard
+                  title="Cancelled Plans"
+                  value={planStats?.cancelled || 0}
+                  unit="Plans cancelled"
+                  icon={<FontAwesomeIcon icon={faTimesCircle} />}
+                  gradient="bg-white"
+                  trend={{ 
+                    text: `${Math.round((planStats?.cancelled / (planStats?.total || 1)) * 100)}% cancellation`, 
+                    color: "bg-red-100 text-red-800",
+                    direction: 'down'
+                  }}
+                />
+
+                <StatCard
+                  title="Growth Progress"
+                  value={`${planStats?.plantedPercentage || 0}%`}
+                  unit="Of total capacity"
+                  icon={<FontAwesomeIcon icon={faChartLine} />}
+                  gradient="bg-white"
+                  trend={{ 
+                    text: "Planted ratio", 
+                    color: "bg-purple-100 text-purple-800",
+                    direction: 'up'
+                  }}
+                />
+
+                <StatCard
+                  title="Completion Rate"
+                  value={`${planStats?.completionRate || 0}%`}
+                  unit="Overall success rate"
+                  icon={<FontAwesomeIcon icon={faTachometerAlt} />}
+                  gradient="bg-white"
+                  trend={{ 
+                    text: "Performance metric", 
+                    color: "bg-orange-100 text-orange-800",
+                    direction: 'up'
+                  }}
+                />
+              </div>
             </div>
-            
-            {planAlerts.activities.length > 0 ? (
-              <div className="space-y-4">
-                {planAlerts.activities.map(activity => (
-                  <div
-                    key={activity.id}
-                    onClick={() => handleActivityClick(activity)}
-                    className={`flex items-start p-4 rounded-xl border-l-4 transition-all duration-300 hover:shadow-md cursor-pointer group ${
-                      activity.type === 'harvest' 
-                        ? 'border-l-amber-500 bg-amber-50 hover:bg-amber-100' 
-                        : 'border-l-green-500 bg-green-50 hover:bg-green-100'
-                    }`}
-                  >
-                    <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
-                      activity.type === 'harvest' ? 'bg-amber-100 group-hover:bg-amber-200' : 'bg-green-100 group-hover:bg-green-200'
-                    } mr-4 transition-colors`}>
-                      <FontAwesomeIcon 
-                        icon={activity.type === 'harvest' ? faSeedling : faCalendarPlus}
-                        className={activity.type === 'harvest' ? 'text-amber-600' : 'text-green-600'}
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className={`font-semibold ${
-                          activity.type === 'harvest' ? 'text-amber-800' : 'text-green-800'
-                        }`}>
-                          {activity.type === 'harvest' ? '🌾 Harvest Alert' : '📅 Planting Reminder'}
-                          <FontAwesomeIcon 
-                            icon={faArrowRight} 
-                            className="ml-2 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-                          />
-                        </h4>
-                        <span className="text-xs text-gray-500">
-                          {new Date(activity.date).toLocaleDateString()}
-                        </span>
-                      </div>
-                      <p className={`text-sm ${
-                        activity.type === 'harvest' ? 'text-amber-700' : 'text-green-700'
-                      }`}>
-                        {activity.message}
-                      </p>
-                      <div className="mt-2 flex items-center gap-2">
-                        <span className="text-xs font-bold px-2 py-1 bg-white rounded-full border">
-                          Sector: {activity.plan.sectorName}
-                        </span>
-                        <span className="text-xs font-bold px-2 py-1 bg-white rounded-full border">
-                          {activity.plan.cropName}
-                        </span>
-                      </div>
-                    </div>
+          )}
+
+          {/* Alerts & Activities Section */}
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
+            {/* Urgent Alerts */}
+            <div id="alerts-section" className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200 h-fit">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold text-gray-900 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center">
+                    <FontAwesomeIcon icon={faExclamationTriangle} className="text-red-600 text-lg" />
                   </div>
-                ))}
+                  <div>
+                    Urgent Alerts
+                    {planAlerts.alerts.length > 0 && (
+                      <span className="block text-sm font-normal text-gray-500 mt-1">
+                        Requires immediate attention
+                      </span>
+                    )}
+                  </div>
+                </h3>
+                {planAlerts.alerts.length > 0 && (
+                  <span className="bg-red-100 text-red-800 text-sm font-bold px-3 py-1 rounded-full">
+                    {planAlerts.alerts.length}
+                  </span>
+                )}
               </div>
-            ) : (
-              <div className="text-center py-8">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <FontAwesomeIcon icon={faCalendarAlt} className="text-2xl text-gray-400" />
+
+              {planAlerts.alerts.length > 0 ? (
+                <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
+                  {planAlerts.alerts.map(alert => (
+                    <div
+                      key={alert.id}
+                      className={`flex items-start p-4 rounded-xl border-l-4 transition-all duration-200 hover:shadow-sm ${
+                        alert.type === 'high-temp' 
+                          ? 'border-l-orange-500 bg-orange-50' 
+                          : alert.type === 'rain'
+                          ? 'border-l-blue-500 bg-blue-50'
+                          : 'border-l-yellow-500 bg-yellow-50'
+                      }`}
+                    >
+                      <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
+                        alert.type === 'high-temp' ? 'bg-orange-100' : 
+                        alert.type === 'rain' ? 'bg-blue-100' : 
+                        'bg-yellow-100'
+                      } mr-4`}>
+                        <FontAwesomeIcon 
+                          icon={
+                            alert.type === 'high-temp' ? faTemperatureHigh :
+                            alert.type === 'rain' ? faCloudRain :
+                            faTint
+                          }
+                          className={
+                            alert.type === 'high-temp' ? 'text-orange-600' :
+                            alert.type === 'rain' ? 'text-blue-600' :
+                            'text-yellow-600'
+                          }
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className={`font-semibold ${
+                          alert.type === 'high-temp' ? 'text-orange-800' :
+                          alert.type === 'rain' ? 'text-blue-800' :
+                          'text-yellow-800'
+                        }`}>
+                          {alert.type === 'high-temp' ? '🌡️ Temperature Alert' :
+                           alert.type === 'rain' ? '🌧️ Rain Alert' :
+                           '💧 Humidity Alert'}
+                        </h4>
+                        <p className={`text-sm mt-1 ${
+                          alert.type === 'high-temp' ? 'text-orange-700' :
+                          alert.type === 'rain' ? 'text-blue-700' :
+                          'text-yellow-700'
+                        }`}>
+                          {alert.message}
+                        </p>
+                        <div className="mt-2 flex items-center gap-2">
+                          <span className="text-xs font-medium px-2 py-1 bg-white rounded-full border">
+                            Sector: {alert.plan.sectorName}
+                          </span>
+                          <span className="text-xs font-medium px-2 py-1 bg-white rounded-full border">
+                            {alert.plan.cropName}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <p className="text-gray-600 font-medium">No upcoming activities</p>
-                <p className="text-gray-500 text-sm mt-1">Check back later for scheduled events</p>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <FontAwesomeIcon icon={faCheckCircle} className="text-2xl text-green-600" />
+                  </div>
+                  <p className="text-gray-700 font-semibold">No urgent alerts</p>
+                  <p className="text-gray-500 text-sm mt-1">All systems are operating normally</p>
+                </div>
+              )}
+            </div>
+
+            {/* Upcoming Activities */}
+            <div id="activities-section" className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200 h-fit">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold text-gray-900 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+                    <FontAwesomeIcon icon={faCalendarCheck} className="text-green-600 text-lg" />
+                  </div>
+                  <div>
+                    Upcoming Activities
+                    <span className="block text-sm font-normal text-gray-500 mt-1">
+                      Scheduled events and tasks
+                    </span>
+                  </div>
+                </h3>
+                <span className="bg-green-100 text-green-800 text-sm font-bold px-3 py-1 rounded-full">
+                  {planAlerts.activities.length}
+                </span>
               </div>
-            )}
+              
+              {planAlerts.activities.length > 0 ? (
+                <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
+                  {planAlerts.activities.map(activity => (
+                    <div
+                      key={activity.id}
+                      onClick={() => handleActivityClick(activity)}
+                      className={`flex items-start p-4 rounded-xl border-l-4 transition-all duration-200 hover:shadow-sm cursor-pointer group ${
+                        activity.type === 'harvest' 
+                          ? 'border-l-amber-500 bg-amber-50 hover:bg-amber-100' 
+                          : 'border-l-green-500 bg-green-50 hover:bg-green-100'
+                      }`}
+                    >
+                      <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
+                        activity.type === 'harvest' ? 'bg-amber-100 group-hover:bg-amber-200' : 'bg-green-100 group-hover:bg-green-200'
+                      } mr-4 transition-colors`}>
+                        <FontAwesomeIcon 
+                          icon={activity.type === 'harvest' ? faSeedling : faCalendarPlus}
+                          className={activity.type === 'harvest' ? 'text-amber-600' : 'text-green-600'}
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className={`font-semibold ${
+                            activity.type === 'harvest' ? 'text-amber-800' : 'text-green-800'
+                          }`}>
+                            {activity.type === 'harvest' ? '🌾 Harvest Alert' : '📅 Planting Reminder'}
+                            <ChevronRight className="ml-2 w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity inline" />
+                          </h4>
+                          <span className="text-xs text-gray-500 font-medium">
+                            {new Date(activity.date).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <p className={`text-sm ${
+                          activity.type === 'harvest' ? 'text-amber-700' : 'text-green-700'
+                        }`}>
+                          {activity.message}
+                        </p>
+                        <div className="mt-2 flex items-center gap-2">
+                          <span className="text-xs font-medium px-2 py-1 bg-white rounded-full border">
+                            Sector: {activity.plan.sectorName}
+                          </span>
+                          <span className="text-xs font-medium px-2 py-1 bg-white rounded-full border">
+                            {activity.plan.cropName}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <FontAwesomeIcon icon={faCalendarAlt} className="text-2xl text-gray-400" />
+                  </div>
+                  <p className="text-gray-700 font-semibold">No upcoming activities</p>
+                  <p className="text-gray-500 text-sm mt-1">Check back later for scheduled events</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Quick Actions Footer */}
+          <div className="mt-8 bg-white/90 backdrop-blur-md rounded-2xl p-6 border border-white/50">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div>
+                <h4 className="text-lg font-semibold text-gray-900">Need to take action?</h4>
+                <p className="text-gray-600 text-sm">Manage your farm operations efficiently</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => navigate('/planning')}
+                  className="px-6 py-2 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 transition-colors flex items-center gap-2"
+                >
+                  <FontAwesomeIcon icon={faClipboardList} />
+                  View Planning
+                </button>
+                <button 
+                  onClick={() => navigate('/analytics')}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors flex items-center gap-2"
+                >
+                  <FontAwesomeIcon icon={faChartLine} />
+                  Analytics
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-  )};
+  );
+};
+
 export default Dashboard;

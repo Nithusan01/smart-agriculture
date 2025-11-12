@@ -279,7 +279,7 @@ const PlanCard = ({
             </div>
 
             {/* Location Information */}
-            <div>
+            
               {location && (
                 <div className="bg-gradient-to-br from-indigo-50/80 to-purple-50/80 backdrop-blur-sm rounded-2xl border border-indigo-200/50 p-5 shadow-lg hover:shadow-xl transition-all duration-300">
                   <div className="flex items-center gap-3 mb-4">
@@ -293,7 +293,7 @@ const PlanCard = ({
                   </p>
                 </div>
               )}
-            </div>
+            
           </div>
         )}
 

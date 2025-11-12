@@ -80,20 +80,5 @@ module.exports = (sequelize) => {
     }
   );
 
-  // Associations
-  CultivationPlan.associate = (models) => {
-    CultivationPlan.belongsTo(models.User, {
-      foreignKey: 'userId',
-      as: 'user',
-      onDelete: 'CASCADE',
-    });
-
-    CultivationPlan.belongsTo(models.Crop, {
-      foreignKey: 'cropId',
-      as: 'crop',
-      onDelete: 'SET NULL',
-    });
-  };
-
   return CultivationPlan;
 };

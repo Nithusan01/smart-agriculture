@@ -52,7 +52,7 @@ export const AuthProvider = ({ children }) => {
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`
       setCurrentUser(user)
 
-      return { success: true }
+      return { success: true ,data:user}
     } catch (error) {
       return {
         success: false,

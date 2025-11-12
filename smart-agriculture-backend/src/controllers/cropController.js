@@ -12,6 +12,21 @@ const addCrop =async (req,res)=>{
 
         const { cropName, cropType, durationDays, waterRequirement, season, recommendedSoil } = req.body;
 
+        // check exsisting crop
+        const existingCrop = await Crop.findOne({
+            where: {
+                cropName
+            }
+        })
+
+        if(existingCrop){
+            return res.status(400).json({
+                success:false,
+                message:"crop name already exists"
+            })
+
+        }
+
         const newCrop =await Crop.create({
             cropName,
             cropType,

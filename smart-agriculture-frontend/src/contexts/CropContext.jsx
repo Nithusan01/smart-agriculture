@@ -1,6 +1,6 @@
 // src/contexts/CropContext.jsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { getCrops,createCrop,removeCrop, updateCrop } from '../services/cropApi';
+import { getCrops,createCrop,removeCrop, updateCrop,getCropById } from '../services/cropApi';
 
 const CropContext = createContext();
 
@@ -13,9 +13,9 @@ export const CropProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
-      const [status,setStatus] = useState("");
+  const [status,setStatus] = useState("");
+  const [crop,setCrop] = useState([]);
 
-  
 
   const fetchCrops = async () => {
     try {
@@ -137,6 +137,23 @@ export const CropProvider = ({ children }) => {
     }
 };
 
+//get crop by id
+ const fetchCropById = async (id) => {
+    try {
+        if (!id) {
+            throw new Error('Crop ID is required');
+        }
+
+        const response = await getCropById(id);
+        return response.data?.data || response.data;
+        
+    } catch (error) {
+        console.error('Error fetching crop:', error);
+        throw error;
+    }
+}
+
+
 
   const value = {
     crops,
@@ -148,7 +165,8 @@ export const CropProvider = ({ children }) => {
     setError,
     handleDelete,
     deletingId,
-    editCrop
+    editCrop,
+    fetchCropById
   };
 
   return (

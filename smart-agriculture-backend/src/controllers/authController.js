@@ -105,7 +105,7 @@ const login = async (req, res) => {
     // Update last login
     await user.update({ lastLogin: new Date() });
 
-    res.json({
+    res.status(200).json({
       success: true,
       message: 'Login successful',
       token,
@@ -120,6 +120,7 @@ const login = async (req, res) => {
         createdAt:user.createdAt
       }
     });
+    
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({

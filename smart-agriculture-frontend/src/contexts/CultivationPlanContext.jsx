@@ -10,6 +10,7 @@ export const useCultivationPlan = () => useContext(CultivationPlanContext);
 
 export const CultivationPlanProvider = ({ children }) => {
   const [plans, setPlans] = useState([]);
+  const [changePlan,setChangePlan]= useState(false)
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
   const {currentUser} = useAuth();
@@ -65,7 +66,7 @@ export const CultivationPlanProvider = ({ children }) => {
         abortController.abort();
       };
 
- },[currentUser,plans.length,plans.status]);
+ },[currentUser,plans.length,plans.status,plans.sectorName,changePlan]);
 
 
 // In your CultivationPlanContext.jsx
@@ -76,6 +77,7 @@ const editPlan = async (id, updates) => {
       prev.map((p) => (p.id === id ? res.data : p))
     );
     setStatus("Plan updated successfully!");
+    setChangePlan(true)
     return { success: true };
   } catch (error) {
     const errorMessage = error.response?.data?.message || 'Failed to update plan';
@@ -115,6 +117,7 @@ const deletePlan = async(id) => {
       value={{
         plans,
         loading,
+        setLoading,
         status,
         setStatus,
         addPlan,

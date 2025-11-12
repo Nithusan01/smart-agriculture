@@ -94,33 +94,33 @@ export const WeatherProvider = ({ children }) => {
     return `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
   };
 
-  const getWeatherRecommendations = (weatherData) => {
-    if (!weatherData) return [];
+  // const getWeatherRecommendations = (weatherData) => {
+  //   if (!weatherData) return [];
 
-    const recommendations = [];
-    const { main, weather } = weatherData;
+  //   const recommendations = [];
+  //   const { main, weather } = weatherData;
 
-    // Temperature-based recommendations
-    if (main.temp < 10) {
-      recommendations.push('Consider delaying planting due to cold temperatures');
-    } else if (main.temp > 35) {
-      recommendations.push('High temperatures detected - ensure adequate irrigation');
-    }
+  //   // Temperature-based recommendations
+  //   if (main.temp < 10) {
+  //     recommendations.push('Consider delaying planting due to cold temperatures');
+  //   } else if (main.temp > 25) {
+  //     recommendations.push('High temperatures detected - ensure adequate irrigation');
+  //   }
 
-    // Rain-based recommendations
-    if (weather[0].main === 'Rain') {
-      recommendations.push('Rain expected - adjust irrigation schedule');
-    }
+  //   // Rain-based recommendations
+  //   if (weather[0].main === 'Rain') {
+  //     recommendations.push('Rain expected - adjust irrigation schedule');
+  //   }
 
-    // Humidity-based recommendations
-    if (main.humidity > 80) {
-      recommendations.push('High humidity - watch for fungal diseases');
-    } else if (main.humidity < 30) {
-      recommendations.push('Low humidity - increase irrigation frequency');
-    }
+  //   // Humidity-based recommendations
+  //   if (main.humidity > 80) {
+  //     recommendations.push('High humidity - watch for fungal diseases');
+  //   } else if (main.humidity < 30) {
+  //     recommendations.push('Low humidity - increase irrigation frequency');
+  //   }
 
-    return recommendations;
-  };
+  //   return recommendations;
+  // };
 
   return (
     <WeatherContext.Provider value={{
@@ -131,7 +131,7 @@ export const WeatherProvider = ({ children }) => {
       fetchWeather,
       fetchWeatherForPlan, // Add the new function
       getWeatherIcon,
-      getWeatherRecommendations
+      
     }}>
       {children}
     </WeatherContext.Provider>

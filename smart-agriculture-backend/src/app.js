@@ -4,6 +4,9 @@ const {protect} = require('./middlewares/auth');
 const authRoutes = require('./routes/auth');
 const cultivationPlanRoutes = require('./routes/cultivationPlan');
 const cropRoutes = require('./routes/crop')
+const diseaseRoutes = require('./routes/disease')
+const detectedDiseaseRoutes = require('./routes/detectedDisease')
+const chatRoutes = require('./routes/chat');
 
 const app = express();
 
@@ -16,6 +19,10 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/cultivationPlan', cultivationPlanRoutes);
 app.use('/api/crop',cropRoutes)
+app.use('/api/disease',diseaseRoutes)
+app.use('/api/detectedDisease',detectedDiseaseRoutes)
+app.use('/api/chat', chatRoutes);
+
 
 
 // Protected route example

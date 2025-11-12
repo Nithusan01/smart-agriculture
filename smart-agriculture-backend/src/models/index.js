@@ -1,12 +1,19 @@
-const { Sequelize, DataTypes } = require('sequelize'); 
+const { Sequelize, DataTypes } = require('sequelize');
 const config = require('../config/config.js');
-const UserModel = require('./User');
-const CultivationPlanModel = require('./cultivationPlan');
-const CropModel = require('./crop');
 
+// Import models
+const UserModel = require('./user');
+const CropModel = require('./crop');
+const CultivationPlanModel = require('./cultivationPlan');
+const DiseaseModel = require('./disease');
+const DetectedDiseaseModel = require('./DetectedDisease');
+const ChatHistoryModel = require('./chatHistory.js')
+
+// Determine environment
 const env = process.env.NODE_ENV || 'development';
 const dbConfig = config[env];
 
+// Initialize Sequelize
 const sequelize = new Sequelize(
   dbConfig.database,
   dbConfig.username,
@@ -16,30 +23,99 @@ const sequelize = new Sequelize(
     port: dbConfig.port,
     dialect: dbConfig.dialect,
     logging: dbConfig.logging,
-    dialectOptions: dbConfig.dialectOptions || {}
+    dialectOptions: dbConfig.dialectOptions || {},
   }
 );
 
-// Initialize models
+// Initialize all models
 const User = UserModel(sequelize, DataTypes);
-const CultivationPlan = CultivationPlanModel(sequelize, DataTypes);
 const Crop = CropModel(sequelize, DataTypes);
+const CultivationPlan = CultivationPlanModel(sequelize, DataTypes);
+const Disease = DiseaseModel(sequelize, DataTypes);
+const DetectedDisease = DetectedDiseaseModel(sequelize, DataTypes);
+const ChatHistory = ChatHistoryModel(sequelize,DataTypes)
+//
+// ✅ Define Associations
+//
 
-// Set up associations
-User.hasMany(CultivationPlan, { foreignKey: 'userId', as: 'plans', onDelete: 'CASCADE' });
-CultivationPlan.belongsTo(User, { foreignKey: 'userId', as: 'user' });
-CultivationPlan.belongsTo(Crop, { foreignKey: 'cropId', as: 'crop' });
-Crop.hasMany(CultivationPlan, { foreignKey: 'cropId', as: 'plans' });
+// 1️⃣ User → CultivationPlan (One-to-Many)
+User.hasMany(CultivationPlan, {
+  foreignKey: 'userId',
+  as: 'plans',
+  onDelete: 'CASCADE',
+});
+CultivationPlan.belongsTo(User, {
+  foreignKey: 'userId',
+  as: 'user',
+});
+
+// 2️⃣ Crop → CultivationPlan (One-to-Many)
+Crop.hasMany(CultivationPlan, {
+  foreignKey: 'cropId',
+  as: 'plans',
+});
+CultivationPlan.belongsTo(Crop, {
+  foreignKey: 'cropId',
+  as: 'crop',
+});
+
+// 3️⃣ Crop → Disease (One-to-Many)
+Crop.hasMany(Disease, {
+  foreignKey: 'cropId',
+  as: 'diseases',
+});
+Disease.belongsTo(Crop, {
+  foreignKey: 'cropId',
+  as: 'crop',
+});
+
+// 4️⃣ CultivationPlan → DetectedDisease (One-to-Many)
+CultivationPlan.hasMany(DetectedDisease, {
+  foreignKey: 'cultivationPlanId',
+  as: 'detectedDiseases',
+});
+DetectedDisease.belongsTo(CultivationPlan, {
+  foreignKey: 'cultivationPlanId',
+  as: 'plan',
+});
+
+// 5️⃣ Disease → DetectedDisease (One-to-Many)
+Disease.hasMany(DetectedDisease, {
+  foreignKey: 'diseaseId',
+  as: 'detectedInPlans',
+});
+DetectedDisease.belongsTo(Disease, {
+  foreignKey: 'diseaseId',
+  as: 'disease',
+});
+
+// 6️⃣ User → DetectedDisease (One-to-Many)
+User.hasMany(DetectedDisease, {
+  foreignKey: 'userId',
+  as: 'userDetectedDiseases',
+});
+DetectedDisease.belongsTo(User, {
+  foreignKey: 'userId',
+  as: 'user',
+});
 
 
+
+//
+// ✅ Export all models
+//
 const models = {
   User,
-  CultivationPlan,
   Crop,
+  CultivationPlan,
+  Disease,
+  DetectedDisease,
+  ChatHistory,
   sequelize,
-  Sequelize
+  Sequelize,
 };
 
+// Add Sequelize operators
 models.Op = Sequelize.Op;
 
 module.exports = models;

@@ -36,7 +36,7 @@ const AgriSmartSection = () => {
     <div className="font-sans ">
 
       {/* Hero Section */}
-      <section className="relative  min-h-[500px] flex items-center ">
+      <section className="relative  min-h-[800px] flex items-center ">
         {/* Background image with overlay */}
         <div 
           className="absolute inset-0 bg-cover bg-center"
@@ -44,7 +44,7 @@ const AgriSmartSection = () => {
             backgroundImage: "url('/agri.jpg')"
           }}
         >
-          <div className="absolute inset-0 bg-gradient-to-t from-green-500/60 via-green-500/70 to-green-300/90"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-green-600/50 to-green-600/50"></div>
         </div>
         
         {/* Hero content */}
