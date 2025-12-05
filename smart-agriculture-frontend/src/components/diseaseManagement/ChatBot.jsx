@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import api from '../../services/api.js';
+import {api} from '../../services/api.js';
 
 const ChatBot = () => {
   const [messages, setMessages] = useState([]);
@@ -116,8 +116,8 @@ const ChatBot = () => {
         sender: 'bot',
         timestamp: new Date(),
         data: response.data.data,
-        diseases: response.data.data.diseases || [],
-        treatments: response.data.data.treatments || null
+        diseases: response.data.data.diseases || []
+      
       };
 
       setMessages(prev => [...prev, botResponse]);
@@ -198,17 +198,19 @@ const ChatBot = () => {
                         <p className="text-xs text-gray-600 italic">{disease.severity}</p>
                       )}
                       <p className="text-xs text-gray-700 mt-1">{disease.primarySymptom}</p>
+                      <p className="font-semibold text-green-700">🌿 Organic Treatments:</p>
+                      <p  className="text-xs ml-2">• {disease.treatment}</p>
                     </div>
                   ))}
                 </div>
               )}
 
               {/* Display treatment information if available */}
-              {message?.treatments && (
+              {message?.treatment && (
                 <div className="mt-2 text-sm border-t pt-2">
                   <div className="mb-2">
                     <p className="font-semibold text-green-700">🌿 Organic Treatments:</p>
-                      <p  className="text-xs ml-2">• {message.treatments}</p>
+                      <p  className="text-xs ml-2">• {message.treatment}</p>
                   
                   </div>
                   <div>

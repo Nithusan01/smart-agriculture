@@ -111,7 +111,7 @@ const Register = () => {
     <h2 className="py-3 pb-4 text-center font-bold text-white text-2xl">
       Create Your Farm Account
     </h2>
-    {error && <div className="alert alert-danger">{error}</div>}
+    {error && <div className="bg-red-700/50 border-red-200 text-white py-1 pl-2 mb-3">{error}</div>}
 
     <form onSubmit={handleSubmit} className="space-y-8">
 

@@ -71,12 +71,21 @@ const Header = () => {
           >
             Disease Mgmt
           </Link>
+
+          <Link 
+            to="/device-management" 
+            className={`px-4 py-2 rounded-xl transition-colors duration-300 hover:bg-green-700/40 rounded ${isActive('/device-management')}`}
+          >
+            device Mgmt 
+          </Link>
+
           <Link 
             to="/" 
             className={`px-4 py-2 rounded-xl transition-colors duration-300 hover:bg-green-700/40 rounded ${isActive('/')}`}
           >
             About 
           </Link>
+
         </div>
       )
     } else {

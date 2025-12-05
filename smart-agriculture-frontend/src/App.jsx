@@ -19,69 +19,83 @@ import Footer from './components/layout/Footer'
 import AgriSmartSection from './components/agriSmartSection/AgriSmartSection'
 import Planning from './components/planning/planning'
 import DiseaseManagement from './components/diseaseManagement/DiseaseManagement'
+import { DeviceAuthProvider } from './contexts/DeviceAuthContext'
+import DevicesDashboard from './components/device/DevicesDashboard'
 
 function App() {
   return (
 
     <AuthProvider>
+
       <CropProvider>
         <DiseaseProvider>
-        <WeatherProvider>
-          <CultivationPlanProvider>
-            <Router>
-              <div className="App">
-                <Header />
-                <main className="main-content">
-                  <Routes>
-                   
-                    {/* <Route path="/dashboard"  element={<Navigate to="/dashboard" replace />} />  */}
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/register" element={<Register />} />
-                     <Route path="/" element={<AgriSmartSection />} />
+          <WeatherProvider>
+            <CultivationPlanProvider>
+              <DeviceAuthProvider>
+                <Router>
+                  <div className="App">
+                    <Header />
+                    <main className="main-content">
+                      <Routes>
 
-                    <Route
-                      path="/dashboard"
-                      element={
-                        <PrivateRoute>
-                          <Dashboard />
-                        </PrivateRoute>
-                      }
-                    />
+                        {/* <Route path="/dashboard"  element={<Navigate to="/dashboard" replace />} />  */}
+                        <Route path="/login" element={<Login />} />
+                        <Route path="/register" element={<Register />} />
+                        <Route path="/" element={<AgriSmartSection />} />
+
+                        <Route
+                          path="/dashboard"
+                          element={
+                            <PrivateRoute>
+                              <Dashboard />
+                            </PrivateRoute>
+                          }
+                        />
 
 
-                    <Route
-                      path="/admin"
-                      element={
-                        <ProtectedAdminRoute>
-                          <AdminPage />
-                        </ProtectedAdminRoute>
-                      }
-                    />
+                        <Route
+                          path="/admin"
+                          element={
+                            <ProtectedAdminRoute>
+                              <AdminPage />
+                            </ProtectedAdminRoute>
+                          }
+                        />
 
-                    <Route
-                      path="/planning"
-                      element={
-                        <PrivateRoute>
-                          <Planning />
-                        </PrivateRoute>
-                      }
-                    />
-                    <Route
-                      path="/chatbot"
-                      element={
-                        <PrivateRoute>
-                          <DiseaseManagement/>
-                        </PrivateRoute>
-                      }
-                    />
+                        <Route
+                          path="/planning"
+                          element={
+                            <PrivateRoute>
+                              <Planning />
+                            </PrivateRoute>
+                          }
+                        />
+                        <Route
+                          path="/chatbot"
+                          element={
+                            <PrivateRoute>
+                              <DiseaseManagement />
+                            </PrivateRoute>
+                          }
+                        />
 
-                  </Routes>
-                </main>
-                <Footer />
-              </div>
-            </Router>
-          </CultivationPlanProvider>
-        </WeatherProvider>
+                        <Route
+                          path="/device-management"
+                          element={
+                            <PrivateRoute>
+                              <DevicesDashboard />
+                            </PrivateRoute>
+                          }
+                        />
+
+                      </Routes>
+                    </main>
+                    <Footer />
+                  </div>
+                </Router>
+              </DeviceAuthProvider>
+            </CultivationPlanProvider>
+          </WeatherProvider>
         </DiseaseProvider>
       </CropProvider>
 

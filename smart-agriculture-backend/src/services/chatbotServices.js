@@ -119,7 +119,8 @@ class ChatbotService {
         name: d.diseaseName,
         severity: d.severity,
         primarySymptom: d.symptoms || 'Various symptoms',
-        treatments: d.treatment || 'No treatment info available',
+        treatment: d.treatment || 'No treatment info available',
+        description: d.description || 'No description available'
       })),
       symptoms: symptoms,
       suggestions: matchingDiseases.map(d => `Tell me about ${d.diseaseName}`)
@@ -195,7 +196,7 @@ class ChatbotService {
           ]
         },
         limit: 5,
-        attributes: ['id', 'diseaseName', 'severity', 'symptoms']
+        attributes: ['id', 'diseaseName', 'severity', 'symptoms', 'description', 'treatment']
       });
 
       return diseases;

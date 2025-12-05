@@ -7,7 +7,9 @@ const CropModel = require('./crop');
 const CultivationPlanModel = require('./cultivationPlan');
 const DiseaseModel = require('./disease');
 const DetectedDiseaseModel = require('./DetectedDisease');
-const ChatHistoryModel = require('./chatHistory.js')
+const ChatHistoryModel = require('./chatHistory.js');
+const DeviceModel = require('./device.js');
+const SensorDataModel = require('./sensorData');
 
 // Determine environment
 const env = process.env.NODE_ENV || 'development';
@@ -33,7 +35,9 @@ const Crop = CropModel(sequelize, DataTypes);
 const CultivationPlan = CultivationPlanModel(sequelize, DataTypes);
 const Disease = DiseaseModel(sequelize, DataTypes);
 const DetectedDisease = DetectedDiseaseModel(sequelize, DataTypes);
-const ChatHistory = ChatHistoryModel(sequelize,DataTypes)
+const ChatHistory = ChatHistoryModel(sequelize,DataTypes);
+const Device = DeviceModel(sequelize,DataTypes);
+const SensorData = SensorDataModel(sequelize,DataTypes)
 //
 // ✅ Define Associations
 //
@@ -99,7 +103,35 @@ DetectedDisease.belongsTo(User, {
   as: 'user',
 });
 
+User.hasMany(SensorData, {
+  foreignKey: 'userId',
+  as: 'sensorData',
+  onDelete: 'CASCADE',
+});
+SensorData.belongsTo(User, {
+  foreignKey: 'userId',
+  as: 'user',
+});
 
+User.hasMany(Device, {
+  foreignKey: 'userId',
+  as: 'device',
+  onDelete: 'CASCADE',
+});
+Device.belongsTo(User, {
+  foreignKey: 'userId',
+  as: 'user',
+});
+
+Device.hasMany(SensorData, {
+  foreignKey: 'deviceId',
+  as: 'sensorData'
+});
+
+SensorData.belongsTo(Device, {
+  foreignKey: 'deviceId',
+  as: 'device'
+});
 
 //
 // ✅ Export all models
@@ -111,6 +143,8 @@ const models = {
   Disease,
   DetectedDisease,
   ChatHistory,
+  Device,
+  SensorData,
   sequelize,
   Sequelize,
 };

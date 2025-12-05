@@ -36,5 +36,5 @@ api.interceptors.response.use(
     return Promise.reject(error)
   }
 )
-
-export default api
+// Export both APIs
+export { api }

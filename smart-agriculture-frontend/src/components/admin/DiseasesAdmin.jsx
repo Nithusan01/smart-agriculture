@@ -114,296 +114,298 @@ const DiseasesAdmin = () => {
 
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6 text-green-700">
-        🌿 Disease Management
-      </h1>
-      <button
-        onClick={() => setShowDiseaseForm(!showDiseaseForm)}
-        className={`flex items-center gap-2 px-6 py-3 my-3 rounded-xl font-semibold transition-all duration-300 shadow-lg ${showDiseaseForm
-            ? 'bg-red-500 hover:bg-red-600 text-white'
-            : 'bg-green-500 hover:bg-green-600 text-white'
-          }`}
-      >
-        {showDiseaseForm ? (
-          <>
-            <X size={18} />
-            Cancel
-          </>
-        ) : (
-          <>
-            <Plus size={18} />
-            Add New disease
-          </>
-        )}
-      </button>
-      {/* Enhanced Add / Edit Disease Form */}
-      {showDiseaseForm && ( 
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-100"
-      >
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-gray-800">
-            {editingDisease ? "✏️ Edit Disease" : "➕ Add New Disease"}
-          </h2>
-          {editingDisease && (
-            <button
-              type="button"
-              onClick={() => setEditingDisease(null)}
-              className="flex items-center gap-2 text-gray-500 hover:text-gray-700 text-sm"
-            >
-              <span>Cancel Edit</span>
-              <X size={16} />
-            </button>
+    <div className=" p-6 max-w-5xl mx-auto">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold mb-6 text-green-700">
+          🌿 Disease Management
+        </h1>
+        <button
+          onClick={() => setShowDiseaseForm(!showDiseaseForm)}
+          className={`flex items-center gap-2 px-6 py-3 my-3 rounded-xl font-semibold transition-all duration-300 shadow-lg ${showDiseaseForm
+              ? 'bg-red-500 hover:bg-red-600 text-white'
+              : 'bg-green-500 hover:bg-green-600 text-white'
+            }`}
+        >
+          {showDiseaseForm ? (
+            <>
+              <X size={18} />
+              Cancel
+            </>
+          ) : (
+            <>
+              <Plus size={18} />
+              Add New disease
+            </>
           )}
-        </div>
-
-        <div className="grid gap-6 md:grid-cols-2">
-          {/* Disease Name */}
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">
-              Disease Name <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              name="diseaseName"
-              placeholder="e.g., Powdery Mildew, Leaf Rust"
-              value={newDisease.diseaseName}
-              onChange={handleInputChange}
-              className="w-full p-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-100 transition-all duration-200"
-              required
-            />
-          </div>
-
-          {/* Severity Level */}
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">
-              Severity Level <span className="text-red-500">*</span>
-            </label>
-            <select
-              name="severity"
-              value={newDisease.severity}
-              onChange={handleInputChange}
-              className="w-full p-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-100 transition-all duration-200 appearance-none cursor-pointer"
-              required
-            >
-              <option value="">Select severity level</option>
-              <option value="Low" className="text-green-600">🟢 Low - Minor impact</option>
-              <option value="Medium" className="text-yellow-600">🟡 Medium - Moderate impact</option>
-              <option value="High" className="text-red-600">🔴 High - Critical impact</option>
-            </select>
-          </div>
-
-          {/* Crop Selection - Full Width */}
-          <div className="md:col-span-2 space-y-2">
-            <label className="block text-sm font-medium text-gray-700">
-              Affected Crop <span className="text-red-500">*</span>
-            </label>
-
-            {cropsLoading ? (
-              <div className="p-4 bg-gray-50 border-2 border-gray-200 rounded-lg flex items-center justify-center">
-                <div className="flex items-center gap-3 text-gray-600">
-                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-green-500 border-t-transparent"></div>
-                  Loading available crops...
-                </div>
-              </div>
-            ) : (
-              <>
-                <select
-                  name="cropId"
-                  value={newDisease.cropId}
-                  onChange={handleInputChange}
-                  className="w-full p-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-100 transition-all duration-200 appearance-none cursor-pointer"
-                  required
-                >
-                  <option value="">
-                    {crops.length === 0 ? "No crops available - Add crops first" : "Select affected crop..."}
-                  </option>
-                  {crops.map((crop) => (
-                    <option key={crop.id} value={crop.id}>
-                      {crop.cropName} {crop.variety && `- ${crop.variety}`}
-                    </option>
-                  ))}
-                </select>
-
-                {/* Selected Crop Details */}
-                {newDisease.cropId && selectedCrop && (
-                  <div className="mt-3 p-4 bg-green-50 rounded-lg border border-green-200">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="font-semibold text-green-800">Selected Crop:</span>
-                      <span className="text-green-700">{selectedCrop.cropName}</span>
-                    </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm text-green-700">
-                      {selectedCrop.durationDays && (
-                        <div className="flex items-center gap-1">
-                          <Calendar size={14} />
-                          <span>{selectedCrop.durationDays} days cycle</span>
-                        </div>
-                      )}
-                      {selectedCrop.waterRequirement && (
-                        <div className="flex items-center gap-1">
-                          <Droplet size={14} />
-                          <span>Water: {selectedCrop.waterRequirement}</span>
-                        </div>
-                      )}
-                      {selectedCrop.season && (
-                        <div className="flex items-center gap-1">
-                          <Sun size={14} />
-                          <span>Season: {selectedCrop.season}</span>
-                        </div>
-                      )}
-                      {selectedCrop.soilType && (
-                        <div className="flex items-center gap-1">
-                          <Sprout size={14} />
-                          <span>Soil: {selectedCrop.soilType}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </>
+        </button>
+      </div>
+      {/* Enhanced Add / Edit Disease Form */}
+      {showDiseaseForm && (
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-100"
+        >
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-gray-800">
+              {editingDisease ? "✏️ Edit Disease" : "➕ Add New Disease"}
+            </h2>
+            {editingDisease && (
+              <button
+                type="button"
+                onClick={() => setEditingDisease(null)}
+                className="flex items-center gap-2 text-gray-500 hover:text-gray-700 text-sm"
+              >
+                <span>Cancel Edit</span>
+                <X size={16} />
+              </button>
             )}
           </div>
 
-          {/* Symptoms */}
-          <div className="md:col-span-2 space-y-2">
-            <label className="block text-sm font-medium text-gray-700">
-              Symptoms & Identification <span className="text-red-500">*</span>
-            </label>
-            <textarea
-              name="symptoms"
-              placeholder="Describe the visible symptoms, patterns, and how to identify this disease..."
-              value={newDisease.symptoms}
-              onChange={handleInputChange}
-              rows={4}
-              className="w-full p-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-100 transition-all duration-200 resize-vertical"
-              required
-            />
-            <p className="text-xs text-gray-500">
-              Include details like leaf spots, discoloration, growth patterns, etc.
-            </p>
-          </div>
-
-          {/* Treatment */}
-          <div className="md:col-span-2 space-y-2">
-            <label className="block text-sm font-medium text-gray-700">
-              Treatment & Prevention <span className="text-red-500">*</span>
-            </label>
-            <textarea
-              name="treatment"
-              placeholder="Provide treatment methods, pesticides, organic solutions, and prevention measures..."
-              value={newDisease.treatment}
-              onChange={handleInputChange}
-              rows={4}
-              className="w-full p-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-100 transition-all duration-200 resize-vertical"
-              required
-            />
-            <p className="text-xs text-gray-500">
-              Include both chemical and organic treatment options
-            </p>
-          </div>
-
-          {/* Additional Information */}
-          <div className="md:col-span-2 space-y-2">
-            <label className="block text-sm font-medium text-gray-700">
-              Additional Information
-            </label>
-            <textarea
-              name="description"
-              placeholder="Any additional notes, environmental conditions that favor this disease, spread patterns, etc."
-              value={newDisease.description}
-              onChange={handleInputChange}
-              rows={3}
-              className="w-full p-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-100 transition-all duration-200 resize-vertical"
-            />
-          </div>
-
-          {/* Optional Fields */}
-          <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* Disease Name */}
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">
-                Optimal Temperature Range
+                Disease Name <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
-                name="optimalTemperature"
-                placeholder="e.g., 20-30°C"
-                value={newDisease.optimalTemperature}
+                name="diseaseName"
+                placeholder="e.g., Powdery Mildew, Leaf Rust"
+                value={newDisease.diseaseName}
                 onChange={handleInputChange}
                 className="w-full p-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-100 transition-all duration-200"
+                required
               />
             </div>
 
+            {/* Severity Level */}
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">
-                Humidity Conditions
-              </label>
-              <input
-                type="text"
-                name="humidity"
-                placeholder="e.g., High humidity"
-                value={newDisease.humidity}
-                onChange={handleInputChange}
-                className="w-full p-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-100 transition-all duration-200"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
-                Spread Rate
+                Severity Level <span className="text-red-500">*</span>
               </label>
               <select
-                name="spreadRate"
-                value={newDisease.spreadRate}
+                name="severity"
+                value={newDisease.severity}
                 onChange={handleInputChange}
-                className="w-full p-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-100 transition-all duration-200"
+                className="w-full p-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-100 transition-all duration-200 appearance-none cursor-pointer"
+                required
               >
-                <option value="">Select spread rate</option>
-                <option value="Slow">Slow</option>
-                <option value="Moderate">Moderate</option>
-                <option value="Rapid">Rapid</option>
+                <option value="">Select severity level</option>
+                <option value="Low" className="text-green-600">🟢 Low - Minor impact</option>
+                <option value="Medium" className="text-yellow-600">🟡 Medium - Moderate impact</option>
+                <option value="High" className="text-red-600">🔴 High - Critical impact</option>
               </select>
             </div>
-          </div>
-        </div>
 
-        {/* Submit Button */}
-        <div className="flex flex-col sm:flex-row gap-3 justify-between items-center mt-8 pt-6 border-t border-gray-200">
-          <div className="text-sm text-gray-500">
-            Fields marked with <span className="text-red-500">*</span> are required
+            {/* Crop Selection - Full Width */}
+            <div className="md:col-span-2 space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Affected Crop <span className="text-red-500">*</span>
+              </label>
+
+              {cropsLoading ? (
+                <div className="p-4 bg-gray-50 border-2 border-gray-200 rounded-lg flex items-center justify-center">
+                  <div className="flex items-center gap-3 text-gray-600">
+                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-green-500 border-t-transparent"></div>
+                    Loading available crops...
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <select
+                    name="cropId"
+                    value={newDisease.cropId}
+                    onChange={handleInputChange}
+                    className="w-full p-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-100 transition-all duration-200 appearance-none cursor-pointer"
+                    required
+                  >
+                    <option value="">
+                      {crops.length === 0 ? "No crops available - Add crops first" : "Select affected crop..."}
+                    </option>
+                    {crops.map((crop) => (
+                      <option key={crop.id} value={crop.id}>
+                        {crop.cropName} {crop.variety && `- ${crop.variety}`}
+                      </option>
+                    ))}
+                  </select>
+
+                  {/* Selected Crop Details */}
+                  {newDisease.cropId && selectedCrop && (
+                    <div className="mt-3 p-4 bg-green-50 rounded-lg border border-green-200">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="font-semibold text-green-800">Selected Crop:</span>
+                        <span className="text-green-700">{selectedCrop.cropName}</span>
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm text-green-700">
+                        {selectedCrop.durationDays && (
+                          <div className="flex items-center gap-1">
+                            <Calendar size={14} />
+                            <span>{selectedCrop.durationDays} days cycle</span>
+                          </div>
+                        )}
+                        {selectedCrop.waterRequirement && (
+                          <div className="flex items-center gap-1">
+                            <Droplet size={14} />
+                            <span>Water: {selectedCrop.waterRequirement}</span>
+                          </div>
+                        )}
+                        {selectedCrop.season && (
+                          <div className="flex items-center gap-1">
+                            <Sun size={14} />
+                            <span>Season: {selectedCrop.season}</span>
+                          </div>
+                        )}
+                        {selectedCrop.soilType && (
+                          <div className="flex items-center gap-1">
+                            <Sprout size={14} />
+                            <span>Soil: {selectedCrop.soilType}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+
+            {/* Symptoms */}
+            <div className="md:col-span-2 space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Symptoms & Identification <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                name="symptoms"
+                placeholder="Describe the visible symptoms, patterns, and how to identify this disease..."
+                value={newDisease.symptoms}
+                onChange={handleInputChange}
+                rows={4}
+                className="w-full p-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-100 transition-all duration-200 resize-vertical"
+                required
+              />
+              <p className="text-xs text-gray-500">
+                Include details like leaf spots, discoloration, growth patterns, etc.
+              </p>
+            </div>
+
+            {/* Treatment */}
+            <div className="md:col-span-2 space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Treatment & Prevention <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                name="treatment"
+                placeholder="Provide treatment methods, pesticides, organic solutions, and prevention measures..."
+                value={newDisease.treatment}
+                onChange={handleInputChange}
+                rows={4}
+                className="w-full p-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-100 transition-all duration-200 resize-vertical"
+                required
+              />
+              <p className="text-xs text-gray-500">
+                Include both chemical and organic treatment options
+              </p>
+            </div>
+
+            {/* Additional Information */}
+            <div className="md:col-span-2 space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Additional Information
+              </label>
+              <textarea
+                name="description"
+                placeholder="Any additional notes, environmental conditions that favor this disease, spread patterns, etc."
+                value={newDisease.description}
+                onChange={handleInputChange}
+                rows={3}
+                className="w-full p-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-100 transition-all duration-200 resize-vertical"
+              />
+            </div>
+
+            {/* Optional Fields */}
+            <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Optimal Temperature Range
+                </label>
+                <input
+                  type="text"
+                  name="optimalTemperature"
+                  placeholder="e.g., 20-30°C"
+                  value={newDisease.optimalTemperature}
+                  onChange={handleInputChange}
+                  className="w-full p-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-100 transition-all duration-200"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Humidity Conditions
+                </label>
+                <input
+                  type="text"
+                  name="humidity"
+                  placeholder="e.g., High humidity"
+                  value={newDisease.humidity}
+                  onChange={handleInputChange}
+                  className="w-full p-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-100 transition-all duration-200"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Spread Rate
+                </label>
+                <select
+                  name="spreadRate"
+                  value={newDisease.spreadRate}
+                  onChange={handleInputChange}
+                  className="w-full p-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-100 transition-all duration-200"
+                >
+                  <option value="">Select spread rate</option>
+                  <option value="Slow">Slow</option>
+                  <option value="Moderate">Moderate</option>
+                  <option value="Rapid">Rapid</option>
+                </select>
+              </div>
+            </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="flex items-center gap-3 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed"
-          >
-            {loading ? (
-              <>
-                <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
-                Processing...
-              </>
-            ) : editingDisease ? (
-              <>
-                <Save size={18} />
-                Update Disease
-              </>
-            ) : (
-              <>
-                <Plus size={18} />
-                Add Disease to Database
-              </>
-            )}
-          </button>
-        </div>
-      </form> )}
+          {/* Submit Button */}
+          <div className="flex flex-col sm:flex-row gap-3 justify-between items-center mt-8 pt-6 border-t border-gray-200">
+            <div className="text-sm text-gray-500">
+              Fields marked with <span className="text-red-500">*</span> are required
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex items-center gap-3 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <>
+                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                  Processing...
+                </>
+              ) : editingDisease ? (
+                <>
+                  <Save size={18} />
+                  Update Disease
+                </>
+              ) : (
+                <>
+                  <Plus size={18} />
+                  Add Disease to Database
+                </>
+              )}
+            </button>
+          </div>
+        </form>)}
       {/* Enhanced Disease List */}
       {loading ? (
         <div className="flex justify-center items-center h-48 bg-white rounded-lg shadow-sm border border-gray-100">
           <div className="text-center">
             {/* <Loader2 className="animate-spin text-green-600 mx-auto mb-3" size={40} /> */}
-            <LoadingSpinner/>
+            <LoadingSpinner />
             <p className="text-gray-600">Loading diseases data...</p>
           </div>
         </div>

@@ -21,6 +21,7 @@ import CropForm from './CropForm';
 import CropList from './CropList';
 import UserList from './UserList';
 import DiseasesAdmin from './DiseasesAdmin';
+import DeviceAdminPage from './DeviceAdminPage';
 
 const AdminPage = () => {
     const [activeSection, setActiveSection] = useState('crops');
@@ -62,11 +63,18 @@ const AdminPage = () => {
             description: 'Manage disease database and treatments'
         },
         { 
+            id: 'device', 
+            name: 'Device Management',   
+            icon: <Bell size={20} />,
+            description: 'Manage registered devices'  
+        },
+        { 
             id: 'settings', 
             name: 'System Settings', 
             icon: <Settings size={20} />,
             description: 'System configuration and preferences'
         },
+        
     ];
 
     // Stats data for dashboard
@@ -246,6 +254,22 @@ const AdminPage = () => {
                         </div>
                     </div>
                 );
+
+            case 'device':
+                return (
+                    <div className="space-y-6">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                            <div>
+                                <h2 className="text-2xl font-bold text-gray-900">Disease Management</h2>
+                                <p className="text-gray-600 mt-1">Manage disease database and treatment information</p>
+                            </div>
+                           
+                        </div>
+                        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+                            <DeviceAdminPage refreshTrigger={refreshTriggers.device} />
+                        </div>
+                    </div>
+                );    
 
             case 'settings':
                 return (
