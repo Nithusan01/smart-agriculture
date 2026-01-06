@@ -13,6 +13,16 @@ export const DeviceAuthProvider = ({ children }) => {
     const [isLoading, setIsLoading] = useState(true)
     const { currentUser } = useAuth();
     const [devices, setDevices] = useState([]);
+     const [stats, setStats] = useState({
+        totalDevices: 0,
+        activeDevices: 0,
+        totalReadings: 0
+      });
+    const [loading, setLoading] = useState(true);
+    const [selectedDevice, setSelectedDevice] = useState(null);
+      
+    
+
     //const [usersLoading, setUsersLoading] = useState(false)
 
 
@@ -181,10 +191,41 @@ export const DeviceAuthProvider = ({ children }) => {
         }
     }
 
+      useEffect(() => {
+        if (currentUser) {
+          fetchUserDevices();
+        }
+      }, [currentUser]);
+    
+      const fetchUserDevices = async () => {
+        try {
+          setLoading(true);
+          const response = await api.get('device/user-devices');
+          if (response.data.success) {
+            setDevices(response.data.devices || []);
+            calculateStats(response.data.devices);
+            {response.data.devices.status === 'active' ? setSelectedDevice(response.data.devices[0]?.deviceId) : setSelectedDevice(null)}
+          }
+        } catch (error) {
+          console.error('Error fetching devices:', error);
+        } finally {
+          setLoading(false);
+        }
+      };
+      
+    
+      const calculateStats = (deviceList) => {
+        setStats({
+          totalDevices: deviceList.length,
+          activeDevices: deviceList.filter(d => d.status === 'active').length,
+          totalReadings: deviceList.reduce((sum, d) => sum + (d.dataCount || 0), 0)
+        });
+      };
+
+
     
 
     const value = {
-        currentUser,
         currentDevice,
         isLoading,
         login,
@@ -193,7 +234,13 @@ export const DeviceAuthProvider = ({ children }) => {
         fetchAllDevices,
         deleteDevice,
         updateDevice,
-        updateDeviceStatus
+        updateDeviceStatus,
+        loading,
+        stats,
+        fetchUserDevices,
+        selectedDevice,
+        setSelectedDevice
+
 
     }
 

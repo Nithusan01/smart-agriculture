@@ -27,7 +27,7 @@ const addSensorData = async (req, res) => {
 
     // Create sensor record
     const newSensor = await SensorData.create({
-      deviceId: device.id, // Use the internal UUID from Device.id
+      deviceId: device.id,
       temperature,
       humidity,
       readingTime: readingTime || new Date(),
@@ -44,7 +44,7 @@ const addSensorData = async (req, res) => {
     const sensorPayload = {
       ...newSensor.toJSON(),
       // Add the string deviceId for frontend reference
-      publicDeviceId: device.deviceId,
+      deviceId: device.deviceId,
       deviceName: device.name || device.deviceId
     };
 
@@ -113,9 +113,7 @@ const getHistory = async (req, res) => {
         message: 'Device not found' 
       });
     }
-
-    // Build WHERE clause
-    const where = { deviceId: device.id }; // Use internal UUID
+    const where = { deviceId: device.id }; 
     
     // Handle date range filters
     if (from || to) {
@@ -127,11 +125,10 @@ const getHistory = async (req, res) => {
     // Get sensor data - CHANGED ORDER TO DESC for recent first
     const data = await SensorData.findAll({
       where,
-      order: [['createdAt', 'DESC']], // Changed from ASC to DESC
+      order: [['createdAt', 'DESC']], 
       limit: Math.min(parseInt(limit, 10), 1000)
     });
 
-    // Enhance data with public deviceId
     const enhancedData = data.map(record => ({
       ...record.toJSON(),
       publicDeviceId: device.deviceId

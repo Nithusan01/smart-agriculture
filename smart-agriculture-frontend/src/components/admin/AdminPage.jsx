@@ -2,25 +2,25 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCrops } from "../../contexts/CropContext";
 import { useDiseases } from "../../contexts/DiseaseContext";
-import { 
-  Users, 
-  Sprout, 
-  Skull, 
-  Settings, 
-  BarChart3, 
-  Bell,
-  Search,
-  Plus,
-  X,
-  Menu,
-  ChevronDown,
-  LogOut,
-  User,
-  Shield,
-  AlertCircle,
-  Wifi,
-  Database,
-  Activity
+import {
+    Users,
+    Sprout,
+    Skull,
+    Settings,
+    BarChart3,
+    Bell,
+    Search,
+    Plus,
+    X,
+    Menu,
+    ChevronDown,
+    LogOut,
+    User,
+    Shield,
+    AlertCircle,
+    Wifi,
+    Database,
+    Activity
 } from 'lucide-react';
 import CropForm from './CropForm';
 import CropList from './CropList';
@@ -31,8 +31,8 @@ import DeviceAdminPage from './DeviceAdminPage';
 const AdminPage = () => {
     const [activeSection, setActiveSection] = useState('dashboard');
     const { users, fetchAllUsers, currentUser, logout, setUsers } = useAuth();
-    const {crops} = useCrops();
-    const {diseases}= useDiseases();
+    const { crops } = useCrops();
+    const { diseases } = useDiseases();
     const [showCropForm, setShowCropForm] = useState(false);
     const [refreshTriggers, setRefreshTriggers] = useState({
         crops: 0,
@@ -43,73 +43,69 @@ const AdminPage = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [showUserMenu, setShowUserMenu] = useState(false);
+    const currentYear = new Date().getFullYear();
+
 
     const sections = [
-        { 
-            id: 'dashboard', 
-            name: 'Dashboard', 
+        {
+            id: 'dashboard',
+            name: 'Dashboard',
             icon: <BarChart3 size={20} />,
             description: 'System overview and analytics'
         },
-        { 
-            id: 'users', 
-            name: 'User Management', 
+        {
+            id: 'users',
+            name: 'User Management',
             icon: <Users size={20} />,
             description: 'Manage system users and permissions'
         },
-        { 
-            id: 'crops', 
-            name: 'Crop Management', 
+        {
+            id: 'crops',
+            name: 'Crop Management',
             icon: <Sprout size={20} />,
             description: 'Manage crop database and varieties'
         },
-        { 
-            id: 'diseases', 
-            name: 'Disease Management', 
+        {
+            id: 'diseases',
+            name: 'Disease Management',
             icon: <Skull size={20} />,
             description: 'Manage disease database and treatments'
         },
-        { 
-            id: 'devices', 
-            name: 'Device Management',   
+        {
+            id: 'devices',
+            name: 'Device Management',
             icon: <Wifi size={20} />,
-            description: 'Manage registered IoT devices'  
-        },
-        { 
-            id: 'settings', 
-            name: 'System Settings', 
-            icon: <Settings size={20} />,
-            description: 'System configuration and preferences'
+            description: 'Manage registered IoT devices'
         },
     ];
 
     // Stats data for dashboard
     const stats = [
-        { 
-            label: 'Total Users', 
-            value: users.length, 
-            change: '+12%', 
+        {
+            label: 'Total Users',
+            value: users.length,
+            change: '+12%',
             trend: 'up',
             icon: <Users className="text-blue-500" size={24} />
         },
-        { 
-            label: 'Active Crops', 
-            value: crops.length, 
-            change: '+5%', 
+        {
+            label: 'Active Crops',
+            value: crops.length,
+            change: '+5%',
             trend: 'up',
             icon: <Sprout className="text-green-500" size={24} />
         },
-        { 
-            label: 'Diseases Tracked', 
-            value: diseases.length, 
-            change: '+3%', 
+        {
+            label: 'Diseases Tracked',
+            value: diseases.length,
+            change: '+3%',
             trend: 'up',
             icon: <Skull className="text-red-500" size={24} />
         },
-        { 
-            label: 'Pending Actions', 
-            value: '7', 
-            change: '-2%', 
+        {
+            label: 'Pending Actions',
+            value: '7',
+            change: '-2%',
             trend: 'down',
             icon: <AlertCircle className="text-yellow-500" size={24} />
         },
@@ -122,18 +118,6 @@ const AdminPage = () => {
         }
     }, [activeSection, currentUser]);
 
-    // const handleCropAdded = () => {
-    //     setShowCropForm(false);
-    //     refreshSection('crops');
-    // };
-
-    const refreshSection = (section) => {
-        setRefreshTriggers(prev => ({
-            ...prev,
-            [section]: prev[section] + 1
-        }));
-    };
-
     const handleLogout = async () => {
         try {
             await logout();
@@ -143,6 +127,43 @@ const AdminPage = () => {
             console.error('Logout failed:', error);
         }
     };
+    const formatTimeAgo = (dateString) => {
+        if (!dateString) return 'Recently';
+
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffMs = now - date;
+        const diffSecs = Math.floor(diffMs / 1000);
+        const diffMins = Math.floor(diffSecs / 60);
+        const diffHours = Math.floor(diffMins / 60);
+        const diffDays = Math.floor(diffHours / 24);
+        const diffWeeks = Math.floor(diffDays / 7);
+        const diffMonths = Math.floor(diffDays / 30);
+        const diffYears = Math.floor(diffDays / 365);
+
+        if (diffSecs < 60) return 'Just now';
+        if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
+        if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+        if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+        if (diffWeeks < 4) return `${diffWeeks} week${diffWeeks > 1 ? 's' : ''} ago`;
+        if (diffMonths < 12) return `${diffMonths} month${diffMonths > 1 ? 's' : ''} ago`;
+        return `${diffYears} year${diffYears > 1 ? 's' : ''} ago`;
+    };
+
+    // Then update your recent activity variables
+    const recentUser = [...users]
+        .filter(u => u && u.created_at)
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0] || null;
+
+    const recentCrop = [...crops]
+        .filter(c => c && c.created_at)
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0] || null;
+
+    const recentDisease = [...diseases]
+        .filter(d => d && d.created_at)
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0] || null;
+
+
 
     const renderActiveSection = () => {
         switch (activeSection) {
@@ -167,9 +188,8 @@ const AdminPage = () => {
                                         <div className="p-2 bg-gray-50 rounded-lg">
                                             {stat.icon}
                                         </div>
-                                        <div className={`text-sm font-medium px-2 py-1 rounded-full ${
-                                            stat.trend === 'up' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                                        }`}>
+                                        <div className={`text-sm font-medium px-2 py-1 rounded-full ${stat.trend === 'up' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                            }`}>
                                             {stat.change}
                                         </div>
                                     </div>
@@ -187,10 +207,23 @@ const AdminPage = () => {
                                     <span className="text-sm text-blue-600 cursor-pointer hover:underline">View all</span>
                                 </div>
                                 <div className="space-y-3">
+
                                     {[
-                                        { action: 'New user registered', time: '2 hours ago', user: 'John Doe' },
-                                        { action: 'Crop variety added', time: '4 hours ago', user: 'System' },
-                                        { action: 'Disease reported', time: '6 hours ago', user: 'Farmer Joe' },
+                                        {
+                                            action: 'New user registered',
+                                            time: recentUser ? formatTimeAgo(recentUser.created_at) : 'Recently',
+                                            user: recentUser ? `${recentUser.firstName || recentUser.username || 'New User'}` : 'System'
+                                        },
+                                        {
+                                            action: 'Crop variety added',
+                                            time: recentCrop ? formatTimeAgo(recentCrop.created_at) : 'Recently',
+                                            user: 'System'
+                                        },
+                                        {
+                                            action: 'Disease reported',
+                                            time: recentDisease ? formatTimeAgo(recentDisease.created_at) : 'Recently',
+                                            user: recentDisease ? 'System Admin' : 'System'
+                                        },
                                     ].map((item, index) => (
                                         <div key={index} className="flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg transition-colors">
                                             <div className="w-2 h-2 bg-green-500 rounded-full"></div>
@@ -206,28 +239,28 @@ const AdminPage = () => {
                             <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
                                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
                                 <div className="grid grid-cols-2 gap-3">
-                                    <button 
+                                    <button
                                         onClick={() => setActiveSection('crops')}
                                         className="p-4 bg-green-50 hover:bg-green-100 rounded-lg text-center transition-all duration-200 hover:scale-105"
                                     >
                                         <Sprout className="mx-auto mb-2 text-green-600" size={24} />
                                         <span className="text-sm font-medium text-green-700">Add Crop</span>
                                     </button>
-                                    <button 
+                                    <button
                                         onClick={() => setActiveSection('diseases')}
                                         className="p-4 bg-red-50 hover:bg-red-100 rounded-lg text-center transition-all duration-200 hover:scale-105"
                                     >
                                         <Skull className="mx-auto mb-2 text-red-600" size={24} />
                                         <span className="text-sm font-medium text-red-700">Add Disease</span>
                                     </button>
-                                    <button 
+                                    <button
                                         onClick={() => setActiveSection('users')}
                                         className="p-4 bg-blue-50 hover:bg-blue-100 rounded-lg text-center transition-all duration-200 hover:scale-105"
                                     >
                                         <Users className="mx-auto mb-2 text-blue-600" size={24} />
                                         <span className="text-sm font-medium text-blue-700">New User</span>
                                     </button>
-                                    <button 
+                                    <button
                                         onClick={() => setActiveSection('devices')}
                                         className="p-4 bg-purple-50 hover:bg-purple-100 rounded-lg text-center transition-all duration-200 hover:scale-105"
                                     >
@@ -243,39 +276,6 @@ const AdminPage = () => {
             case 'crops':
                 return (
                     <div className="space-y-6">
-                        {/* <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                            <div>
-                                <h2 className="text-2xl font-bold text-gray-900">Crop Management</h2>
-                                <p className="text-gray-600 mt-1">Manage your crop database and varieties</p>
-                            </div>
-                            <button
-                                onClick={() => setShowCropForm(!showCropForm)}
-                                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg ${
-                                    showCropForm 
-                                        ? 'bg-red-500 hover:bg-red-600 text-white' 
-                                        : 'bg-green-500 hover:bg-green-600 text-white'
-                                }`}
-                            >
-                                {showCropForm ? (
-                                    <>
-                                        <X size={18} />
-                                        Cancel
-                                    </>
-                                ) : (
-                                    <>
-                                        <Plus size={18} />
-                                        Add New Crop
-                                    </>
-                                )}
-                            </button>
-                        </div>
-
-                        {showCropForm && (
-                            <div className="bg-white rounded-xl shadow-lg p-6 border border-green-200 animate-fade-in">
-                                <CropForm onSuccess={handleCropAdded} />
-                            </div>
-                        )} */}
-
                         <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
                             <CropList refreshTrigger={refreshTriggers.crops} />
                         </div>
@@ -285,16 +285,6 @@ const AdminPage = () => {
             case 'users':
                 return (
                     <div className="space-y-6">
-                        {/* <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                            <div>
-                                <h2 className="text-2xl font-bold text-gray-900">User Management</h2>
-                                <p className="text-gray-600 mt-1">Manage system users and their permissions</p>
-                            </div>
-                            <button className="flex items-center gap-2 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg">
-                                <Plus size={18} />
-                                Add User
-                            </button>
-                        </div> */}
                         <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
                             <UserList refreshTrigger={refreshTriggers.users} />
                         </div>
@@ -304,19 +294,6 @@ const AdminPage = () => {
             case 'diseases':
                 return (
                     <div className="space-y-6">
-                        {/* <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                            <div>
-                                <h2 className="text-2xl font-bold text-gray-900">Disease Management</h2>
-                                <p className="text-gray-600 mt-1">Manage disease database and treatment information</p>
-                            </div>
-                            <button 
-                                onClick={() => refreshSection('diseases')}
-                                className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors"
-                            >
-                                <Activity size={16} />
-                                Refresh
-                            </button>
-                        </div> */}
                         <DiseasesAdmin />
                     </div>
                 );
@@ -324,56 +301,7 @@ const AdminPage = () => {
             case 'devices':
                 return (
                     <div className="space-y-6">
-                        
-                            <DeviceAdminPage refreshTrigger={refreshTriggers.devices} />
-                        
-                    </div>
-                );    
-
-            case 'settings':
-                return (
-                    <div className="space-y-6">
-                        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-6">System Settings</h2>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="p-4 border border-gray-200 rounded-lg hover:border-green-500 transition-colors">
-                                    <div className="flex items-center gap-3 mb-2">
-                                        <div className="p-2 bg-blue-100 rounded-lg">
-                                            <Settings size={20} className="text-blue-600" />
-                                        </div>
-                                        <h3 className="font-semibold text-gray-900">General Settings</h3>
-                                    </div>
-                                    <p className="text-gray-600 text-sm">Configure system preferences and defaults</p>
-                                </div>
-                                <div className="p-4 border border-gray-200 rounded-lg hover:border-green-500 transition-colors">
-                                    <div className="flex items-center gap-3 mb-2">
-                                        <div className="p-2 bg-green-100 rounded-lg">
-                                            <Database size={20} className="text-green-600" />
-                                        </div>
-                                        <h3 className="font-semibold text-gray-900">Database Management</h3>
-                                    </div>
-                                    <p className="text-gray-600 text-sm">Backup and restore system data</p>
-                                </div>
-                                <div className="p-4 border border-gray-200 rounded-lg hover:border-green-500 transition-colors">
-                                    <div className="flex items-center gap-3 mb-2">
-                                        <div className="p-2 bg-purple-100 rounded-lg">
-                                            <Shield size={20} className="text-purple-600" />
-                                        </div>
-                                        <h3 className="font-semibold text-gray-900">Security Settings</h3>
-                                    </div>
-                                    <p className="text-gray-600 text-sm">Configure user permissions and access control</p>
-                                </div>
-                                <div className="p-4 border border-gray-200 rounded-lg hover:border-green-500 transition-colors">
-                                    <div className="flex items-center gap-3 mb-2">
-                                        <div className="p-2 bg-yellow-100 rounded-lg">
-                                            <Bell size={20} className="text-yellow-600" />
-                                        </div>
-                                        <h3 className="font-semibold text-gray-900">Notifications</h3>
-                                    </div>
-                                    <p className="text-gray-600 text-sm">Configure email and push notifications</p>
-                                </div>
-                            </div>
-                        </div>
+                        <DeviceAdminPage refreshTrigger={refreshTriggers.devices} />
                     </div>
                 );
 
@@ -389,11 +317,9 @@ const AdminPage = () => {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            {/* Top Navigation Bar - FIXED: Now properly implemented */}
             <header className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm border-b border-gray-200">
                 <div className="px-4 sm:px-6 lg:px-8 h-16">
                     <div className="flex items-center justify-between h-full">
-                        {/* Left: Menu button and title */}
                         <div className="flex items-center space-x-4">
                             <button
                                 onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -414,7 +340,6 @@ const AdminPage = () => {
                             </div>
                         </div>
 
-                        {/* Center: Search bar - hidden on small screens */}
                         <div className="hidden md:flex flex-1 max-w-md mx-4">
                             <div className="relative w-full">
                                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
@@ -422,19 +347,13 @@ const AdminPage = () => {
                                     type="text"
                                     placeholder="Search users, crops, diseases..."
                                     value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value) }
+                                    onChange={(e) => setSearchQuery(e.target.value)}
                                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                                 />
                             </div>
                         </div>
 
-                        {/* Right: User menu and notifications */}
                         <div className="flex items-center space-x-4">
-                            {/* Notifications */}
-                            <button className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                                <Bell size={20} />
-                                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-                            </button>
 
                             {/* User profile dropdown */}
                             <div className="relative">
@@ -445,20 +364,14 @@ const AdminPage = () => {
                                     <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
                                         <User size={16} className="text-green-600" />
                                     </div>
-                                    {/* <div className="hidden md:block text-left">
-                                        <p className="text-sm font-medium text-gray-900">
-                                            {currentUser?.username || currentUser?.email || 'Admin'}
-                                        </p>
-                                        <p className="text-xs text-gray-500 capitalize">{currentUser?.role || 'Administrator'}</p>
-                                    </div> */}
                                     <ChevronDown size={16} className="text-gray-400" />
                                 </button>
 
                                 {/* Dropdown menu */}
                                 {showUserMenu && (
                                     <>
-                                        <div 
-                                            className="fixed inset-0 z-40" 
+                                        <div
+                                            className="fixed inset-0 z-40"
                                             onClick={() => setShowUserMenu(false)}
                                         />
                                         <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
@@ -468,14 +381,6 @@ const AdminPage = () => {
                                                 </p>
                                                 <p className="text-xs text-gray-500">{currentUser?.email}</p>
                                             </div>
-                                            <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
-                                                <User size={16} />
-                                                My Profile
-                                            </button>
-                                            <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
-                                                <Settings size={16} />
-                                                Account Settings
-                                            </button>
                                             <div className="border-t border-gray-100 my-1"></div>
                                             <button
                                                 onClick={handleLogout}
@@ -501,19 +406,6 @@ const AdminPage = () => {
                     mt-16 lg:mt-16 h-[calc(100vh-4rem)] overflow-y-auto 
                 `}>
                     <div className="flex flex-col h-full">
-                        {/* Sidebar Header - Hidden on mobile as we have header */}
-                        {/* <div className="hidden lg:block p-6 border-b border-gray-200">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center">
-                                    <Sprout size={24} className="text-white" />
-                                </div>
-                                <div>
-                                    <h2 className="text-lg font-bold text-gray-900">Farm Management</h2>
-                                    <p className="text-xs text-gray-500">Administrator Panel</p>
-                                </div>
-                            </div>
-                        </div> */}
-
                         {/* Navigation */}
                         <nav className="flex-1 p-4 space-y-2">
                             {sections.map((section) => (
@@ -526,15 +418,13 @@ const AdminPage = () => {
                                             setShowCropForm(false);
                                         }
                                     }}
-                                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${
-                                        activeSection === section.id
-                                            ? 'bg-green-50 text-green-700 border border-green-200 shadow-sm'
-                                            : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
-                                    }`}
+                                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${activeSection === section.id
+                                        ? 'bg-green-50 text-green-700 border border-green-200 shadow-sm'
+                                        : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                                        }`}
                                 >
-                                    <div className={`p-2 rounded-lg ${
-                                        activeSection === section.id ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'
-                                    }`}>
+                                    <div className={`p-2 rounded-lg ${activeSection === section.id ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'
+                                        }`}>
                                         {section.icon}
                                     </div>
                                     <div className="flex-1">
@@ -559,7 +449,7 @@ const AdminPage = () => {
                             </div>
                             <div className="mt-4 text-center text-xs text-gray-500">
                                 <p>Version 1.0.0</p>
-                                <p className="mt-1">© 2024 Farm Management</p>
+                                <p className="mt-1">© {currentYear} Farm Management</p>
                             </div>
                         </div>
                     </div>
@@ -569,7 +459,7 @@ const AdminPage = () => {
                 <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-x-hidden px-4 lg:pl-72">
                     {/* Overlay for mobile sidebar */}
                     {sidebarOpen && (
-                        <div 
+                        <div
                             className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
                             onClick={() => setSidebarOpen(false)}
                         />

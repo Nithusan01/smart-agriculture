@@ -40,7 +40,8 @@ import {
   faRuler,
   faSpinner,
   faTag,
-  faClock
+  faClock,
+  faInfoCircle
 } from "@fortawesome/free-solid-svg-icons";
 
 const Planning = () => {
@@ -318,16 +319,16 @@ const Planning = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-lime-50 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 py-8">
       <section id="planning" className="container mx-auto px-4 max-w-7xl">
         {/* Header Section */}
-        <div className="text-center mt-12 pt-4">
-          <h2 className="text-4xl font-bold text-green-800 mb-2">
+        <div className="text-start mt-12 pt-4">
+          <h2 className="text-5xl font-bold text-green-600 mb-2">
             Cultivation Planning
           </h2>
-          {/* <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-start text-gray-600 mb-8">
             Plan and manage your agricultural activities with IoT-powered insights and real-time weather data
-          </p> */}
+          </p>
         </div>
 
         {/* Status Messages */}

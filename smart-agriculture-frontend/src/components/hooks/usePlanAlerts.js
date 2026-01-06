@@ -46,7 +46,7 @@ export const usePlanAlerts = (plans, planWeather) => {
       }
 
       // High temp alert
-      if (weather.main.temp > 30 && plan.status === 'planted') { // More realistic threshold
+      if (weather.main.temp > 20 && plan.status === 'planted') { // More realistic threshold
         alertList.push({
           id: `${plan.id}-temp`,
           type: 'high-temp',

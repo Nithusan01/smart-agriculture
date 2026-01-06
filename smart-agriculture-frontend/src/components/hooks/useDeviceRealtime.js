@@ -11,11 +11,32 @@ export default function useDeviceRealtime(deviceId, { pollingFallback = true } =
   const [history, setHistory] = useState([]);
   const [connected, setConnected] = useState(false);
   const [error, setError] = useState(null);
+  
+  // Keep track of previous deviceId to detect changes
+  const prevDeviceIdRef = useRef(deviceId);
 
   useEffect(() => {
     if (!deviceId) {
       console.log('No deviceId provided');
+      // Clear state when deviceId becomes null/undefined
+      setLatest(null);
+      setHistory([]);
+      setConnected(false);
+      setError(null);
       return;
+    }
+    
+    // Check if deviceId actually changed
+    const deviceIdChanged = prevDeviceIdRef.current !== deviceId;
+    prevDeviceIdRef.current = deviceId;
+    
+    if (deviceIdChanged) {
+      console.log(`DeviceId changed from ${prevDeviceIdRef.current} to ${deviceId}`);
+      // Clear previous device data immediately
+      setLatest(null);
+      setHistory([]);
+      setConnected(false);
+      setError(null);
     }
     
     console.log(`Connecting to WebSocket for device ${deviceId}...`);
@@ -23,7 +44,9 @@ export default function useDeviceRealtime(deviceId, { pollingFallback = true } =
     // Clean up any existing socket
     if (socketRef.current) {
       console.log('Cleaning up previous socket connection');
+      socketRef.current.emit('unsubscribeDevice', prevDeviceIdRef.current);
       socketRef.current.disconnect();
+      socketRef.current = null;
     }
     
     // Create new socket connection
@@ -95,7 +118,6 @@ export default function useDeviceRealtime(deviceId, { pollingFallback = true } =
         if (latestRes.data?.data) {
           setLatest(latestRes.data.data);
         }
-        
         if (historyRes.data?.data) {
           setHistory(historyRes.data.data);
         }
@@ -108,7 +130,7 @@ export default function useDeviceRealtime(deviceId, { pollingFallback = true } =
     
     // Cleanup function
     return () => {
-      console.log('Cleaning up WebSocket connection');
+      console.log('Cleaning up WebSocket connection for device:', deviceId);
       if (socketRef.current) {
         socketRef.current.emit('unsubscribeDevice', deviceId);
         socketRef.current.disconnect();
@@ -123,10 +145,14 @@ export default function useDeviceRealtime(deviceId, { pollingFallback = true } =
     
     console.log('Starting polling fallback...');
     
+    let isMounted = true;
+    
     const poll = async () => {
+      if (!isMounted || !deviceId) return;
+      
       try {
         const response = await api.get(`sensor/${deviceId}/latest`);
-        if (response.data?.data) {
+        if (response.data?.data && isMounted) {
           setLatest(response.data.data);
         }
       } catch (err) {
@@ -141,6 +167,7 @@ export default function useDeviceRealtime(deviceId, { pollingFallback = true } =
     const interval = setInterval(poll, 10000);
     
     return () => {
+      isMounted = false;
       clearInterval(interval);
     };
   }, [deviceId, pollingFallback, connected]);

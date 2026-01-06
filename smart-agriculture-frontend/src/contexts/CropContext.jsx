@@ -139,6 +139,7 @@ export const CropProvider = ({ children }) => {
         ));
         
         setStatus("Crop updated successfully!");
+        fetchCrops(); // Refresh the crops list
         return { success: true };
     } catch (error) {
         console.error('Edit crop error:', error);

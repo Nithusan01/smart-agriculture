@@ -57,7 +57,13 @@ exports.deviceLogin = async (req, res) => {
     
     if (!isLinkedToUser) {
       console.log('⚠️ Device not linked to any user:', deviceId);
-      // We still authenticate but warn ESP32
+    }
+    if (device.status !== 'active') {
+      console.log('⚠️ Device is not active:', deviceId);
+      return res.status(403).json({ 
+        success: false, 
+        message: 'Device is not active. Please contact the admin.' 
+      });
     }
 
     // Update last seen
@@ -157,7 +163,6 @@ exports.addDeviceToUser = async (req, res) => {
 
 
     device.userId = userId;
-    device.status = "active";
     await device.save();
     
     return res.json({ 
@@ -247,8 +252,7 @@ exports.getUserDevices = async (req, res) => {
     // Get sensor data count for each device (optional)
     const devicesWithStats = await Promise.all(
       devices.map(async (device) => {
-        // If you have SensorData model
-        // const dataCount = await SensorData.count({ where: { deviceId: device.id } });
+       
         return {
           ...device.toJSON(),
           // dataCount: dataCount || 0
@@ -291,7 +295,7 @@ exports.registerDevice = async (req, res) => {
       secretKey,
       deviceName: deviceName.trim(),
       location: location || 'Not specified',
-      status: "inactive", // Starts as inactive until linked to user
+      status: "active", 
       userId: null // Not linked to any user initially
     });
 

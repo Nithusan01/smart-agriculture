@@ -3,7 +3,6 @@ import { useMemo } from 'react';
 
 export const useDateUtils = () => {
   const dateUtils = useMemo(() => {
-    // ... your existing functions ...
 
     // Check if a date is within a specific number of days from today
     const isDateWithinDays = (targetDate, days = 1) => {

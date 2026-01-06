@@ -627,7 +627,7 @@ const CropList = ({ refreshTrigger }) => {
                                         </td>
 
                                         <td className="py-4 px-6">
-                                            <div className="space-y-2">
+                                            <div className="space-y-2 space-x-0 sm:space-x-2 ">
                                                 {editingCrop === crop.id ? (
                                                     <select
                                                         name="cropType"
@@ -656,7 +656,7 @@ const CropList = ({ refreshTrigger }) => {
                                                         <option value="Both">Both</option>
                                                     </select>
                                                 ) : (
-                                                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getSeasonBadge(crop.season)}`}>
+                                                    <span className={`inline-flex items-center  px-3 py-1 rounded-full text-xs font-medium ${getSeasonBadge(crop.season)}`}>
                                                         <Sun size={12} className="inline mr-1" />
                                                         {crop.season}
                                                     </span>
@@ -671,7 +671,7 @@ const CropList = ({ refreshTrigger }) => {
                                                     name="durationDays"
                                                     value={editFormData.durationDays}
                                                     onChange={handleEditInputChange}
-                                                    className="w-full p-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-100 transition-all duration-200"
+                                                    className="w-full  p-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-100 transition-all duration-200"
                                                     min="1"
                                                 />
                                             ) : (
@@ -683,7 +683,7 @@ const CropList = ({ refreshTrigger }) => {
                                         </td>
 
                                         <td className="py-4 px-6">
-                                            <div className="space-y-2">
+                                            <div className="space-y-2 space-x-2 ">
                                                 {editingCrop === crop.id ? (
                                                     <select
                                                         name="waterRequirement"
@@ -717,7 +717,7 @@ const CropList = ({ refreshTrigger }) => {
                                                         <option value="Chalky">Chalky</option>
                                                     </select>
                                                 ) : (
-                                                    <div className="text-sm text-gray-700">
+                                                    <div className="inline-flex px-2 py-1 text-sm text-gray-700 rounded-full text-xs font-medium bg-yellow-100">
                                                         {crop.recommendedSoil}
                                                     </div>
                                                 )}

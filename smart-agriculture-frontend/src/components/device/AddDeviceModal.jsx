@@ -67,8 +67,8 @@ const AddDeviceModal = ({ isOpen, onClose, onSubmit }) => {
 
             <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl">
               <p className="text-sm text-blue-800">
-                <strong>Note:</strong> Enter the credentials from your ESP32 code.
-                You'll find these in your Arduino sketch.
+                <strong>Note:</strong> Enter the credentials for your device.
+                You'll find these in your device
               </p>
             </div>
 
