@@ -208,7 +208,7 @@ const AdminPage = () => {
                                 </div>
                                 <div className="space-y-3">
 
-                                    {[
+                                    {[   
                                         {
                                             action: 'New user registered',
                                             time: recentUser ? formatTimeAgo(recentUser.created_at) : 'Recently',

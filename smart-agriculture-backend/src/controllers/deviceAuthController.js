@@ -1,8 +1,7 @@
 // controllers/deviceAuth.controller.js
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
-const { Device, User } = require("../models"); // Import User model if needed
-const user = require("../models/user");
+const { Device, User,CultivationPlan } = require("../models"); // Import User model if needed
 
 // -------------- GENERATORS -----------------
 
@@ -124,7 +123,7 @@ exports.deviceLogin = async (req, res) => {
 // ---------ADD DEVICE TO USER-----------
 exports.addDeviceToUser = async (req, res) => {
   try {
-    const { deviceId, secretKey } = req.body; 
+    const { deviceId, secretKey, planId } = req.body; 
     
     if (!deviceId || !secretKey) {
       return res.status(400).json({ 
@@ -146,6 +145,7 @@ exports.addDeviceToUser = async (req, res) => {
     }
     
     const userId = req.user.id; // From JWT middleware
+  
 
     // Check if device already linked to another user
     if (device.userId && device.userId !== userId) {
@@ -163,6 +163,7 @@ exports.addDeviceToUser = async (req, res) => {
 
 
     device.userId = userId;
+    device.planId = planId || null;
     await device.save();
     
     return res.json({ 
@@ -173,6 +174,7 @@ exports.addDeviceToUser = async (req, res) => {
         deviceId: device.deviceId,
         deviceName: device.deviceName,
         userId: device.userId,
+        planId: device.planId,
         location: device.location,
         status: device.status
       }
@@ -216,6 +218,7 @@ exports.removeDeviceFromUser = async (req, res) => {
     }
     
     device.userId = null;
+    device.planId = null;
     await device.save();
 
     
@@ -296,7 +299,8 @@ exports.registerDevice = async (req, res) => {
       deviceName: deviceName.trim(),
       location: location || 'Not specified',
       status: "active", 
-      userId: null // Not linked to any user initially
+      userId: null, // Not linked to any user initially
+      planId: null
     });
 
     console.log('✅ Device registered:', deviceId);

@@ -65,6 +65,7 @@ const Planning = () => {
   const [editingPlan, setEditingPlan] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [ expandedPlan, setExpandedPlan] = useState(false);
 
   // ✅ Custom reusable hooks
   const planLocations = usePlanLocations(plans);
@@ -905,7 +906,7 @@ const Planning = () => {
                   const plannedPlans = plans.filter(plan => plan.status === 'planted');
 
                   return plannedPlans.length > 0 ? (
-                    <div className="grid gap-6">
+                    <div className="grid gap-6" >
                       {plannedPlans.map((plan) => (
                         <PlanCard
                           key={plan.id}

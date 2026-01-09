@@ -31,6 +31,12 @@ module.exports = (sequelize) => {
         references: { model: 'users', key: 'user_id' },
         field: 'user_id',
     },
+    planId: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: { model: 'cultivation_plans', key: 'plan_id' },
+      field: 'plan_id',
+    },
     status: {
       type: DataTypes.ENUM('active', 'inactive'),
       defaultValue: 'inactive',
