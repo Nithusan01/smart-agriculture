@@ -20,6 +20,9 @@ export const DeviceAuthProvider = ({ children }) => {
       });
     const [loading, setLoading] = useState(true);
     const [selectedDevice, setSelectedDevice] = useState(null);
+     const [showAddModal, setShowAddModal] = useState(false);
+       
+     
       
     
 
@@ -222,7 +225,52 @@ export const DeviceAuthProvider = ({ children }) => {
         });
       };
 
+      const fetchDeviceByPlanId = async (planId) => {
+        try {
+          const response = await api.get(`device/plan/${planId}`);
+            if (response.data.success) {
+                return response.data.device;
+            }
+        } catch (error) {
+          console.error('Error fetching device by planId:', error);
+          return null;
+        }
 
+    }
+    const handleRemoveDevice = async (deviceId) => {
+        if (!window.confirm('Are you sure you want to remove this device?')) return;
+        
+        try {
+          await api.patch(`/device/${deviceId}/remove-from-user`);
+          fetchUserDevices();
+          if (selectedDevice === deviceId) {
+            setSelectedDevice(null);
+          }
+          alert('✅ Device removed successfully!');
+        } catch (error) {
+          alert('❌ Failed to remove device');
+          console.error('Error removing device:', error);
+        }
+      };
+
+       const handleAddDevice = async (deviceData) => {
+          try {
+            const response = await api.post('/device/add-to-user', deviceData);
+            if (response.data.success) {
+              setShowAddModal(false);
+              fetchUserDevices();
+              alert('✅ Device added successfully!');
+            }
+          } catch (error) {
+            alert(error.response?.data?.message || '❌ Failed to add device');
+          }
+        };
+      
+        const getSelectedDeviceInfo = () => {
+          if (!selectedDevice) return null;
+          return devices.find(d => d.deviceId === selectedDevice) || null;
+        };
+      
     
 
     const value = {
@@ -239,7 +287,13 @@ export const DeviceAuthProvider = ({ children }) => {
         stats,
         fetchUserDevices,
         selectedDevice,
-        setSelectedDevice
+        setSelectedDevice,
+        fetchDeviceByPlanId,
+        handleRemoveDevice,
+        handleAddDevice,
+        getSelectedDeviceInfo,
+        showAddModal,
+        setShowAddModal
 
 
     }

@@ -36,6 +36,7 @@ module.exports = (sequelize) => {
       allowNull: true,
       references: { model: 'cultivation_plans', key: 'plan_id' },
       field: 'plan_id',
+      onDelete: 'SET NULL',
     },
     status: {
       type: DataTypes.ENUM('active', 'inactive'),

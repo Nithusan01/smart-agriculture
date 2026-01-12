@@ -142,6 +142,18 @@ CropScheduleRule.belongsTo(Crop, {
   foreignKey: "cropId"
 });
 
+Device.belongsTo(CultivationPlan, {
+  foreignKey: 'cultivationPlanId',
+  as: 'cultivationPlan',
+  onDelete: 'SET NULL'
+});
+
+CultivationPlan.hasOne(Device, {
+  foreignKey: 'cultivationPlanId',
+  as: 'device',
+  onDelete: 'SET NULL'
+});
+
 //
 // ✅ Export all models
 //

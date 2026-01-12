@@ -1,10 +1,13 @@
 import React from 'react';
 import { useDeviceAuth } from '../../contexts/DeviceAuthContext';
 import useDeviceRealtime from '../hooks/useDeviceRealtime';
+import { useCultivationPlan } from '../../contexts/CultivationPlanContext';
 
 const DeviceCard = ({ device, isSelected, onSelect, onViewInfo, onRemove }) => {
   const { selectedDevice } = useDeviceAuth();
   const { latest } = useDeviceRealtime(selectedDevice);
+  const {plans}=useCultivationPlan();
+  const plan = plans.find(p => p.id === device.planId);
   
   
   const getStatusColor = (status) => {
@@ -82,6 +85,7 @@ const DeviceCard = ({ device, isSelected, onSelect, onViewInfo, onRemove }) => {
                 {isOnline ? 'Online • Live Data' : 'Offline'}
               </span>
             </div>
+           
           </div>
           
           <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -93,6 +97,14 @@ const DeviceCard = ({ device, isSelected, onSelect, onViewInfo, onRemove }) => {
               <div className="font-medium text-gray-800">{getLastSeenText(device.lastSeen)}</div>
             </div>
           </div>
+           <div className='lex items-center gap-2 text-sm text-gray-600'> 
+            <div>
+              <span className="font-medium">Plan:  </span>
+              {plan?.cropName || 'Unnamed Plan'} 
+              {plan?.sectorName && ` - Sector ${plan.sectorName}`}
+              </div>
+            
+            </div>
           
         </div>
         

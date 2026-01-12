@@ -1,5 +1,5 @@
 const express = require('express');
-const { deviceLogin,addDeviceToUser,removeDeviceFromUser,getUserDevices, registerDevice,getAllDevices,getCurrentDevice,deleteDevice,updateDevice, updateStatus} = require('../controllers/deviceAuthController');
+const { deviceLogin,addDeviceToUser,removeDeviceFromUser,getUserDevices, registerDevice,getAllDevices,getCurrentDevice,deleteDevice,updateDevice, updateStatus,getDeviceByPlanId} = require('../controllers/deviceAuthController');
 const { verifyDeviceToken } = require('../middlewares/authDevice');
 // const { registerValidation, loginValidation } = require('../middlewares/validation');
 const { protect } = require('../middlewares/auth');
@@ -17,5 +17,6 @@ router.get('/',protect,getAllDevices);
 router.delete('/:id',protect,deleteDevice)
 router.put('/:id',protect,updateDevice);
 router.patch('/:id/status',protect,updateStatus);
+router.get('/plan/:planId',protect,getDeviceByPlanId);
 
 module.exports = router;

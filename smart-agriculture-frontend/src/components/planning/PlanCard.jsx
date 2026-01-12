@@ -26,6 +26,23 @@ import {
   faCalendarDay,
   faLeaf
 } from "@fortawesome/free-solid-svg-icons";
+import { useDeviceAuth } from "../../contexts/DeviceAuthContext";
+import { useState, useEffect } from "react";
+import DeviceCard from "../device/DeviceCard";
+import useDeviceRealtime from "../hooks/useDeviceRealtime";
+import {
+  Bell,
+  ChevronRight,
+  TrendingUp,
+  TrendingDown,
+  Droplets,
+  Thermometer,
+  Calendar,
+  AlertTriangle
+} from 'lucide-react';
+import DeviceInfoModal from "../device/DeviceInfoModel";
+
+
 
 const PlanCard = ({
   plan,
@@ -34,7 +51,7 @@ const PlanCard = ({
   onEdit,
   onDelete,
   showAlerts = true,
-  changeStatus
+
 }) => {
 
   const {
@@ -53,6 +70,13 @@ const PlanCard = ({
   const growthProgress = Math.round(calculateGrowthProgress(plan.plantingDate, plan.expectedHarvestDate));
   const isHarvestReady = isReadyForHarvest(plan.plantingDate, plan.expectedHarvestDate);
   const growthStage = getGrowthStage(growthProgress);
+
+  const { devices, selectedDevice, setSelectedDevice, setShowInfoModal, getSelectedDeviceInfo, handleRemoveDevice, showInfoModal } = useDeviceAuth();
+  const device = devices.find((dev) => dev.planId === plan.id);
+  const { latest } = useDeviceRealtime(selectedDevice);
+  const [localShowInfoModal, setLocalShowInfoModal] = useState(false);
+
+
 
   // Custom progress color function
   const getCustomProgressColor = (progress) => {
@@ -177,10 +201,10 @@ const PlanCard = ({
                       {plan.farmSoilType}
                     </span>
                   </span>
-                  <span  className={`px-3 py-1.5 rounded-lg text-xs font-semibold text-white shadow-md ${statusConfig.bg} hover:opacity-90 transition-opacity duration-300 min-w-[120px] flex items-center justify-center gap-2`}>
-                     <span className="flex items-center gap-1.5">
-                    <FontAwesomeIcon icon={statusConfig.icon} className="w-4 h-4" />
-                    <span>{plan.status || 'Planned'}</span>
+                  <span className={`px-3 py-1.5 rounded-lg text-xs font-semibold text-white shadow-md ${statusConfig.bg} hover:opacity-90 transition-opacity duration-300 min-w-[120px] flex items-center justify-center gap-2`}>
+                    <span className="flex items-center gap-1.5">
+                      <FontAwesomeIcon icon={statusConfig.icon} className="w-4 h-4" />
+                      <span>{plan.status || 'Planned'}</span>
                     </span>
                   </span>
                 </div>
@@ -196,8 +220,8 @@ const PlanCard = ({
 
             {/* Date cards */}
             <div className="space-y-3">
-  {/* Date cards row */}
-  {/* <div className="grid grid-cols-2 gap-3">
+              {/* Date cards row */}
+              {/* <div className="grid grid-cols-2 gap-3">
     <div className="bg-gradient-to-r from-blue-50 to-indigo-50/70 rounded-xl p-3 border border-blue-100 hover:border-blue-200 transition-colors duration-300">
       <div className="flex items-center gap-2 mb-1">
         <div className="w-7 h-7 bg-gradient-to-br from-blue-400 to-indigo-400 rounded-lg flex items-center justify-center">
@@ -218,24 +242,24 @@ const PlanCard = ({
       <p className="text-sm font-bold text-gray-800">{plan.expectedHarvestDate}</p>
     </div>
   </div> */}
-  
-  {/* Location row - full width */}
-  {location && (
-    <div className="bg-gradient-to-br from-indigo-50/80 to-purple-50/60 rounded-xl border border-indigo-200/70 p-3">
-      <div className="flex items-center gap-2 mb-2">
-        <div className="w-7 h-7 bg-gradient-to-br from-indigo-400 to-purple-400 rounded-lg flex items-center justify-center flex-shrink-0">
-          <FontAwesomeIcon icon={faGlobeAmericas} className="text-white text-xs" />
-        </div>
-        <div className="min-w-0">
-          <p className="text-xs font-semibold text-gray-500 mb-0.5">Farm Location</p>
-          <p className="text-xs font-medium text-gray-700 truncate" title={location}>
-            {location}
-          </p>
-        </div>
-      </div>
-    </div>
-  )}
-</div>
+
+              {/* Location row - full width */}
+              {location && (
+                <div className="bg-gradient-to-br from-indigo-50/80 to-purple-50/60 rounded-xl border border-indigo-200/70 p-3">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-7 h-7 bg-gradient-to-br from-indigo-400 to-purple-400 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <FontAwesomeIcon icon={faGlobeAmericas} className="text-white text-xs" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold text-gray-500 mb-0.5">Farm Location</p>
+                      <p className="text-xs font-medium text-gray-700 truncate" title={location}>
+                        {location}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Action Buttons */}
@@ -263,109 +287,109 @@ const PlanCard = ({
 
         {/* Weather and Location Section */}
         {plan.status !== "harvested" && (
-    <div className="grid grid-cols-1 lg:grid-cols-1 gap-4 sm:gap-6 mb-8">
-  {/* Weather Information */}
-  <div className="min-w-0">
-    {weather ? (
-      <div className="bg-gradient-to-br from-blue-50/80 to-cyan-50/60 rounded-2xl border border-blue-200/70 p-3 sm:p-4 shadow-sm hover:shadow-md transition-all duration-300">
-        {/* Single horizontal row */}
-        <div className="flex items-center justify-between gap-3 sm:gap-4">
-          {/* Left side: Icon and title */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center shadow-md">
-              <FontAwesomeIcon icon={faCloudSun} className="text-white text-sm" />
-            </div>
+          <div className="grid grid-cols-1 lg:grid-cols-1 gap-4 sm:gap-6 mb-8">
+            {/* Weather Information */}
             <div className="min-w-0">
-              <h4 className="font-bold text-gray-800 text-xs sm:text-sm">Live Weather</h4>
-              <p className="text-xs text-gray-400 truncate">Current</p>
-            </div>
-          </div>
+              {weather ? (
+                <div className="bg-gradient-to-br from-blue-50/80 to-cyan-50/60 rounded-2xl border border-blue-200/70 p-3 sm:p-4 shadow-sm hover:shadow-md transition-all duration-300">
+                  {/* Single horizontal row */}
+                  <div className="flex items-center justify-between gap-3 sm:gap-4">
+                    {/* Left side: Icon and title */}
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center shadow-md">
+                        <FontAwesomeIcon icon={faCloudSun} className="text-white text-sm" />
+                      </div>
+                      <div className="min-w-0">
+                        <h4 className="font-bold text-gray-800 text-xs sm:text-sm">Live Weather</h4>
+                        <p className="text-xs text-gray-400 truncate">Current</p>
+                      </div>
+                    </div>
 
-          {/* Center: Temperature */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="text-center">
-              <p className="text-xl sm:text-2xl font-bold text-gray-800">
-                {Math.round(weather.main.temp)}°C
-              </p>
-              <p className="text-xs text-gray-500 capitalize truncate max-w-[80px]">
-                {weather.weather[0].description}
-              </p>
-            </div>
-            
-            <div className="hidden sm:block bg-white/80 rounded-lg p-2 shadow-sm">
-              <div className="flex items-center gap-1">
-                <FontAwesomeIcon icon={faTemperatureHigh} className="text-orange-500 text-xs" />
-                <span className="text-xs font-semibold text-gray-500">Feels</span>
-              </div>
-              <p className="text-sm font-bold text-orange-600">
-                {Math.round(weather.main.feels_like)}°C
-              </p>
-            </div>
-          </div>
+                    {/* Center: Temperature */}
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <div className="text-center">
+                        <p className="text-xl sm:text-2xl font-bold text-gray-800">
+                          {Math.round(weather.main.temp)}°C
+                        </p>
+                        <p className="text-xs text-gray-500 capitalize truncate max-w-[80px]">
+                          {weather.weather[0].description}
+                        </p>
+                      </div>
 
-          {/* Right side: Metrics icons */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="hidden sm:flex items-center gap-1 sm:gap-2">
-              <div className="flex items-center gap-1">
-                <FontAwesomeIcon icon={faTint} className="text-blue-500 text-xs" />
-                <span className="text-xs font-bold text-blue-600">{weather.main.humidity}%</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <FontAwesomeIcon icon={faWind} className="text-emerald-500 text-xs" />
-                <span className="text-xs font-bold text-emerald-600">{weather.wind.speed}m/s</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <FontAwesomeIcon icon={faGaugeHigh} className="text-rose-500 text-xs" />
-                <span className="text-xs font-bold text-rose-600">{weather.main.pressure}</span>
-              </div>
-            </div>
-            
-            <img
-              src={`https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`}
-              alt={weather.weather[0].description}
-              className="w-6 h-6 sm:w-8 sm:h-8"
-            />
-          </div>
-        </div>
+                      <div className="hidden sm:block bg-white/80 rounded-lg p-2 shadow-sm">
+                        <div className="flex items-center gap-1">
+                          <FontAwesomeIcon icon={faTemperatureHigh} className="text-orange-500 text-xs" />
+                          <span className="text-xs font-semibold text-gray-500">Feels</span>
+                        </div>
+                        <p className="text-sm font-bold text-orange-600">
+                          {Math.round(weather.main.feels_like)}°C
+                        </p>
+                      </div>
+                    </div>
 
-        {/* Mobile feels like and metrics */}
-        <div className="sm:hidden mt-2 pt-2 border-t border-blue-100/30">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1">
-              <FontAwesomeIcon icon={faTemperatureHigh} className="text-orange-500 text-xs" />
-              <span className="text-xs font-semibold text-gray-500">Feels like:</span>
-              <span className="text-xs font-bold text-orange-600 ml-1">{Math.round(weather.main.feels_like)}°C</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1">
-                <FontAwesomeIcon icon={faTint} className="text-blue-500 text-xs" />
-                <span className="text-xs font-bold text-blue-600">{weather.main.humidity}%</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <FontAwesomeIcon icon={faWind} className="text-emerald-500 text-xs" />
-                <span className="text-xs font-bold text-emerald-600">{weather.wind.speed}m/s</span>
-              </div>
+                    {/* Right side: Metrics icons */}
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <div className="hidden sm:flex items-center gap-1 sm:gap-2">
+                        <div className="flex items-center gap-1">
+                          <FontAwesomeIcon icon={faTint} className="text-blue-500 text-xs" />
+                          <span className="text-xs font-bold text-blue-600">{weather.main.humidity}%</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <FontAwesomeIcon icon={faWind} className="text-emerald-500 text-xs" />
+                          <span className="text-xs font-bold text-emerald-600">{weather.wind.speed}m/s</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <FontAwesomeIcon icon={faGaugeHigh} className="text-rose-500 text-xs" />
+                          <span className="text-xs font-bold text-rose-600">{weather.main.pressure}</span>
+                        </div>
+                      </div>
+
+                      <img
+                        src={`https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`}
+                        alt={weather.weather[0].description}
+                        className="w-6 h-6 sm:w-8 sm:h-8"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Mobile feels like and metrics */}
+                  <div className="sm:hidden mt-2 pt-2 border-t border-blue-100/30">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1">
+                        <FontAwesomeIcon icon={faTemperatureHigh} className="text-orange-500 text-xs" />
+                        <span className="text-xs font-semibold text-gray-500">Feels like:</span>
+                        <span className="text-xs font-bold text-orange-600 ml-1">{Math.round(weather.main.feels_like)}°C</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-1">
+                          <FontAwesomeIcon icon={faTint} className="text-blue-500 text-xs" />
+                          <span className="text-xs font-bold text-blue-600">{weather.main.humidity}%</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <FontAwesomeIcon icon={faWind} className="text-emerald-500 text-xs" />
+                          <span className="text-xs font-bold text-emerald-600">{weather.wind.speed}m/s</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : plan.farmLat && plan.farmLng ? (
+                <div className="bg-gradient-to-br from-amber-50/80 to-yellow-50/60 rounded-2xl border border-amber-200/70 p-3 sm:p-4 flex items-center justify-center">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 border border-amber-500 border-t-transparent rounded-full animate-spin"></div>
+                    <span className="text-amber-700 font-medium text-xs">Loading weather...</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-gradient-to-br from-gray-50/80 to-gray-100/60 rounded-2xl border border-gray-200/70 p-3 sm:p-4 flex items-center justify-center">
+                  <div className="flex items-center gap-2">
+                    <FontAwesomeIcon icon={faCloudSun} className="text-gray-400 text-sm" />
+                    <span className="text-gray-600 font-medium text-xs">No weather data</span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-        </div>
-      </div>
-    ) : plan.farmLat && plan.farmLng ? (
-      <div className="bg-gradient-to-br from-amber-50/80 to-yellow-50/60 rounded-2xl border border-amber-200/70 p-3 sm:p-4 flex items-center justify-center">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 border border-amber-500 border-t-transparent rounded-full animate-spin"></div>
-          <span className="text-amber-700 font-medium text-xs">Loading weather...</span>
-        </div>
-      </div>
-    ) : (
-      <div className="bg-gradient-to-br from-gray-50/80 to-gray-100/60 rounded-2xl border border-gray-200/70 p-3 sm:p-4 flex items-center justify-center">
-        <div className="flex items-center gap-2">
-          <FontAwesomeIcon icon={faCloudSun} className="text-gray-400 text-sm" />
-          <span className="text-gray-600 font-medium text-xs">No weather data</span>
-        </div>
-      </div>
-    )}
-  </div>
-</div>
         )}
 
         {/* Weather Alerts */}
@@ -396,6 +420,108 @@ const PlanCard = ({
             )}
           </div>
         )}
+
+        {device && (<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+          <DeviceCard
+            key={device?.deviceId}
+            device={device}
+            isSelected={selectedDevice === device.deviceId}
+            onSelect={() => { device.status === "active" ? setSelectedDevice(device.deviceId) : alert("⚠️ This device is inactive. Please contact the admin.") }}
+            onRemove={() => handleRemoveDevice(device.deviceId)}
+            onViewInfo={() => {
+              getSelectedDeviceInfo();
+              setLocalShowInfoModal(true);
+            }}
+          />
+
+          {selectedDevice === device.deviceId && (
+            <div className="bg-gradient-to-br from-white/70 to-gray-50/70 rounded-2xl border border-gray-200/70 p-6 shadow-sm hover:shadow-md transition-all duration-300">
+
+              <div>
+                {/* Placeholder for additional device details or actions */}
+                <h4 className="text-lg font-semibold text-gray-800 mb-2">Device Details</h4>
+                <p className="text-sm text-gray-600 mb-4">
+                  Manage and monitor the device associated with this plan.
+                </p>
+                <div className="space-y-5">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-white/80 rounded-xl p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Thermometer className="w-4 h-4 text-red-500" />
+                        <span className="text-xs text-gray-500">Temperature</span>
+                      </div>
+                      <div className="text-2xl font-bold text-gray-900">{latest?.temperature || 0} °C</div>
+                      {latest?.temperature < 20 ? (
+                        <div className="text-xs text-gray-500 mt-1">Cool</div>
+                      ) : (latest?.temperature <= 30 ? (
+                        <div className="text-xs text-gray-500 mt-1">Ideal for crops</div>
+                      ) : (latest?.temperature > 30 && (latest?.temperature <= 45)) ? (
+                        <div className="text-xs text-gray-500 mt-1">Warm</div>
+                      ) : (latest?.temperature > 45) ? (
+                        <div className="text-xs text-gray-500 mt-1">Hot</div>
+                      ) : (
+                        <div className="text-xs text-gray-500 mt-1">N/A</div>
+                      ))}
+                    </div>
+
+                    <div className="bg-white/80 rounded-xl p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Droplets className="w-4 h-4 text-blue-500" />
+                        <span className="text-xs text-gray-500">Humidity</span>
+                      </div>
+                      <div className="text-2xl font-bold text-gray-900">{latest?.humidity || 0}%</div>
+                      {latest?.humidity < 50 ? (
+                        <div className="text-xs text-gray-500 mt-1">Low humidity</div>
+                      ) : (latest?.humidity <= 80 ? (
+                        <div className="text-xs text-gray-500 mt-1">Ideal for crops</div>
+                      ) : (latest?.humidity > 80 && (latest?.humidity <= 100)) ? (
+                        <div className="text-xs text-gray-500 mt-1">High humidity</div>
+                      ) : (
+                        <div className="text-xs text-gray-500 mt-1">N/A</div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t border-blue-100">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-sm font-medium text-gray-700">Weather Condition</div>
+                        <div className="text-lg font-semibold text-gray-900">Partly Cloudy</div>
+                      </div>
+                      <div className="text-3xl">⛅</div>
+                    </div>
+                    <div className="text-xs text-gray-500 mt-2">
+                      Perfect conditions for outdoor farming activities
+                    </div>
+                  </div>
+                </div>
+
+
+
+
+
+              </div>
+            </div>
+          )}
+
+             
+
+
+        </div>)}
+        {localShowInfoModal && (
+    <DeviceInfoModal
+      isOpen={localShowInfoModal}
+      onClose={() => setLocalShowInfoModal(false)}
+      device={device}
+      onRemove={() => {
+        handleRemoveDevice(device.deviceId);
+        setLocalShowInfoModal(false);
+      }}
+    />
+  )}
+
+
 
         {/* Enhanced Progress Bar */}
         {(plan.status === "planted" || plan.status === "growing") && (
@@ -463,6 +589,8 @@ const PlanCard = ({
             </div>
           </div>
         )}
+
+
       </div>
     </div>
   );

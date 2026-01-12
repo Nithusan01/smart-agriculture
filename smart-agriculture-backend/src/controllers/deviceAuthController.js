@@ -1,3 +1,5 @@
+
+
 // controllers/deviceAuth.controller.js
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
@@ -160,7 +162,18 @@ exports.addDeviceToUser = async (req, res) => {
         message: 'Device already linked to your account'
       });
     }
-
+    // If planId is provided,check belongs to device
+    if (planId)
+    {
+      const d = await Device.findOne({ where: { planId: planId, userId } });
+      if (d) {
+        return res.status(404).json({
+          success: false,
+          message: 'this plan is already assigned to another device please choose another plan'
+        });
+      }
+    }
+  
 
     device.userId = userId;
     device.planId = planId || null;
@@ -533,5 +546,18 @@ exports.updateStatus = async (req, res) => {
       message: "Server error",
       error: err.message 
     });
+  }
+};
+exports.getDeviceByPlanId = async (planId) => {
+  try {
+    const device = await Device.findOne({
+       where: {
+       planId,
+       userId: req.user.id
+       } });
+    res.status(200).json({ success: true, data:device });
+  } catch (err) {
+    console.error('❌ Get device by planId error:', err);
+    throw err;
   }
 };

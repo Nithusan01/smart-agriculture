@@ -10,45 +10,28 @@ import useDeviceRealtime from '../hooks/useDeviceRealtime';
 
 const DevicesDashboard = () => {
   const { currentUser } = useAuth();
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showInfoModal, setShowInfoModal] = useState(false);
   const [activeView, setActiveView] = useState('overview'); // 'overview' or 'details'
-  const { devices, stats, fetchUserDevices, loading, setSelectedDevice, selectedDevice } = useDeviceAuth();
+  const { devices, stats, fetchUserDevices, loading, setSelectedDevice, selectedDevice,handleRemoveDevice,showAddModal,setShowAddModal,handleAddDevice,getSelectedDeviceInfo } = useDeviceAuth();
   const { connected } = useDeviceRealtime(selectedDevice);
+  const [showInfoModal, setShowInfoModal] = useState(false);
 
-  const handleAddDevice = async (deviceData) => {
-    try {
-      const response = await api.post('/device/add-to-user', deviceData);
-      if (response.data.success) {
-        setShowAddModal(false);
-        fetchUserDevices();
-        alert('✅ Device added successfully!');
-      }
-    } catch (error) {
-      alert(error.response?.data?.message || '❌ Failed to add device');
-    }
-  };
+  // const handleAddDevice = async (deviceData) => {
+  //   try {
+  //     const response = await api.post('/device/add-to-user', deviceData);
+  //     if (response.data.success) {
+  //       setShowAddModal(false);
+  //       fetchUserDevices();
+  //       alert('✅ Device added successfully!');
+  //     }
+  //   } catch (error) {
+  //     alert(error.response?.data?.message || '❌ Failed to add device');
+  //   }
+  // };
 
-  const handleRemoveDevice = async (deviceId) => {
-    if (!window.confirm('Are you sure you want to remove this device?')) return;
-    
-    try {
-      await api.patch(`/device/${deviceId}/remove-from-user`);
-      fetchUserDevices();
-      if (selectedDevice === deviceId) {
-        setSelectedDevice(null);
-      }
-      alert('✅ Device removed successfully!');
-    } catch (error) {
-      alert('❌ Failed to remove device');
-      console.error('Error removing device:', error);
-    }
-  };
-
-  const getSelectedDeviceInfo = () => {
-    if (!selectedDevice) return null;
-    return devices.find(d => d.deviceId === selectedDevice) || null;
-  };
+  // const getSelectedDeviceInfo = () => {
+  //   if (!selectedDevice) return null;
+  //   return devices.find(d => d.deviceId === selectedDevice) || null;
+  // };
 
   if (loading) {
     return (
@@ -311,6 +294,7 @@ const DevicesDashboard = () => {
             }}
           />
         )}
+        
       </div>
     </div>
   );

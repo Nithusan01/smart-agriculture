@@ -571,7 +571,7 @@ const Planning = () => {
                             <span className="block text-sm font-normal text-gray-500 mt-1">Primary soil composition</span>
                           </div>
                         </label>
-                        <select
+                        <select                                        
                           name="farmSoilType"
                           value={formData.farmSoilType}
                           onChange={handleInputChange}
