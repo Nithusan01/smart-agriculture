@@ -41,8 +41,10 @@ const loginValidation = [
   handleValidationErrors
 ];
 
+
 module.exports = {
   registerValidation,
   loginValidation,
+  
 
 };

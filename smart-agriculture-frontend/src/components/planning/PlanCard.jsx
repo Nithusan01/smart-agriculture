@@ -27,22 +27,16 @@ import {
   faLeaf
 } from "@fortawesome/free-solid-svg-icons";
 import { useDeviceAuth } from "../../contexts/DeviceAuthContext";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import DeviceCard from "../device/DeviceCard";
 import useDeviceRealtime from "../hooks/useDeviceRealtime";
-import {
-  Bell,
-  ChevronRight,
-  TrendingUp,
-  TrendingDown,
+import { 
   Droplets,
   Thermometer,
-  Calendar,
-  AlertTriangle
 } from 'lucide-react';
-import DeviceInfoModal from "../device/DeviceInfoModel";
-
-
+import { useDetectedDiseases } from "../../contexts/DetectedDiseaseContext";
+import {useDiseases} from '../../contexts/DiseaseContext'
+import { useEffect } from "react";
 
 const PlanCard = ({
   plan,
@@ -51,12 +45,9 @@ const PlanCard = ({
   onEdit,
   onDelete,
   showAlerts = true,
-
 }) => {
-
   const {
     isDateWithinDays,
-    isDateToday,
     formatDate,
     calculateGrowthProgress,
     calculateTimeRemaining,
@@ -66,17 +57,80 @@ const PlanCard = ({
     getGrowthStage
   } = useDateUtils();
 
+  // create disease 
+  const {createDetectedDisease,getdetectionsByplan} = useDetectedDiseases();
+  const {diseases} = useDiseases();
+
+   const [formData, setFormData] = useState({
+    cultivationPlanId: plan.id,
+    diseaseId: "",
+    imageUrl: "",
+    confidence: "",
+    notes: "",
+  });
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [disease,setDisease]= useState([]);
+  const [showAddForm,setShowAddForm] = useState(false);
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+
+   const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage("");
+
+    try {
+
+      const res = await createDetectedDisease(formData);
+
+
+      setMessage(res.data.message);
+      setFormData({
+        cultivationPlanId: plan.id,
+        diseaseId: "",
+        imageUrl: "",
+        confidence: "",
+        notes: "",
+      });
+    } catch (error) {
+      setMessage(error?.response?.data?.message || "Failed to submit detected disease")
+      
+    } finally {
+      setLoading(false);
+    }
+  };
+const fetchDiseases = async(id)=>{
+  try {
+    const res = await getdetectionsByplan(id);
+     setDisease(res?.data?.data)
+    
+    
+  } catch (error) {
+    setMessage(error.response.data.message)
+    
+  }
+}
+useEffect(()=>{
+  fetchDiseases(plan.id)
+
+},[disease.length])
   // Calculate real growth progress
   const growthProgress = Math.round(calculateGrowthProgress(plan.plantingDate, plan.expectedHarvestDate));
   const isHarvestReady = isReadyForHarvest(plan.plantingDate, plan.expectedHarvestDate);
   const growthStage = getGrowthStage(growthProgress);
 
-  const { devices, selectedDevice, setSelectedDevice, setShowInfoModal, getSelectedDeviceInfo, handleRemoveDevice, showInfoModal } = useDeviceAuth();
-  const device = devices.find((dev) => dev.planId === plan.id);
+  // Context - only get what you need
+  const { devices, selectedDevice, setSelectedDevice, handleRemoveDevice } = useDeviceAuth();
+  const device = devices.find(d => d.id === plan.deviceId);
   const { latest } = useDeviceRealtime(selectedDevice);
-  const [localShowInfoModal, setLocalShowInfoModal] = useState(false);
-
-
+  
 
   // Custom progress color function
   const getCustomProgressColor = (progress) => {
@@ -201,10 +255,10 @@ const PlanCard = ({
                       {plan.farmSoilType}
                     </span>
                   </span>
-                  <span className={`px-3 py-1.5 rounded-lg text-xs font-semibold text-white shadow-md ${statusConfig.bg} hover:opacity-90 transition-opacity duration-300 min-w-[120px] flex items-center justify-center gap-2`}>
-                    <span className="flex items-center gap-1.5">
-                      <FontAwesomeIcon icon={statusConfig.icon} className="w-4 h-4" />
-                      <span>{plan.status || 'Planned'}</span>
+                  <span  className={`px-3 py-1.5 rounded-lg text-xs font-semibold text-white shadow-md ${statusConfig.bg} hover:opacity-90 transition-opacity duration-300 min-w-[120px] flex items-center justify-center gap-2`}>
+                     <span className="flex items-center gap-1.5">
+                    <FontAwesomeIcon icon={statusConfig.icon} className="w-4 h-4" />
+                    <span>{plan.status || 'Planned'}</span>
                     </span>
                   </span>
                 </div>
@@ -212,37 +266,10 @@ const PlanCard = ({
                 <h3 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2 break-words">
                   {plan.cropName?.charAt(0).toUpperCase() + plan.cropName?.slice(1)}
                 </h3>
-                {/* <p className="text-gray-600 text-sm font-medium">
-                  Agricultural cultivation plan • ID: {plan.id?.slice(0, 8)}
-                </p> */}
               </div>
             </div>
 
             {/* Date cards */}
-            <div className="space-y-3">
-              {/* Date cards row */}
-              {/* <div className="grid grid-cols-2 gap-3">
-    <div className="bg-gradient-to-r from-blue-50 to-indigo-50/70 rounded-xl p-3 border border-blue-100 hover:border-blue-200 transition-colors duration-300">
-      <div className="flex items-center gap-2 mb-1">
-        <div className="w-7 h-7 bg-gradient-to-br from-blue-400 to-indigo-400 rounded-lg flex items-center justify-center">
-          <FontAwesomeIcon icon={faCalendarDay} className="text-white text-xs" />
-        </div>
-        <p className="text-xs font-semibold text-gray-500">Planting</p>
-      </div>
-      <p className="text-sm font-bold text-gray-800">{plan.plantingDate}</p>
-    </div>
-    
-    <div className="bg-gradient-to-r from-emerald-50 to-teal-50/70 rounded-xl p-3 border border-emerald-100 hover:border-emerald-200 transition-colors duration-300">
-      <div className="flex items-center gap-2 mb-1">
-        <div className="w-7 h-7 bg-gradient-to-br from-emerald-400 to-teal-400 rounded-lg flex items-center justify-center">
-          <FontAwesomeIcon icon={faLeaf} className="text-white text-xs" />
-        </div>
-        <p className="text-xs font-semibold text-gray-500">Harvest</p>
-      </div>
-      <p className="text-sm font-bold text-gray-800">{plan.expectedHarvestDate}</p>
-    </div>
-  </div> */}
-
               {/* Location row - full width */}
               {location && (
                 <div className="bg-gradient-to-br from-indigo-50/80 to-purple-50/60 rounded-xl border border-indigo-200/70 p-3">
@@ -259,7 +286,7 @@ const PlanCard = ({
                   </div>
                 </div>
               )}
-            </div>
+            
           </div>
 
           {/* Action Buttons */}
@@ -315,7 +342,7 @@ const PlanCard = ({
                           {weather.weather[0].description}
                         </p>
                       </div>
-
+                      
                       <div className="hidden sm:block bg-white/80 rounded-lg p-2 shadow-sm">
                         <div className="flex items-center gap-1">
                           <FontAwesomeIcon icon={faTemperatureHigh} className="text-orange-500 text-xs" />
@@ -343,7 +370,7 @@ const PlanCard = ({
                           <span className="text-xs font-bold text-rose-600">{weather.main.pressure}</span>
                         </div>
                       </div>
-
+                      
                       <img
                         src={`https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`}
                         alt={weather.weather[0].description}
@@ -396,7 +423,7 @@ const PlanCard = ({
         {showAlerts && weather && plan.status !== "harvested" && (
           <div className="space-y-3 mb-6">
             {weather.main.temp > 20 && (plan.status === 'planted' || (plan.status === 'planned' && isDateWithinDays(plan.plantingDate, 1))) && (
-              <div className="bg-gradient-to-r from-orange-50 to-amber-50/70 rounded-xl border-l-3 border-orange-500 p-4 shadow-sm">
+              <div className="bg-gradient-to-r from-orange-50 to-amber-50/70 rounded-xl border border-orange-300/50 p-4 shadow-sm">
                 <div className="flex items-start gap-3">
                   <FontAwesomeIcon icon={faExclamationTriangle} className="text-orange-500 mt-0.5" />
                   <div>
@@ -421,107 +448,88 @@ const PlanCard = ({
           </div>
         )}
 
-        {device && (<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-          <DeviceCard
-            key={device?.deviceId}
-            device={device}
-            isSelected={selectedDevice === device.deviceId}
-            onSelect={() => { device.status === "active" ? setSelectedDevice(device.deviceId) : alert("⚠️ This device is inactive. Please contact the admin.") }}
-            onRemove={() => handleRemoveDevice(device.deviceId)}
-            onViewInfo={() => {
-              getSelectedDeviceInfo();
-              setLocalShowInfoModal(true);
-            }}
-          />
-
-          {selectedDevice === device.deviceId && (
-            <div className="bg-gradient-to-br from-white/70 to-gray-50/70 rounded-2xl border border-gray-200/70 p-6 shadow-sm hover:shadow-md transition-all duration-300">
-
-              <div>
-                {/* Placeholder for additional device details or actions */}
-                <h4 className="text-lg font-semibold text-gray-800 mb-2">Device Details</h4>
-                <p className="text-sm text-gray-600 mb-4">
-                  Manage and monitor the device associated with this plan.
-                </p>
-                <div className="space-y-5">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-white/80 rounded-xl p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Thermometer className="w-4 h-4 text-red-500" />
-                        <span className="text-xs text-gray-500">Temperature</span>
+        {/* Device Section */}
+        {device && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-8">
+            {/* DeviceCard now handles its own modal */}
+            <DeviceCard
+              key={device?.deviceId}
+              device={device}
+              isSelected={selectedDevice === device.deviceId}
+              onSelect={() => {
+                device.status === "active" 
+                  ? setSelectedDevice(device.deviceId) 
+                  : alert("⚠️ This device is inactive. Please contact the admin.");
+              }}
+              onRemove={() => handleRemoveDevice(device.deviceId)}
+              // No onViewInfo prop needed anymore
+            />
+            
+            {/* Device details section */}
+            {selectedDevice === device.deviceId && (
+              <div className="bg-gradient-to-br from-white/70 to-gray-50/70 rounded-2xl border border-gray-200/70 p-6 shadow-sm hover:shadow-md transition-all duration-300">
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-800 mb-2">Device Details</h4>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Manage and monitor the device associated with this plan.
+                  </p>
+                  <div className="space-y-5">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-white/80 rounded-xl p-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Thermometer className="w-4 h-4 text-red-500" />
+                          <span className="text-xs text-gray-500">Temperature</span>
+                        </div>
+                        <div className="text-2xl font-bold text-gray-900">{latest?.temperature || 0} °C</div>
+                        {latest?.temperature < 20 ? (
+                          <div className="text-xs text-gray-500 mt-1">Cool</div>
+                        ) : ( latest?.temperature <= 30 ? ( 
+                          <div className="text-xs text-gray-500 mt-1">Ideal for crops</div>
+                        ) : ( latest?.temperature > 30 && (latest?.temperature <= 45) ) ? (
+                          <div className="text-xs text-gray-500 mt-1">Warm</div>  
+                        ) : (latest?.temperature > 45) ? (  
+                          <div className="text-xs text-gray-500 mt-1">Hot</div>
+                        ) : (
+                          <div className="text-xs text-gray-500 mt-1">N/A</div>
+                        ))}
                       </div>
-                      <div className="text-2xl font-bold text-gray-900">{latest?.temperature || 0} °C</div>
-                      {latest?.temperature < 20 ? (
-                        <div className="text-xs text-gray-500 mt-1">Cool</div>
-                      ) : (latest?.temperature <= 30 ? (
-                        <div className="text-xs text-gray-500 mt-1">Ideal for crops</div>
-                      ) : (latest?.temperature > 30 && (latest?.temperature <= 45)) ? (
-                        <div className="text-xs text-gray-500 mt-1">Warm</div>
-                      ) : (latest?.temperature > 45) ? (
-                        <div className="text-xs text-gray-500 mt-1">Hot</div>
-                      ) : (
-                        <div className="text-xs text-gray-500 mt-1">N/A</div>
-                      ))}
-                    </div>
-
-                    <div className="bg-white/80 rounded-xl p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Droplets className="w-4 h-4 text-blue-500" />
-                        <span className="text-xs text-gray-500">Humidity</span>
+                      
+                      <div className="bg-white/80 rounded-xl p-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Droplets className="w-4 h-4 text-blue-500" />
+                          <span className="text-xs text-gray-500">Humidity</span>
+                        </div>
+                        <div className="text-2xl font-bold text-gray-900">{latest?.humidity || 0}%</div>
+                        {latest?.humidity < 50 ? (
+                          <div className="text-xs text-gray-500 mt-1">Low humidity</div>
+                        ) : ( latest?.humidity <= 80 ? (
+                          <div className="text-xs text-gray-500 mt-1">Ideal for crops</div>
+                        ) : ( latest?.humidity > 80 && (latest?.humidity <= 100) ) ? (
+                          <div className="text-xs text-gray-500 mt-1">High humidity</div>
+                        ) : (
+                          <div className="text-xs text-gray-500 mt-1">N/A</div>
+                        ))}
                       </div>
-                      <div className="text-2xl font-bold text-gray-900">{latest?.humidity || 0}%</div>
-                      {latest?.humidity < 50 ? (
-                        <div className="text-xs text-gray-500 mt-1">Low humidity</div>
-                      ) : (latest?.humidity <= 80 ? (
-                        <div className="text-xs text-gray-500 mt-1">Ideal for crops</div>
-                      ) : (latest?.humidity > 80 && (latest?.humidity <= 100)) ? (
-                        <div className="text-xs text-gray-500 mt-1">High humidity</div>
-                      ) : (
-                        <div className="text-xs text-gray-500 mt-1">N/A</div>
-                      ))}
                     </div>
-                  </div>
-
-                  <div className="pt-4 border-t border-blue-100">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="text-sm font-medium text-gray-700">Weather Condition</div>
-                        <div className="text-lg font-semibold text-gray-900">Partly Cloudy</div>
+                    
+                    {/* <div className="pt-4 border-t border-blue-100">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="text-sm font-medium text-gray-700">Weather Condition</div>
+                          <div className="text-lg font-semibold text-gray-900">Partly Cloudy</div>
+                        </div>
+                        <div className="text-3xl">⛅</div>
                       </div>
-                      <div className="text-3xl">⛅</div>
-                    </div>
-                    <div className="text-xs text-gray-500 mt-2">
-                      Perfect conditions for outdoor farming activities
-                    </div>
+                      <div className="text-xs text-gray-500 mt-2">
+                        Perfect conditions for outdoor farming activities
+                      </div>
+                    </div> */}
                   </div>
                 </div>
-
-
-
-
-
               </div>
-            </div>
-          )}
-
-             
-
-
-        </div>)}
-        {localShowInfoModal && (
-    <DeviceInfoModal
-      isOpen={localShowInfoModal}
-      onClose={() => setLocalShowInfoModal(false)}
-      device={device}
-      onRemove={() => {
-        handleRemoveDevice(device.deviceId);
-        setLocalShowInfoModal(false);
-      }}
-    />
-  )}
-
-
+            )}
+          </div>
+        )}
 
         {/* Enhanced Progress Bar */}
         {(plan.status === "planted" || plan.status === "growing") && (
@@ -569,8 +577,9 @@ const PlanCard = ({
               </div>
             </div>
 
+            
             {/* Timeline Summary */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div className="bg-white/90 rounded-xl p-3 border border-gray-200/50">
                 <p className="text-xs font-semibold text-gray-500 mb-1">Growth Stage</p>
                 <p className="text-sm font-bold text-gray-800">{growthStage}</p>
@@ -586,10 +595,158 @@ const PlanCard = ({
                   {growthProgress > 75 ? "Excellent" : growthProgress > 50 ? "Good" : "Growing"}
                 </p>
               </div>
-            </div>
+            </div> */}
           </div>
+          
         )}
 
+        {/* <div className="rounded-2xl border border-gray-200/60 p-5 sm:p-6 shadow-sm bg-white/80 mt-6"> */}
+              
+                
+               <div className="mt-6 bg-gradient-to-br from-white to-emerald-50 rounded-2xl border border-emerald-200 p-6">
+  <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+    <FontAwesomeIcon icon={faLeaf} className="text-emerald-500" />
+    Detected Disease
+  </h3>
+  <span>
+    <button
+    key={plan.id}
+    onClick={()=>setShowAddForm(!showAddForm)}
+    className="">
+      detect disease
+    </button>
+  </span>
+
+  {message && (
+    <p className="text-sm text-emerald-600 mb-3">{message}</p>
+  )}
+{showAddForm && (
+  <form onSubmit={handleSubmit} className="space-y-3">
+
+    <select
+     name="diseaseId" 
+     value={formData.diseaseId}
+     onChange={handleChange}
+     className="w-full rounded-lg border px-3 py-2 text-sm"
+    
+     
+     >
+          <option value="" className="text-gray-700">select the disease</option>
+      {diseases.map((disease) =>(
+    <option key={disease.id} value={disease.id} className="text-gray-700">
+     {disease.diseaseName && ` (${disease.diseaseName} )`}
+     </option>
+    ))}
+    </select>
+     {/* <input
+    //   type="text"
+    //   name="diseaseId"
+    //   placeholder="Disease name or ID"
+    //   value={formData.diseaseId}
+    //   onChange={handleChange}
+    //   className="w-full rounded-lg border px-3 py-2 text-sm"
+    // /> */}
+
+    <input
+      type="text"
+      name="imageUrl"
+      placeholder="Image URL (optional)"
+      value={formData.imageUrl}
+      onChange={handleChange}
+      className="w-full rounded-lg border px-3 py-2 text-sm"
+    />
+
+    <input
+      type="number"
+      name="confidence"
+      placeholder="Confidence (%)"
+      value={formData.confidence}
+      onChange={handleChange}
+      min="0"
+      max="100"
+      className="w-full rounded-lg border px-3 py-2 text-sm"
+    />
+
+    {/* <select
+      name="status"
+      value={formData.status}
+      onChange={handleChange}
+      className="w-full rounded-lg border px-3 py-2 text-sm"
+    >
+      <option value="detected">Detected</option>
+      <option value="confirmed">Confirmed</option>
+      <option value="treated">Treated</option>
+    </select> */}
+
+    <textarea
+      name="notes"
+      placeholder="Additional notes"
+      value={formData.notes}
+      onChange={handleChange}
+      className="w-full rounded-lg border px-3 py-2 text-sm"
+    />
+
+    <button
+      type="submit"
+      disabled={loading}
+      className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-2 rounded-lg font-semibold transition"
+    >
+      {loading ? "Saving..." : "Save Disease Info"}
+    </button>
+  </form> )}
+  <div className="mt-6 bg-gradient-to-br from-white to-emerald-50 rounded-2xl border border-emerald-200 p-6">
+
+    <div className="mt-6 overflow-x-auto">
+  <h3 className="font-semibold text-gray-700 mb-2">Detected Diseases</h3>
+  <table className="min-w-full bg-white border border-gray-200 rounded-lg">
+    <thead>
+      <tr className="bg-gray-100">
+        <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Disease Name</th>
+        <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">symptoms</th>
+        <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">treatment</th>
+        <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Status</th>
+        <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Confidence (%)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {disease.length > 0 ? (
+        disease.map((d) => (
+          <tr key={d.id} className="border-t border-gray-200 hover:bg-gray-50">
+            <td className="px-4 py-2 text-sm text-gray-700">{d.disease.diseaseName}</td>
+            {/* <td className="px-4 py-2 text-sm text-gray-700">
+              {d.imageUrl ? (
+                <img src={d.imageUrl} alt="disease" className="w-12 h-12 object-cover rounded" />
+              ) : (
+                "-"
+              )}
+            </td> */}
+            <td className="px-4 py-2 text-sm text-gray-700">{d.disease.symptoms}</td>
+            <td className="px-4 py-2 text-sm text-gray-700">{d.disease.treatment}</td>
+            <td className="px-4 py-2 text-sm text-gray-700">{d.status}</td>
+            <td className="px-4 py-2 text-sm text-gray-700">{d.confidence || "-"}</td>
+          </tr>
+        ))
+      ) : (
+        <tr>
+          <td colSpan="5" className="px-4 py-2 text-center text-gray-500 text-sm">
+            No detected diseases yet.
+          </td>
+        </tr>
+      )}
+    </tbody>
+  </table>
+</div>
+
+
+    
+  </div>
+</div>
+
+                
+              
+
+
+            {/* </div> */}
 
       </div>
     </div>

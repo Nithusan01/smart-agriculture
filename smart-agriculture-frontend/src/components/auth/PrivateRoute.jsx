@@ -4,13 +4,20 @@ import { useAuth } from '../../contexts/AuthContext'
 import LoadingSpinner from '../common/LoadingSpinner'
 
 const PrivateRoute = ({ children }) => {
-  const { currentUser, isLoading } = useAuth()
+  const { currentUser, isLoading,logout } = useAuth()
 
   if (isLoading) {
     return <LoadingSpinner />
   }
+  if (currentUser?.role !== "farmer"){
+    logout();
+    return <Navigate to="/login" replace/>
+  }
+  if (!currentUser) {
+    return <Navigate to="/login" replace />
+  }
   
-  return currentUser ? children : <Navigate to="/login" replace/>
+  return children ;
 }
 
 export default PrivateRoute 

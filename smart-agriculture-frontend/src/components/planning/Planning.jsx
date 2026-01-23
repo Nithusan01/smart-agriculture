@@ -11,6 +11,7 @@ import useDateUtils from "../hooks/useDateUtils"
 import PlanCard from "./PlanCard";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useCrops } from "../../contexts/CropContext";
+import { useDeviceAuth } from "../../contexts/DeviceAuthContext"; 
 import {
   faMapMarkerAlt,
   faSeedling,
@@ -47,6 +48,7 @@ import {
 const Planning = () => {
   const { plans, loading, addPlan, editPlan, deletePlan, status, setStatus } = useCultivationPlan();
   const { crops, loading: cropsLoading, error: cropsError } = useCrops();
+  const { devices,loading:devicesLoading } = useDeviceAuth();
   const { fetchWeatherForPlan } = useWeather();
   const [activeTab, setActiveTab] = useState("crop-plan");
   const [location, setLocation] = useState({ lat: null, lng: null });
@@ -60,7 +62,8 @@ const Planning = () => {
     farmSoilType: "",
     plantingDate: "",
     expectedHarvestDate: "",
-    status: "planned"
+    status: "planned",
+    deviceId: null,
   });
   const [editingPlan, setEditingPlan] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -164,7 +167,8 @@ const Planning = () => {
       farmSoilType: plan.farmSoilType || "",
       plantingDate: plan.plantingDate || "",
       expectedHarvestDate: plan.expectedHarvestDate || "",
-      status: plan.status || "planned"
+      status: plan.status || "planned",
+      deviceId: plan.deviceId || null,
     });
     setLocation({
       lat: plan.farmLat || null,
@@ -186,11 +190,13 @@ const Planning = () => {
       farmSoilType: "",
       plantingDate: "",
       expectedHarvestDate: "",
-      status: "planned"
+      status: "planned",
+      deviceId: null,
     });
     setLocation({ lat: null, lng: null });
     setError("");
     setStatus("");
+    setShowPlanForm(false);
   };
 
   // Handle form submission for both add and edit
@@ -213,6 +219,10 @@ const Planning = () => {
       setIsSubmitting(false);
       return;
     }
+     if (formData.deviceId === '' || formData.deviceId === undefined) {
+      formData.deviceId = null;
+    }
+
 
     const dataToSend = {
       ...formData,
@@ -261,7 +271,7 @@ const Planning = () => {
       });
     } finally {
       setIsSubmitting(false);
-       setShowPlanForm(false);
+       
     }
   };
 
@@ -363,7 +373,7 @@ const Planning = () => {
         {/* Main Content Card */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
           {/* Enhanced Tabs */}
-          <div className="flex border-b border-gray-200 bg-gray-50/50">
+          <div className="flex border-b border-gray-200 bg-gray-100/50">
             {["crop-plan", "active crops", "harvested"].map((tab) => (
               <button
                 key={tab}
@@ -382,9 +392,9 @@ const Planning = () => {
           </div>
 
           {/* Tab Content */}
-          <div className="p-8">
+          <div className="p-8 bg-gray-100/50" >
             {activeTab === "crop-plan" && (
-              <div className="space-y-8">
+              <div className="space-y-8 bg-gray-50 p-6 rounded-2xl border border-gray-200 shadow-sm ">
                 {/* Form Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-center gap-4 text-center sm:text-left">
   <div>
@@ -739,6 +749,8 @@ const Planning = () => {
                       </div>
                     )}
 
+                    
+
 
                     {/* Location Picker - Full width at the end */}
                     <div className="group relative bg-white/80 backdrop-blur-lg rounded-2xl border border-white/50 p-6 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-1">
@@ -777,6 +789,64 @@ const Planning = () => {
                         )}
                       </div>
                     </div>
+                    
+
+                    {/* device Selection - FIXED */}
+                      <div className="group relative bg-white/80 backdrop-blur-lg rounded-2xl border border-white/50 p-6 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-1">
+                        <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-emerald-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                        <label className="relative block text-lg font-bold text-gray-800 mb-4 flex items-center gap-3">
+                          <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center shadow-lg">
+                            <FontAwesomeIcon icon={faSeedling} className="text-white text-lg" />
+                          </div>
+                          <div>
+                            Device Selection
+                            <span className="block text-sm font-normal text-gray-500 mt-1">Choose from available devices</span>
+                          </div>
+                        </label>
+
+                        {devicesLoading ? (
+                          <div className="relative w-full p-4 bg-white/50 border-2 border-green-100 rounded-xl flex items-center justify-center">
+                            <div className="flex items-center gap-3 text-green-600">
+                              <FontAwesomeIcon icon={faSpinner} className="animate-spin" />
+                              <span className="text-sm font-medium">Loading devicess...</span>
+                            </div>
+                          </div>
+                        ) : (
+                          <select
+                            name="deviceId"
+                            value={formData.deviceId}
+                            onChange={handleInputChange}
+                            className="relative w-full p-4 bg-white/50 border-2 border-green-100 rounded-xl focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-100/50 transition-all duration-300 text-lg text-gray-800 appearance-none cursor-pointer"
+
+                            disabled={devices.length === 0}
+                          >
+                            <option value='' >{devices.length === 0 ? 'No devices available' : `${devices.length} devices available Select a device...`}</option>
+                            {devices.map((device) => (
+                              <option key={device.id} value={device.id} className="text-gray-700">
+                                {device.deviceName && ` (${device.deviceName} )`}
+                                {device.deviceId && ` -  ${device.deviceId}`}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+
+
+                        {/* Crop count info */}
+                        {!devicesLoading && devices.length > 0 && (
+                          <div className="mt-3 text-xs text-green-600 font-medium">
+                            {devices.length} available devices in database
+                          </div>
+                        )}
+
+                        {!devicesLoading && devices.length === 0 && (
+                          <div className="mt-3 text-xs text-amber-600 font-medium">
+                            No devices available. Please add device first.
+                          </div>
+                        )}
+                      </div>
+
+                    
+                    
 
                     {/* Plan Summary */}
                     <div className="group relative bg-gradient-to-br from-green-50/80 to-emerald-50/80 backdrop-blur-lg rounded-2xl border border-green-200 p-8 shadow-2xl hover:shadow-3xl transition-all duration-500">
@@ -892,8 +962,8 @@ const Planning = () => {
             )}
 
             {activeTab === "active crops" && (
-              <div className="space-y-6">
-                <div className="text-center mb-8">
+              <div className="space-y-6 "> 
+                <div className="text-center mb-8 ">
                   <h3 className="text-2xl font-bold text-gray-800 mb-2">
                     Planting Schedule & Monitoring
                   </h3>

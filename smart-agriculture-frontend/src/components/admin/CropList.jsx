@@ -376,7 +376,7 @@ const CropList = ({ refreshTrigger }) => {
 </div>
 
             {/* Quick Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
                     <div className="flex items-center justify-between">
                         <div>
@@ -430,7 +430,7 @@ const CropList = ({ refreshTrigger }) => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> */}
 
             {/* Search and Filters */}
             <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">

@@ -31,13 +31,13 @@ module.exports = (sequelize) => {
         references: { model: 'users', key: 'user_id' },
         field: 'user_id',
     },
-    planId: {
-      type: DataTypes.UUID,
-      allowNull: true,
-      references: { model: 'cultivation_plans', key: 'plan_id' },
-      field: 'plan_id',
-      onDelete: 'SET NULL',
-    },
+    // planId: {
+    //   type: DataTypes.UUID,
+    //   allowNull: true,
+    //   references: { model: 'cultivation_plans', key: 'plan_id' },
+    //   field: 'plan_id',
+    //   onDelete: 'SET NULL',
+    // },
     status: {
       type: DataTypes.ENUM('active', 'inactive'),
       defaultValue: 'inactive',

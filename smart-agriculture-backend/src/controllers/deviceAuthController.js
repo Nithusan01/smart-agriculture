@@ -3,7 +3,7 @@
 // controllers/deviceAuth.controller.js
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
-const { Device, User,CultivationPlan } = require("../models"); // Import User model if needed
+const { Device, User } = require("../models"); // Import User model if needed
 
 // -------------- GENERATORS -----------------
 
@@ -125,7 +125,7 @@ exports.deviceLogin = async (req, res) => {
 // ---------ADD DEVICE TO USER-----------
 exports.addDeviceToUser = async (req, res) => {
   try {
-    const { deviceId, secretKey, planId } = req.body; 
+    const { deviceId, secretKey} = req.body; 
     
     if (!deviceId || !secretKey) {
       return res.status(400).json({ 
@@ -162,21 +162,10 @@ exports.addDeviceToUser = async (req, res) => {
         message: 'Device already linked to your account'
       });
     }
-    // If planId is provided,check belongs to device
-    if (planId)
-    {
-      const d = await Device.findOne({ where: { planId: planId, userId } });
-      if (d) {
-        return res.status(404).json({
-          success: false,
-          message: 'this plan is already assigned to another device please choose another plan'
-        });
-      }
-    }
+   
   
 
     device.userId = userId;
-    device.planId = planId || null;
     await device.save();
     
     return res.json({ 
@@ -187,7 +176,6 @@ exports.addDeviceToUser = async (req, res) => {
         deviceId: device.deviceId,
         deviceName: device.deviceName,
         userId: device.userId,
-        planId: device.planId,
         location: device.location,
         status: device.status
       }
@@ -231,7 +219,6 @@ exports.removeDeviceFromUser = async (req, res) => {
     }
     
     device.userId = null;
-    device.planId = null;
     await device.save();
 
     
@@ -313,7 +300,6 @@ exports.registerDevice = async (req, res) => {
       location: location || 'Not specified',
       status: "active", 
       userId: null, // Not linked to any user initially
-      planId: null
     });
 
     console.log('✅ Device registered:', deviceId);
@@ -548,16 +534,16 @@ exports.updateStatus = async (req, res) => {
     });
   }
 };
-exports.getDeviceByPlanId = async (planId) => {
-  try {
-    const device = await Device.findOne({
-       where: {
-       planId,
-       userId: req.user.id
-       } });
-    res.status(200).json({ success: true, data:device });
-  } catch (err) {
-    console.error('❌ Get device by planId error:', err);
-    throw err;
-  }
-};
+// exports.getDeviceByPlanId = async (planId) => {
+//   try {
+//     const device = await Device.findOne({
+//        where: {
+//        planId,
+//        userId: req.user.id
+//        } });
+//     res.status(200).json({ success: true, data:device });
+//   } catch (err) {
+//     console.error('❌ Get device by planId error:', err);
+//     throw err;
+//   }
+// };

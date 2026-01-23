@@ -14,6 +14,25 @@ const DevicesDashboard = () => {
   const { devices, stats, fetchUserDevices, loading, setSelectedDevice, selectedDevice,handleRemoveDevice,showAddModal,setShowAddModal,handleAddDevice,getSelectedDeviceInfo } = useDeviceAuth();
   const { connected } = useDeviceRealtime(selectedDevice);
   const [showInfoModal, setShowInfoModal] = useState(false);
+  const [formData, setFormData] = useState({
+  deviceId: '',
+  // other form fields
+});
+
+// Update both when device is selected
+const handleDeviceSelect = (deviceId) => {
+  setFormData({...formData, deviceId});
+  const device = devices.find(d => d.id === deviceId);
+  setSelectedDevice(device.deviceId);
+};
+
+// Initialize selectedDevice from formData on component mount
+useEffect(() => {
+  if (formData.deviceId && devices.length > 0) {
+    const device = devices.find(d => d.id === formData.deviceId);
+    setSelectedDevice(device.deviceId);
+  }
+}, [devices]); // Run when devices are loaded
 
   // const handleAddDevice = async (deviceData) => {
   //   try {
@@ -73,6 +92,7 @@ const DevicesDashboard = () => {
                 <i className="fas fa-th-large"></i>
                My Devices
               </button>
+              {selectedDevice && (
               <button
                 onClick={() => setActiveView('details')}
                 className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center gap-2 ${
@@ -85,14 +105,15 @@ const DevicesDashboard = () => {
                 <i className="fas fa-chart-line"></i>
                 Device Details
               </button>
-              <button
+              )}
+              {/* <button
                 onClick={() => {
                    setShowAddModal(true);}}
                  className={'px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center gap-2 bg-white text-gray-700 border border-gray-200 hover:bg-blue-500 hover:text-white hover:shadow-lg'}
               >
                 <i className="fas fa-plus-circle"></i>
                 Add Device
-              </button>
+              </button> */}
             </div>
           </div>
         </div>
@@ -109,13 +130,14 @@ const DevicesDashboard = () => {
                     <p className="text-gray-600 mt-1">Manage all your connected devices</p>
                   </div>
                   <div className="flex gap-3 mt-4 sm:mt-0">
+                    {devices.length > 0 && (
                     <button
                       onClick={() => fetchUserDevices()}
                       className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-colors flex items-center gap-2"
                     >
                       <i className="fas fa-sync-alt"></i>
                       Refresh
-                    </button>
+                    </button>)}
                   </div>
                 </div>
 
@@ -140,17 +162,25 @@ const DevicesDashboard = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {devices.map((device) => (
                       <DeviceCard
+                      className="cursor-pointer "
                         key={device.id}
                         device={device}
                         isSelected={selectedDevice === device.deviceId}
                         onSelect={() => {device.status === "active" ? setSelectedDevice(device.deviceId) : alert("⚠️ This device is inactive. Please contact the admin.")}}
                         onRemove={() => handleRemoveDevice(device.deviceId)}
-                        onViewInfo={() => {
-                          getSelectedDeviceInfo();
-                          setShowInfoModal(true);
-                        }}
+                       
                       />
                     ))}
+                    <div className="bg-white rounded-2xl hover:shadow-lg p-8 text-center border-2 border border-gray-200 hover:border-blue-500" onClick={()=> setShowAddModal(true)}>
+                  <div className="w-20 h-20 mx-auto bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mb-6  cursor-pointer " onClick={() => setShowAddModal(true)}>
+                    <i className="fas fa-plus text-blue-500 text-3xl "></i>
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-2">Add Device </h3>
+                  <p className="text-gray-500 mb-6">
+                    Add a device here to view its data and manage settings
+                  </p>
+                </div>
+
                   </div>
                 )}
               </div>
@@ -220,60 +250,342 @@ const DevicesDashboard = () => {
           </div>
         ) : (
           /* Device Details View */
-          <div>
-            {selectedDevice ? (
-              <div>
-                <div className="flex items-center justify-between mb-8">
-                  <div className="flex items-center gap-4">
-                    <button
-                      onClick={() => setActiveView('overview')}
-                      className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors flex items-center gap-2"
-                    >
-                      <i className="fas fa-arrow-left"></i>
-                      Back to Devices
-                    </button>
-                    <h2 className="text-2xl font-bold text-gray-800">Live Device Data</h2>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    {/* <div className={`flex items-center gap-2 px-4 py-2 rounded-full ${
-                      connected ? "bg-green-50 border border-green-100" : "bg-red-50 border border-red-100"
-                    }`}>
-                      <div className={`w-2 h-2 rounded-full ${connected ? "bg-green-500 animate-pulse" : "bg-red-500"}`}></div>
-                      <span className={`text-sm font-medium ${connected ? "text-green-700" : "text-red-700"}`}>
-                        {connected ? "Connected" : "Disconnected"}
-                      </span>
-                    </div> */}
-                    <button
-                      onClick={() => getSelectedDeviceInfo() && setShowInfoModal(true)}
-                      className="px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg font-medium transition-colors"
-                    >
-                      <i className="fas fa-cog mr-2"></i>
-                      Settings
-                    </button>
-                  </div>
-                </div>
-                
-                <DeviceLivePanel deviceId={selectedDevice} />
+          
+ <div className="space-y-8">
+  {selectedDevice ? (
+    <div className="space-y-6">
+      {/* Header Section */}
+      <div className="flex flex-col gap-6">
+        {/* Back Button and Title */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setActiveView('overview')}
+              className="
+                px-5 py-3 bg-gradient-to-r from-gray-50 to-gray-100 
+                hover:from-gray-100 hover:to-gray-200 
+                text-gray-700 rounded-xl font-medium 
+                transition-all duration-200 
+                border border-gray-200 hover:border-gray-300
+                shadow-sm hover:shadow-md
+                flex items-center gap-3
+                group hover:-translate-x-1
+                active:scale-[0.98]
+              "
+            >
+              <div className="
+                w-8 h-8 rounded-lg bg-gradient-to-br from-gray-200 to-gray-300
+                flex items-center justify-center 
+                group-hover:scale-110 transition-transform
+              ">
+                <i className="fas fa-arrow-left text-gray-600 text-sm"></i>
               </div>
-            ) : (
-              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-12 text-center">
-                <div className="w-24 h-24 mx-auto bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mb-6">
-                  <i className="fas fa-microchip text-gray-400 text-4xl"></i>
-                </div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-3">No Device Selected</h3>
-                <p className="text-gray-500 mb-8 max-w-md mx-auto">
-                  Please select a device from the overview to view detailed sensor data and analytics
-                </p>
-                <button
-                  onClick={() => setActiveView('overview')}
-                  className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl font-semibold shadow-md hover:shadow-lg transition-all duration-200"
-                >
-                  <i className="fas fa-arrow-left mr-2"></i>
-                  Back to Device List
-                </button>
-              </div>
-            )}
+              <span className="whitespace-nowrap">All Devices</span>
+            </button>
+            
+            <div className="flex flex-col">
+              <h2 className="text-2xl font-bold text-gray-800">
+                Live Device Data
+              </h2>
+              <p className="text-sm text-gray-500 mt-1">
+                Real-time monitoring and analytics for {selectedDevice.deviceName || 'selected device'}
+              </p>
+            </div>
           </div>
+
+          {/* Connection Status Badge */}
+          <div className={`
+            flex items-center gap-3 px-5 py-3 rounded-xl 
+            ${connected 
+              ? "bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 shadow-green-100/50" 
+              : "bg-gradient-to-r from-red-50 to-rose-50 border border-red-200 shadow-red-100/50"
+            }
+            shadow-sm hover:shadow-md transition-all duration-300
+            self-start sm:self-auto
+          `}>
+            <div className="relative">
+              <div className={`
+                w-3 h-3 rounded-full ${connected ? "bg-green-500" : "bg-red-500"}
+                animate-pulse
+              `}></div>
+              <div className={`
+                absolute inset-0 rounded-full ${connected ? "bg-green-500" : "bg-red-500"} 
+                animate-ping opacity-40
+              `}></div>
+            </div>
+            <span className={`text-sm font-semibold ${connected ? "text-green-800" : "text-red-800"}`}>
+              {connected ? "Live Connected" : "Disconnected"}
+            </span>
+          </div>
+        </div>
+
+        {/* Device Selector Card */}
+        <div className="
+          bg-gradient-to-br from-white to-gray-50 
+          rounded-2xl border border-gray-200 
+          shadow-sm p-6
+        ">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Device Info Section */}
+            <div className="lg:col-span-1">
+              <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100 shadow-sm">
+                <div className="flex items-start gap-4">
+                  {/* Device Icon */}
+                  <div className="
+                    w-12 h-12 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 
+                    flex items-center justify-center flex-shrink-0 shadow-sm
+                  ">
+                    <i className="fas fa-microchip text-blue-600 text-lg"></i>
+                  </div>
+
+                  {/* Device Info */}
+                  <div className="flex-1 min-w-0">
+                    {/* ID Badge */}
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="
+                        text-xs px-3 py-1.5 bg-white text-gray-700 rounded-lg 
+                        border border-blue-200 font-medium
+                        flex items-center gap-2
+                      ">
+                        <i className="fas fa-fingerprint text-blue-500 text-xs"></i>
+                        ID: {selectedDevice?.slice(0, 12)}...
+                      </span>
+
+                      {/* Status Badge */}
+                      <span className="
+                        text-xs px-3 py-1.5 bg-gradient-to-r from-green-50 to-emerald-50 
+                        text-green-700 rounded-lg border border-green-200
+                        flex items-center gap-2
+                      ">
+                        <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
+                        Online
+                      </span>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {/* Info Button */}
+                      <button
+                        onClick={() => setShowInfoModal(true)}
+                        className="
+                          px-3 py-2 text-gray-600 hover:text-blue-600 
+                          hover:bg-white rounded-lg transition-all duration-200
+                          border border-transparent hover:border-blue-200
+                          flex items-center gap-2 text-xs font-medium
+                          hover:shadow-sm
+                        "
+                        title="Device Details"
+                      >
+                        <i className="fas fa-info-circle text-sm"></i>
+                        Details
+                      </button>
+
+                      {/* Refresh Button */}
+                      <button
+                        onClick={() => fetchUserDevices()}
+                        className="
+                          px-3 py-2 text-gray-600 hover:text-green-600 
+                          hover:bg-white rounded-lg transition-all duration-200
+                          border border-transparent hover:border-green-200
+                          flex items-center gap-2 text-xs font-medium
+                          hover:shadow-sm
+                        "
+                        title="Refresh Data"
+                      >
+                        <i className="fas fa-sync-alt text-sm"></i>
+                        Refresh
+                      </button>
+
+                      {/* More Actions
+                      <button
+                        className="
+                          px-3 py-2 text-gray-600 hover:text-purple-600 
+                          hover:bg-white rounded-lg transition-all duration-200
+                          border border-transparent hover:border-purple-200
+                          flex items-center gap-2 text-xs font-medium
+                          hover:shadow-sm
+                        "
+                        title="More Actions"
+                      >
+                        <i className="fas fa-ellipsis-h text-sm"></i>
+                        More
+                      </button> */}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Device Selector Section */}
+            <div className="lg:col-span-2">
+              <div className="space-y-4">
+                {/* Header with label and count */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <svg 
+                      className="w-4 h-4 text-green-600" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round" 
+                        strokeWidth={2} 
+                        d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" 
+                      />
+                    </svg>
+                    <label className="text-sm font-semibold text-gray-700">
+                      Switch to Another Device
+                    </label>
+                  </div>
+                  <span className="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full font-medium">
+                    {devices.length} device{devices.length !== 1 ? 's' : ''} available
+                  </span>
+                </div>
+
+                {/* Select Dropdown */}
+                <div className="relative group">
+                  <select
+                    id="device-select"
+                    name="deviceId"
+                    value={formData.deviceId}
+                    onChange={(e) => handleDeviceSelect(e.target.value)}
+                    disabled={devices.length === 0}
+                    className="
+                      w-full p-4 pl-12 pr-12 bg-white 
+                      border-2 border-gray-200 rounded-xl 
+                      focus:outline-none focus:border-green-500 
+                      focus:ring-4 focus:ring-green-100/50 
+                      text-gray-800 appearance-none 
+                      cursor-pointer transition-all duration-200 
+                      hover:border-gray-300 hover:shadow-sm
+                      disabled:opacity-50 disabled:cursor-not-allowed
+                      peer
+                    "
+                    aria-label="Select a device"
+                  >
+                    <option value="" disabled className="text-gray-400">
+                      {devices.length === 0 ? 'No devices available' : 'Select another device...'}
+                    </option>
+                    {devices.map((device) => (
+                      <option 
+                        key={device.id} 
+                        value={device.id}
+                        className="py-3 border-b border-gray-100 last:border-b-0"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium px-3"> {device.deviceName}</span>
+                          <span className="text-gray-500 text-sm px-3"> ({ device.status})</span>
+                        </div>
+                      </option>
+                    ))}
+                  </select>
+
+                  {/* Device Icon */}
+                  <div className="absolute left-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                    <div className="
+                      w-8 h-8 rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 
+                      flex items-center justify-center
+                    ">
+                      <i className="fas fa-microchip text-gray-500 text-sm "></i>
+                    </div>
+                  </div>
+
+                  {/* Chevron Icon */}
+                  <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                    <svg 
+                      className="w-5 h-5 text-gray-400 peer-hover:text-gray-600 peer-focus:text-green-500 transition-colors" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round" 
+                        strokeWidth={2} 
+                        d="M19 9l-7 7-7-7" 
+                      />
+                    </svg>
+                  </div>
+                </div>
+
+            
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Live Panel */}
+      <div className="
+        bg-gradient-to-br from-white to-gray-50 
+        rounded-2xl border border-gray-200 
+        shadow-sm overflow-hidden
+      ">
+        <DeviceLivePanel deviceId={selectedDevice} />
+      </div>
+    </div>
+  ) : (
+    /* Empty State */
+    <div className="
+      bg-gradient-to-br from-white to-gray-50 
+      rounded-2xl border border-gray-200 
+      shadow-sm p-12 text-center
+      max-w-2xl mx-auto
+    ">
+      <div className="
+        w-28 h-28 mx-auto 
+        bg-gradient-to-br from-gray-100 to-gray-200 
+        rounded-full flex items-center justify-center mb-8
+        shadow-inner
+      ">
+        <i className="fas fa-microchip text-gray-400 text-5xl"></i>
+      </div>
+      <h3 className="text-2xl font-bold text-gray-800 mb-4">
+        No Device Selected
+      </h3>
+      <p className="text-gray-500 mb-8 max-w-md mx-auto text-lg">
+        Select a device from your inventory to view real-time sensor data and analytics
+      </p>
+      <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <button
+          onClick={() => setActiveView('overview')}
+          className="
+            px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-600 
+            hover:from-blue-600 hover:to-blue-700 
+            text-white rounded-xl font-semibold 
+            shadow-lg hover:shadow-xl 
+            transition-all duration-200 
+            hover:-translate-y-0.5
+            flex items-center justify-center gap-3
+            min-w-[200px]
+          "
+        >
+          <i className="fas fa-list text-lg"></i>
+          View All Devices
+        </button>
+        <button
+          onClick={() => setShowAddModal(true)}
+          className="
+            px-8 py-4 bg-gradient-to-r from-gray-100 to-gray-200 
+            hover:from-gray-200 hover:to-gray-300 
+            text-gray-700 rounded-xl font-semibold 
+            border border-gray-300
+            shadow-sm hover:shadow-md 
+            transition-all duration-200 
+            hover:-translate-y-0.5
+            flex items-center justify-center gap-3
+            min-w-[200px]
+          "
+        >
+          <i className="fas fa-plus text-lg text-gray-500"></i>
+          Add New Device
+        </button>
+      </div>
+    </div>
+  )}
+</div>
         )}
 
         {/* Modals */}
@@ -282,18 +594,18 @@ const DevicesDashboard = () => {
           onClose={() => setShowAddModal(false)}
           onSubmit={handleAddDevice}
         />
-
-        {selectedDevice && (
-          <DeviceInfoModal
-            isOpen={showInfoModal}
-            onClose={() => setShowInfoModal(false)}
-            device={getSelectedDeviceInfo()}
-            onRemove={() => {
-              handleRemoveDevice(selectedDevice);
-              setShowInfoModal(false);
-            }}
-          />
-        )}
+        {showInfoModal && (
+        <DeviceInfoModal
+          isOpen={showInfoModal}
+          onClose={() => setShowInfoModal(false)}
+          device={devices.find(d => d.deviceId === selectedDevice)}
+          onRemove={() => {
+            if (onRemove) onRemove();
+            setShowInfoModal(false);
+          }}
+        />
+      )}
+  
         
       </div>
     </div>

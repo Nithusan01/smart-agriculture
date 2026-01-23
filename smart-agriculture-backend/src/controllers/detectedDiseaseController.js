@@ -1,12 +1,22 @@
 const { DetectedDisease, Disease, CultivationPlan } = require('../models/index');
+const { get } = require('../routes/device');
 
 // =================== ADD DETECTED DISEASE ===================
 const addDetectedDisease = async (req, res) => {
   try {
-    const { cultivationPlanId, diseaseId, imageUrl, confidence, notes } = req.body;
+    const { cultivationPlanId, diseaseId, imageUrl, confidence, status,notes } = req.body;
 
     if (!cultivationPlanId) {
       return res.status(400).json({ message: "cultivationPlanId is required" });
+    }
+    const exsistingDisease = await DetectedDisease.findAll({
+      where:{cultivationPlanId:cultivationPlanId,diseaseId:diseaseId}
+    })
+    if(exsistingDisease){
+      return res.status(400).json({
+        success:false,
+        message:"disease already detected"
+      })
     }
 
     const detectedDisease = await DetectedDisease.create({
@@ -15,6 +25,7 @@ const addDetectedDisease = async (req, res) => {
       userId:req.user.id,
       imageUrl,
       confidence,
+      status,
       notes,
     });
 
@@ -24,7 +35,7 @@ const addDetectedDisease = async (req, res) => {
     });
   } catch (error) {
     console.error("Error adding detected disease:", error);
-    return res.status(500).json({ message: "Server error", error: error.message });
+    return res.status(500).json({ message: "Server error", error: message });
   }
 };
 
@@ -92,10 +103,30 @@ const deleteDetectedDisease = async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
+// =================== get DETECTION BY cultivation plan ===================
+const getDetectionsByCultivationPlan = async (req, res) => {
+  try {
+    const { cultivationPlanId } = req.params;
+    const detections = await DetectedDisease.findAll({
+      where: { cultivationPlanId, userId: req.user.id },
+      include: [
+        { model: Disease, as: "disease", attributes: ["diseaseName", "severity","symptoms","treatment"] },
+        { model: CultivationPlan, as: "plan", attributes: ["sectorName", "cropName"] },
+      ],
+      order: [["created_at", "DESC"]],
+    });
+    return res.status(200).json({success:true,data:detections});
+
+  } catch (error) {
+    console.error("Error fetching detections by cultivation plan:", error);
+    return res.status(500).json({ success:false,message: "Server error" });
+  }
+};
 
 module.exports = {
   addDetectedDisease,
   getAllDetectedDiseases,
   updateDetectedStatus,
-  deleteDetectedDisease
+  deleteDetectedDisease,
+  getDetectionsByCultivationPlan,
 }

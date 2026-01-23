@@ -267,7 +267,7 @@ const DiseasesAdmin = ({ refreshTrigger }) => {
 
   const exportDiseases = () => {
     const csvContent = [
-      ['Disease Name', 'Severity', 'Spread Rate', 'Crop', 'Symptoms', 'Treatment', 'Prevention'],
+      ['Disease Name', 'Severity', 'Spread Rate', 'Crop', 'Symptoms', 'Treatment', 'Prevention','imageUrl'],
       ...filteredDiseases.map(disease => {
         const crop = crops.find(c => c.id === disease.cropId);
         return [
@@ -277,7 +277,8 @@ const DiseasesAdmin = ({ refreshTrigger }) => {
           crop?.cropName || 'Unknown Crop',
           disease.symptoms?.substring(0, 100) + '...',
           disease.treatment?.substring(0, 100) + '...',
-          disease.prevention?.substring(0, 100) + '...'
+          disease.prevention?.substring(0, 100) + '...',
+          disease.imageUrl || 'N/A'
         ];
       })
     ].map(row => row.join(',')).join('\n');
@@ -606,7 +607,7 @@ const DiseasesAdmin = ({ refreshTrigger }) => {
       )}
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+      {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
         <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
@@ -660,7 +661,7 @@ const DiseasesAdmin = ({ refreshTrigger }) => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Search and Filters */}
       <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-200">

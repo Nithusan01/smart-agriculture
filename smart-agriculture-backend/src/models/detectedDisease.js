@@ -29,15 +29,15 @@ module.exports = (sequelize) => {
       field: 'disease_id',
     },
 
-    userId: {
-      type: DataTypes.UUID,
-      allowNull: false,
-      references: {
-        model: 'users',
-        key: 'user_id',
-      },
-      field: 'user_id',
-    },
+    // userId: {
+    //   type: DataTypes.UUID,
+    //   allowNull: false,
+    //   references: {
+    //     model: 'users',
+    //     key: 'user_id',
+    //   },
+    //   field: 'user_id',
+    // },
 
     imageUrl: {
       type: DataTypes.STRING,
@@ -57,8 +57,8 @@ module.exports = (sequelize) => {
     },
 
     status: {
-      type: DataTypes.ENUM('active', 'resolved'),
-      defaultValue: 'active',
+      type: DataTypes.ENUM('active', 'resolved',"detected"),
+      defaultValue: 'detected',
     },
 
     notes: {

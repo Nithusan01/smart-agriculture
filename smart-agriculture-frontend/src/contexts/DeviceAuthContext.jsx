@@ -13,6 +13,7 @@ export const DeviceAuthProvider = ({ children }) => {
     const [isLoading, setIsLoading] = useState(true)
     const { currentUser } = useAuth();
     const [devices, setDevices] = useState([]);
+    const [allDevices, setAllDevices] = useState([]);
      const [stats, setStats] = useState({
         totalDevices: 0,
         activeDevices: 0,
@@ -99,7 +100,7 @@ export const DeviceAuthProvider = ({ children }) => {
 
         try {
             const response = await api.get('/device/')
-            setDevices(response.data.data)
+            setAllDevices(response.data.data)
             return {
                 success: true,
                 message: 'device fetched successfully'
@@ -279,6 +280,7 @@ export const DeviceAuthProvider = ({ children }) => {
         login,
         register,
         devices,
+        allDevices,
         fetchAllDevices,
         deleteDevice,
         updateDevice,

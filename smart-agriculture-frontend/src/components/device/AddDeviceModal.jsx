@@ -142,37 +142,7 @@ const AddDeviceModal = ({ isOpen, onClose, onSubmit }) => {
                   </p>
                 </div>
 
-                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Select the Cultivation Plan (optional)
-                  </label>
-                  {planLoading ? (
-                          <div className="relative w-full p-4 bg-white/50 border-2 border-green-100 rounded-xl flex items-center justify-center">
-                            <div className="flex items-center gap-3 text-green-600">
-                              <FontAwesomeIcon icon={faSpinner} className="animate-spin" />
-                              <span className="text-sm font-medium">Loading plans...</span>
-                            </div>
-                          </div>
-                        ) : (
-                          <select
-                            name="planId"
-                            value={formData.planId}
-                            onChange={handleChange}
-                            className="relative w-full p-4 bg-white/50 border-2 border-green-100 rounded-xl focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-100/50 transition-all duration-300 text-lg text-gray-800 appearance-none cursor-pointer"
-                            // required
-                            disabled={plans.length === 0}
-                          >
-                            <option value="">{plans.length === 0 ? 'No plans available' : `${plans.length} plans available Select a plan...`}</option>
-                            {plans.map((plan) => (
-                              <option key={plan.id} value={plan.id} className="text-gray-700">
-                                {/* {getCropEmoji(crop.cropType)} {crop.cropName} - {crop.cropType} */}
-                                {plan.cropName && ` (${plan.cropName})`}
-                               {plan.sectorName && ` -  Sector ${plan.sectorName}`}
-                              </option>
-                            ))}
-                          </select>
-                        )}
-                </div>
+                
 
               </div>
 

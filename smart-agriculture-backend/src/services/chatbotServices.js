@@ -11,6 +11,7 @@ class ChatbotService {
     this.initializeClassifier();
   }
 
+
   async initializeClassifier() {
     const trainingData = [
       { text: "my plant has white spots", intent: "symptom_description" },
@@ -29,6 +30,7 @@ class ChatbotService {
 
     this.classifier.train();
   }
+
 
   async processMessage(userMessage, context = {}, userId = null) {
     const intent = this.classifier.classify(userMessage);
@@ -64,6 +66,8 @@ class ChatbotService {
 
     return response;
   }
+
+  
 
   async saveChatHistory(userId, userMessage, botResponse, intent) {
     try {

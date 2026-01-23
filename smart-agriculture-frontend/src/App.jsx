@@ -12,21 +12,24 @@ import AdminPage from './components/admin/AdminPage'
 import ProtectedAdminRoute from './components/auth/ProtectedAdminRoute'
 import { CropProvider } from './contexts/CropContext'
 import { DiseaseProvider } from './contexts/DiseaseContext'
+import {DetectedDiseaseProvider} from './contexts/DetectedDiseaseContext'
 
 
 import './index.css'
 import Footer from './components/layout/Footer'
 import AgriSmartSection from './components/agriSmartSection/AgriSmartSection'
-import Planning from './components/planning/planning'
+import Planning from './components/planning/Planning'
 import DiseaseManagement from './components/diseaseManagement/DiseaseManagement'
 import { DeviceAuthProvider } from './contexts/DeviceAuthContext'
 import DevicesDashboard from './components/device/DevicesDashboard'
 
 function App() {
+
   return (
     <AuthProvider>
       <CropProvider>
         <DiseaseProvider>
+          <DetectedDiseaseProvider>
           <WeatherProvider>
             <CultivationPlanProvider>
               <DeviceAuthProvider>
@@ -90,9 +93,13 @@ function App() {
               </DeviceAuthProvider>
             </CultivationPlanProvider>
           </WeatherProvider>
+          </DetectedDiseaseProvider>
         </DiseaseProvider>
       </CropProvider>
     </AuthProvider>
+
+
+
   );
 }
 
@@ -110,6 +117,7 @@ function Layout({ children }) {
     </>
   );
 }
+
 
 
 export default App

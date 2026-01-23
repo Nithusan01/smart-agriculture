@@ -11,7 +11,7 @@ export const useDiseases = () => {
 export  const DiseaseProvider = ({children}) => {
 
 
-     const [diseases, setDiseases] = useState([]);
+      const [diseases, setDiseases] = useState([]);
       const [loading, setLoading] = useState(true);
       const [error, setError] = useState(null);
       const [deletingId, setDeletingId] = useState(null);

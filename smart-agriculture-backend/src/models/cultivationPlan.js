@@ -1,4 +1,5 @@
 const { DataTypes } = require('sequelize');
+const device = require('./device');
 
 module.exports = (sequelize) => {
   const CultivationPlan = sequelize.define(
@@ -23,6 +24,12 @@ module.exports = (sequelize) => {
         allowNull: true, // make optional if you still allow custom cropName
         references: { model: 'crops', key: 'crop_id' },
         field: 'crop_id',
+      },
+      deviceId: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        references: { model: 'devices', key: 'id' },
+        field: 'device_id',
       },
 
       sectorName: {

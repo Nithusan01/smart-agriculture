@@ -23,7 +23,7 @@ import { toast } from 'react-toastify';
 
 const DeviceAdminPage = () => {
   const { 
-    devices, 
+    allDevices, 
     register, 
     deleteDevice, 
     fetchAllDevices, 
@@ -50,7 +50,7 @@ const DeviceAdminPage = () => {
   }, []);
 
   // Filter devices based on search and status
-  const filteredDevices = devices.filter(device => {
+  const filteredDevices = allDevices.filter(device => {
     const matchesSearch = 
       device.deviceName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       device.deviceId?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -269,7 +269,7 @@ const DeviceAdminPage = () => {
   const handleExportDevices = () => {
     const csvContent = [
       ['Device Name', 'Device ID', 'Status', 'Last Seen', 'Created At'],
-      ...devices.map(device => [
+      ...allDevices.map(device => [
         device.deviceName,
         device.deviceId,
         device.status,
@@ -425,12 +425,12 @@ const DeviceAdminPage = () => {
       )}
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+      {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
         <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Devices</p>
-              <p className="text-2xl font-bold text-gray-900 mt-2">{devices.length}</p>
+              <p className="text-2xl font-bold text-gray-900 mt-2">{allDevices.length}</p>
             </div>
             <div className="p-3 bg-blue-50 rounded-lg">
               <div className="w-6 h-6 bg-blue-500 rounded-full"></div>
@@ -443,7 +443,7 @@ const DeviceAdminPage = () => {
             <div>
               <p className="text-sm font-medium text-gray-600">Active</p>
               <p className="text-2xl font-bold text-green-600 mt-2">
-                {devices.filter(d => d.status === 'active').length}
+                {allDevices.filter(d => d.status === 'active').length}
               </p>
             </div>
             <div className="p-3 bg-green-50 rounded-lg">
@@ -457,7 +457,7 @@ const DeviceAdminPage = () => {
             <div>
               <p className="text-sm font-medium text-gray-600">Inactive</p>
               <p className="text-2xl font-bold text-red-600 mt-2">
-                {devices.filter(d => d.status === 'inactive').length}
+                {allDevices.filter(d => d.status === 'inactive').length}
               </p>
             </div>
             <div className="p-3 bg-red-50 rounded-lg">
@@ -471,7 +471,7 @@ const DeviceAdminPage = () => {
             <div>
               <p className="text-sm font-medium text-gray-600">Pending</p>
               <p className="text-2xl font-bold text-yellow-600 mt-2">
-                {devices.filter(d => d.status === 'pending').length}
+                {allDevices.filter(d => d.status === 'pending').length}
               </p>
             </div>
             <div className="p-3 bg-yellow-50 rounded-lg">
@@ -479,7 +479,7 @@ const DeviceAdminPage = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Filters and Search */}
       <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-200">
@@ -530,10 +530,10 @@ const DeviceAdminPage = () => {
             </div>
             <div className="flex gap-2">
               <div className="bg-white/20 rounded-lg px-3 py-1 text-white text-sm">
-                Active: {devices.filter(d => d.status === 'active').length}
+                Active: {allDevices.filter(d => d.status === 'active').length}
               </div>
               <div className="bg-white/20 rounded-lg px-3 py-1 text-white text-sm">
-                Inactive: {devices.filter(d => d.status === 'inactive').length}
+                Inactive: {allDevices.filter(d => d.status === 'inactive').length}
               </div>
             </div>
           </div>
@@ -544,11 +544,11 @@ const DeviceAdminPage = () => {
             <AlertCircle size={48} className="mx-auto mb-4 text-gray-400" />
             <p className="text-lg font-medium text-gray-500 mb-2">No devices found</p>
             <p className="text-gray-400">
-              {devices.length === 0 
+              {allDevices.length === 0 
                 ? "Start by adding your first device."
                 : "Try adjusting your search or filter criteria."}
             </p>
-            {devices.length === 0 && (
+            {allDevices.length === 0 && (
               <button
                 onClick={() => setShowForm(true)}
                 className="mt-4 text-green-600 hover:text-green-700 underline"
@@ -605,7 +605,7 @@ const DeviceAdminPage = () => {
                     <td className="py-4 px-6">
                       <div className="flex items-center gap-2">
                         <div className="relative flex-1">
-                          <code className="block bg-gray-100 px-3 py-2 rounded-lg text-sm font-mono truncate">
+                          <code className="block bg-gray-200 px-3 py-2 rounded-lg text-sm font-mono truncate">
                             {showSecretKeys[device.id]
                               ? device.secretKey
                               : "•".repeat(16)}
@@ -625,7 +625,7 @@ const DeviceAdminPage = () => {
                           </button>
                           <button
                             onClick={() => handleCopyToClipboard(device.secretKey, "Secret Key")}
-                            className="p-1 hover:bg-gray-100 rounded transition-colors"
+                            className="p-1 hover:bg-gray-200 rounded transition-colors"
                             title="Copy secret key"
                           >
                             <Copy size={14} className="text-gray-600" />
@@ -633,7 +633,7 @@ const DeviceAdminPage = () => {
                           <button
                             onClick={() => handleRegenerateSecretKey(device)}
                             disabled={actionLoading[device.id]}
-                            className="p-1 hover:bg-gray-100 rounded transition-colors disabled:opacity-50"
+                            className="p-1 hover:bg-gray-200 rounded transition-colors disabled:opacity-50"
                             title="Regenerate secret key"
                           >
                             <Key size={14} className="text-gray-600" />

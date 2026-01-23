@@ -1,11 +1,17 @@
-const { User, CultivationPlan } = require('../models/index');
+const device = require('../models/device');
+const { User, CultivationPlan, Device } = require('../models/index');
+
+const isValidUUID = (uuid) => {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(uuid);
+};
 
 // Create a new cultivation plan
 const createCultivationPlan = async (req, res) => {
 
     try {
 
-        const { sectorName, cropId, cropName, area, farmSoilType, farmLat, farmLng, plantingDate, expectedHarvestDate } = req.body;
+        const { sectorName, cropId, cropName, area, farmSoilType, farmLat, farmLng, plantingDate, expectedHarvestDate,deviceId } = req.body;
 
         // Check if sector name already exists for the user
         const existingPlan = await CultivationPlan.findOne({
@@ -16,12 +22,55 @@ const createCultivationPlan = async (req, res) => {
             }
         });
 
+
+        
+         // Handle empty device_id - convert to null
+    // if (deviceId === '' || deviceId === undefined) {
+    //   deviceId = null;
+    // }
+
+    // Validate UUID format if provided
+    if (deviceId && !isValidUUID(deviceId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid device ID format'
+      });
+    }
+
+
+
+
+
         if (existingPlan && !["harvested", "cancelled"].includes(existingPlan.status)) {
             return res.status(400).json({
                 success: false,
                 message: 'Sector name already exists'
             });
         }
+        // If deviceId is provided, verify that the device exists and belongs to the user
+        if (deviceId) {
+            const device = await Device.findOne({
+                where: { id: deviceId, userId: req.user.id}
+            });
+            const existingPlanWithDevice = await CultivationPlan.findOne({
+                where: { deviceId: deviceId, userId: req.user.id }
+            });
+            if (!device){
+                return res.status(400).jason({
+                    success: false,
+                    message: "invalid deviceId: Device not found or does not belong to user"
+                })
+            }
+            
+                if (existingPlanWithDevice) {
+                    return res.status(400).json({
+                        success: false,
+                        message: "Device is already assigned to another cultivation plan"
+                    });
+                }
+            
+        }
+
 
         // Create new cultivation plan
         const cultivationPlan = await CultivationPlan.create({
@@ -35,7 +84,8 @@ const createCultivationPlan = async (req, res) => {
             farmLng,
             plantingDate,
             expectedHarvestDate,
-            userId: req.user.id
+            userId: req.user.id,
+            deviceId
 
         });
 
@@ -77,19 +127,60 @@ const getPlans = async (req, res) => {
 
 const updatePlan = async (req, res) => {
     try {
+         const updateData = req.body;
         const plan = await CultivationPlan.findOne({
             where: { id: req.params.id, userId: req.user.id }
         });
+
+         // Handle empty device_id - convert to null
+    if (updateData.deviceId === '' || updateData.deviceId === undefined) {
+      updateData.deviceId = null;
+    }
+
+    // Validate UUID format if provided
+    if (updateData.deviceId && !isValidUUID(updateData.deviceId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid device ID format'
+      });
+    }
+
+
+    // If deviceId is provided, verify that the device exists and belongs to the user
+        if (updateData.deviceId) {
+            const device = await Device.findOne({
+                where: { id: updateData.deviceId, userId: req.user.id}
+            });
+            const existingPlanWithDevice = await CultivationPlan.findOne({
+                where: { deviceId: updateData.deviceId, userId: req.user.id }
+            });
+            if (!device){
+                return res.status(400).jason({
+                    success: false,
+                    message: "invalid deviceId: Device not found or does not belong to user"
+                })
+            }
+            
+                if (existingPlanWithDevice) {
+                    return res.status(400).json({
+                        success: false,
+                        message: "Device is already assigned to another cultivation plan"
+                    });
+                }
+            
+        }
+
+        
 
         if (!plan) {
             return res.status(404).json({ success: false, message: 'Plan not found' });
         }
 
-        await plan.update(req.body);
+        await plan.update(updateData);
         res.status(200).json({ success: true, data: plan });
     } catch (error) {
         console.error('Update plan error:', error);
-        res.status(500).json({ success: false, message: 'Server error' });
+        res.status(500).json({ success: false, message: 'Server error during update' });
     }
 };
 
@@ -133,6 +224,22 @@ const getPlanById = async (req, res) => {
         res.status(500).json({ success: false, message: 'Server error' });
     }
 };
+const getPlanByDeviceId = async (req, res) => {
+    try {
+        const plan = await CultivationPlan.findOne({
+            where: { deviceId: req.params.deviceId, userId: req.user.id}
+        });
+        if (!plan) {
+            return res.status(404).json({ success: false, message: 'Plan not found' });
+        }
+        res.status(200).json({ success: true, data: plan });
+    } catch (error) {
+        console.error('Get plan by device ID error:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
+
 
 
 module.exports = {
@@ -140,6 +247,7 @@ module.exports = {
     getPlans,
     updatePlan,
     deletePlan,
-    getPlanById
+    getPlanById,
+    getPlanByDeviceId
 
 };
