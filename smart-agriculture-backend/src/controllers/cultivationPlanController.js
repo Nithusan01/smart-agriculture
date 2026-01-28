@@ -1,4 +1,3 @@
-const device = require('../models/device');
 const { User, CultivationPlan, Device } = require('../models/index');
 
 const isValidUUID = (uuid) => {
@@ -88,13 +87,14 @@ const createCultivationPlan = async (req, res) => {
             deviceId
 
         });
+    
 
         res.status(201).json({
             success: true,
             message: 'Cultivation plan created successfully',
             data: cultivationPlan
         });
-
+        
     }
 
 
@@ -161,12 +161,15 @@ const updatePlan = async (req, res) => {
                 })
             }
             
-                if (existingPlanWithDevice) {
+                if (existingPlanWithDevice && existingPlanWithDevice.deviceId !== plan.deviceId) {
                     return res.status(400).json({
                         success: false,
                         message: "Device is already assigned to another cultivation plan"
                     });
+                
+
                 }
+                
             
         }
 
@@ -238,6 +241,29 @@ const getPlanByDeviceId = async (req, res) => {
         res.status(500).json({ success: false, message: 'Server error' });
     }
 };
+const removeDeviceFromPlan =async( req,res) =>{
+    try {
+        const {id} = req.params;
+        const plan = await CultivationPlan.findOne({
+            where: { id:id ,userId:req.user.id}
+        })
+        if(!plan){
+        return res.status(404).json({ success: false, message: 'Plan not found' });
+
+        }
+        plan.deviceId=null;
+        await plan.save();
+        res.status(200).json({success:true,message:"plan remove successfully"})
+        
+    } catch (error) {
+
+         console.error('remove device Id from plan error:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+
+        
+    }
+    
+}
 
 
 
@@ -248,6 +274,7 @@ module.exports = {
     updatePlan,
     deletePlan,
     getPlanById,
-    getPlanByDeviceId
+    getPlanByDeviceId,
+    removeDeviceFromPlan
 
 };

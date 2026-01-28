@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faUserCircle, faSignOutAlt, faBars, faTimes } from '@fortawesome/free-solid-svg-icons'
+import { faSignOutAlt, faBars, faTimes } from '@fortawesome/free-solid-svg-icons'
 import UserMenu from './UserMenu';
+import Swal from 'sweetalert2'
 
 const Header = () => {
   const { currentUser, logout } = useAuth()
@@ -12,24 +13,96 @@ const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout()
-    navigate("/login")
-    setIsMobileMenuOpen(false)
-  }
+  // const handleLogout = () => {
+  //   logout()
+  //   navigate("/login")
+  //   setIsMobileMenuOpen(false)
+  // }
+
+
+  const handleLogout = async () => {
+      try {
+        const result = await Swal.fire({
+          title: 'Leaving so soon?',
+          html: `
+          <div class="text-center">
+            <p>Are you sure you want to logout?</p>
+            <small class="text-gray-500">You'll need to login again to access your farm data.</small>
+          </div>
+        `,
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonColor: '#dc2626',
+          cancelButtonColor: '#059669',
+          confirmButtonText: '<i class="fas fa-sign-out-alt"></i> Logout',
+          cancelButtonText: '<i class="fas fa-times"></i> Cancel',
+          background: '#f8f9fa',
+          customClass: {
+            confirmButton: 'px-4 py-2 rounded-lg',
+            cancelButton: 'px-4 py-2 rounded-lg'
+          }
+        });
+  
+        if (result.isConfirmed) {
+          // Show loading
+          const loadingToast = Swal.fire({
+            title: 'Signing out...',
+            text: 'Please wait while we secure your session',
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading()
+          });
+  
+          // Perform logout
+          await logout();
+  
+  
+          // Close loading
+          await loadingToast.close();
+  
+          // Show success and redirect
+          await Swal.fire({
+            title: '👋 Goodbye!',
+            text: 'You have been successfully logged out.',
+            icon: 'success',
+            timer: 2000,
+            showConfirmButton: false,
+            background: '#f0fdf4',
+            iconColor: '#10b981'
+          });
+  
+          // Redirect to home
+          navigate('/');
+        }
+      } catch (error) {
+        console.error('Logout error:', error);
+  
+        await Swal.fire({
+          title: '😕 Something went wrong',
+          text: 'Failed to logout. Please try again.',
+          icon: 'error',
+          confirmButtonText: 'Try Again',
+          background: '#fef2f2',
+          iconColor: '#ef4444'
+        });
+      }
+    };
+
+
+
+
 
   const isActive = (path) => {
-    return location.pathname === path ? 'border-b-2 border-yellow-400' : ''
+    return location.pathname === path ? 'bg-green-100 text-green-700' : 'text-gray-700'
   }
 
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false)
   }
 
-  // Track scroll position for header background
+  // Track scroll position
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+      setIsScrolled(window.scrollY > 20);
     };
     
     window.addEventListener("scroll", handleScroll);
@@ -39,7 +112,7 @@ const Header = () => {
   // Close mobile menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (isMobileMenuOpen && !e.target.closest('.mobile-menu-container') && !e.target.closest('.mobile-menu-button')) {
+      if (isMobileMenuOpen && !e.target.closest('.mobile-menu') && !e.target.closest('.menu-btn')) {
         setIsMobileMenuOpen(false);
       }
     };
@@ -50,176 +123,191 @@ const Header = () => {
 
   // Prevent body scroll when mobile menu is open
   useEffect(() => {
-    if (isMobileMenuOpen) {
-      document.body.classList.add('menu-open');
-    } else {
-      document.body.classList.remove('menu-open');
-    }
+    document.body.style.overflow = isMobileMenuOpen ? 'hidden' : '';
     return () => {
-      document.body.classList.remove('menu-open');
+      document.body.style.overflow = '';
     };
   }, [isMobileMenuOpen]);
+
+  const isOnAuthPage = () => {
+    return location.pathname === '/login' || location.pathname === '/register';
+  }
 
   // Navigation items based on user role
   const getNavigationItems = () => {
     if (currentUser?.role === "admin") {
-      // Admin only sees Admin and About Us
       return (
-        <div className="flex gap-3 lg:gap-6 font-bold text-lg lg:text-xl">
+        <div className="flex gap-3">
           <Link 
             to="/admin" 
-            className={`px-3 lg:px-4 py-2 rounded-xl transition-colors duration-300 hover:bg-green-700/40 ${isActive('/admin')}`}
+            className={`px-5 py-2.5 rounded-lg font-semibold text-xl transition-colors hover:bg-gray-100 ${isActive('/admin')}`}
           >
+            Admin
           </Link>
-          
         </div>
       )
     } else if (currentUser) {
-      // Regular user navigation
       return (
-        <div className="flex flex-wrap justify-center gap-2 lg:gap-6 font-bold text-sm sm:text-base lg:text-2xl">
+        <div className="flex gap-3">
           <Link 
             to="/dashboard" 
-            className={`px-2 sm:px-3 lg:px-4 py-1 lg:py-2 rounded-lg lg:rounded-xl transition-colors duration-300 hover:bg-green-700/40 ${isActive('/dashboard')}`}
+            className={`px-5 py-2.5 rounded-lg font-semibold text-xl transition-colors hover:bg-gray-100 ${isActive('/dashboard')}`}
           >
             Dashboard
           </Link>
           <Link 
             to="/planning" 
-            className={`px-2 sm:px-3 lg:px-4 py-1 lg:py-2 rounded-lg lg:rounded-xl transition-colors duration-300 hover:bg-green-700/40 ${isActive('/planning')}`}
+            className={`px-5 py-2.5 rounded-lg font-semibold text-xl transition-colors hover:bg-gray-100 ${isActive('/planning')}`}
           >
             Planning
           </Link>
           <Link 
             to="/device-management" 
-            className={`px-2 sm:px-3 lg:px-4 py-1 lg:py-2 rounded-lg lg:rounded-xl transition-colors duration-300 hover:bg-green-700/40 ${isActive('/device-management')}`}
+            className={`px-5 py-2.5 rounded-lg font-semibold text-xl transition-colors hover:bg-gray-100 ${isActive('/device-management')}`}
           >
-            Iot Devices
-          </Link> 
+            Devices
+          </Link>
           <Link 
             to="/chatbot" 
-            className={`px-2 sm:px-3 lg:px-4 py-1 lg:py-2 rounded-lg lg:rounded-xl transition-colors duration-300 hover:bg-green-700/40 ${isActive('/chatbot')}`}
+            className={`px-5 py-2.5 rounded-lg font-semibold text-xl transition-colors hover:bg-gray-100 ${isActive('/chatbot')}`}
           >
             Diseases
-          </Link>
-          
-        </div>
-      )
-    } else {
-      // Not logged in
-      return (
-        <div className="flex gap-3 lg:gap-6 font-bold text-base lg:text-xl">
-          <Link 
-            to="/" 
-           
-          >
           </Link>
         </div>
       )
     }
+    return null;
   }
 
-  // Check if user is on auth pages
-  const isOnAuthPage = () => {
-    return location.pathname === '/login' || location.pathname === '/register';
-  }
-
-  // Mobile navigation items based on user role
+  // Mobile navigation items
   const getMobileNavigationItems = () => {
     if (currentUser?.role === "admin") {
       return (
-        <div className="flex flex-col space-y-4">
-          <div className="flex flex-col space-y-3 font-bold text-lg">
-            <Link to="/admin" className={`px-4 py-3 hover:bg-green-700/20 rounded-lg ${isActive('/admin')}`} onClick={closeMobileMenu}>
-              Admin Dashboard
-            </Link>
-            <Link to="/" className={`px-4 py-3 hover:bg-green-700/20 rounded-lg ${isActive('/')}`} onClick={closeMobileMenu}>
-              About Us
-            </Link>
-          </div>
-          <div className="flex flex-col space-y-3 border-t border-green-600 border-opacity-20 pt-4">
-            <button onClick={handleLogout} className="flex items-center justify-center gap-3 hover:bg-green-700/20 px-4 py-3 rounded-lg text-lg">
-              <FontAwesomeIcon icon={faSignOutAlt} />
-              <span>Logout</span>
-            </button>
-          </div>
-        </div>
+        <>
+          <Link 
+            to="/admin" 
+            className={`px-5 py-3.5 rounded-lg font-semibold text-base ${isActive('/admin')}`} 
+            onClick={closeMobileMenu}
+          >
+            Admin
+          </Link>
+          <button 
+            onClick={handleLogout} 
+            className="px-5 py-3.5 text-red-600 hover:bg-red-50 rounded-lg font-semibold text-base flex items-center gap-2"
+          >
+            <FontAwesomeIcon icon={faSignOutAlt} />
+            Logout
+          </button>
+        </>
       )
     } else if (currentUser) {
       return (
-        <div className="flex flex-col space-y-4">
-          <div className="flex flex-col space-y-3 font-bold text-lg">
-            <Link to="/dashboard" className={`px-4 py-3 hover:bg-green-700/20 rounded-lg ${isActive('/dashboard')}`} onClick={closeMobileMenu}>
-              Dashboard
-            </Link>
-            <Link to="/planning" className={`px-4 py-3 hover:bg-green-700/20 rounded-lg ${isActive('/planning')}`} onClick={closeMobileMenu}>
-              Planning
-            </Link>
-            <Link to="/device-management" className={`px-4 py-3 hover:bg-green-700/20 rounded-lg ${isActive('/device-management')}`} onClick={closeMobileMenu}>
-              IoT Devices
-            </Link>
-            <Link to="/chatbot" className={`px-4 py-3 hover:bg-green-700/20 rounded-lg ${isActive('/chatbot')}`} onClick={closeMobileMenu}>
-              Disease Management
-            </Link>
-          </div>
-          <div className="flex flex-col space-y-3 border-t border-green-600 border-opacity-20 pt-4">
-            <button onClick={handleLogout} className="flex items-center justify-center gap-3 hover:bg-green-700/20 px-4 py-3 rounded-lg text-lg">
-              <FontAwesomeIcon icon={faSignOutAlt} />
-              <span>Logout</span>
-            </button>
-          </div>
-        </div>
+        <>
+          <Link 
+            to="/dashboard" 
+            className={`px-5 py-3.5 rounded-lg font-semibold text-base ${isActive('/dashboard')}`} 
+            onClick={closeMobileMenu}
+          >
+            Dashboard
+          </Link>
+          <Link 
+            to="/planning" 
+            className={`px-5 py-3.5 rounded-lg font-semibold text-base ${isActive('/planning')}`} 
+            onClick={closeMobileMenu}
+          >
+            Planning
+          </Link>
+          <Link 
+            to="/device-management" 
+            className={`px-5 py-3.5 rounded-lg font-semibold text-base ${isActive('/device-management')}`} 
+            onClick={closeMobileMenu}
+          >
+            Devices
+          </Link>
+          <Link 
+            to="/chatbot" 
+            className={`px-5 py-3.5 rounded-lg font-semibold text-base ${isActive('/chatbot')}`} 
+            onClick={closeMobileMenu}
+          >
+            Diseases
+          </Link>
+          <button 
+            onClick={handleLogout} 
+            className="px-5 py-3.5 text-red-600 hover:bg-red-50 rounded-lg font-semibold text-base flex items-center gap-2"
+          >
+            <FontAwesomeIcon icon={faSignOutAlt} />
+            Logout
+          </button>
+        </>
       )
     } else {
       return (
-        <div className="flex flex-col space-y-4">
+        <>
           {(location.pathname === "/register" || location.pathname === "/") && (
-            <Link to="/login" className="border-2 border-green-600 text-green-600 hover:bg-green-600 hover:text-white px-4 py-3 rounded-lg text-center font-bold transition-colors duration-300" onClick={closeMobileMenu}>
+            <Link 
+              to="/login" 
+              className="px-5 py-3.5 border-2 border-green-600 text-green-600 hover:bg-green-50 rounded-lg font-semibold text-base text-center" 
+              onClick={closeMobileMenu}
+            >
               Login
             </Link>
           )}
           {(location.pathname === "/login" || location.pathname === "/") && (
-            <Link to="/register" className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-3 rounded-lg text-center font-bold transition-colors duration-300" onClick={closeMobileMenu}>
+            <Link 
+              to="/register" 
+              className="px-5 py-3.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold text-base text-center" 
+              onClick={closeMobileMenu}
+            >
               Sign Up
             </Link>
           )}
-        </div>
+        </>
       )
     }
   }
 
   return (
-    <header className={`fixed top-0 left-0 w-full z-50 py-2 transition-all text-green-600 duration-500 ease-out ${
-      isScrolled || isMobileMenuOpen  || isOnAuthPage() || location.pathname == "/"
-        ? 'bg-white/95 backdrop-blur-xl shadow-lg border-b border-gray-200' 
-        : 'bg-transparent'
-    } ${isScrolled ? 'animate-fade-in-down' : ''}`}>
+    <header className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
+      isScrolled || isMobileMenuOpen || isOnAuthPage() || location.pathname === "/device-management" || location.pathname === "/" || location.pathname === "/planning" || location.pathname === "/chatbot" ||  location.pathname === "/dashboard"
+        ? 'bg-white shadow-md border-b border-gray-200' 
+        : 'bg-gary-100 backdrop-blur-sm'
+    }`}>
       
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
-        <div className="flex justify-between items-center">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="flex justify-between items-center h-20">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 font-bold text-white z-10">
-            <i className="fas fa-leaf text-yellow-400 text-3xl sm:text-4xl md:text-5xl"></i>
-            <span className='text-xl sm:text-2xl md:text-3xl text-green-600 hidden xs:inline'>AgriSmart</span>
+          <Link to="/" className="flex items-center gap-2">
+            <i className="fas fa-leaf text-green-600 text-5xl"></i>
+            <span className="text-4xl font-bold text-gray-900">AgriSmart</span>
           </Link>
           
-          {/* Desktop Navigation - Responsive positioning */}
-          <nav className="hidden lg:flex items-center mx-4 flex-1 justify-end">
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center">
             {getNavigationItems()}
           </nav>
 
-          {/* Right Side - Responsive buttons */}
-          <div className="hidden lg:flex items-center gap-3">
+          {/* Right Side Actions */}
+          <div className="hidden md:flex items-center gap-3">
             {currentUser ? (
-              <div className="flex items-center gap-4  ">
-                <UserMenu />
-              </div> 
-            ) : ( 
+              <>
+              <button 
+            onClick={handleLogout} 
+            className="px-5 py-3.5 text-red-600 hover:bg-red-50 rounded-lg font-semibold text-base flex items-center gap-2"
+          >
+            <FontAwesomeIcon icon={faSignOutAlt} />
+            Logout
+          </button>
+              
+              
+              <UserMenu />
+              </>
+            
+            ) : (
               <div className="flex gap-3">
-                {(location.pathname === "/register" || location.pathname === "/") && (  
+                {(location.pathname === "/register" || location.pathname === "/") && (
                   <Link 
                     to="/login" 
-                    className="border-2 border-green-600 text-green-600 hover:bg-green-600 hover:text-white px-4 md:px-5 py-2 rounded-lg font-bold text-sm md:text-base transition-colors duration-300"
+                    className="px-5 py-2.5 border-2 border-green-600 text-green-600 hover:bg-green-50 rounded-lg font-semibold text-base transition-colors"
                   >
                     Login
                   </Link>
@@ -227,7 +315,7 @@ const Header = () => {
                 {(location.pathname === "/login" || location.pathname === "/") && (
                   <Link 
                     to="/register" 
-                    className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 md:px-5 py-2 rounded-lg font-bold text-sm md:text-base transition-colors duration-300"
+                    className="px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold text-base transition-colors"
                   >
                     Sign Up
                   </Link>
@@ -238,29 +326,23 @@ const Header = () => {
 
           {/* Mobile Menu Button */}
           <button 
-            className="lg:hidden text-green-700 text-2xl p-2 mobile-menu-button"
+            className="md:hidden text-gray-700 text-2xl p-2 menu-btn"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Toggle menu"
-            aria-expanded={isMobileMenuOpen}
           >
             <FontAwesomeIcon icon={isMobileMenuOpen ? faTimes : faBars} />
           </button>
         </div>
-
-        {/* Tablet Navigation (hidden on mobile, shown on tablet, hidden on desktop) */}
-        <nav className="hidden md:flex lg:hidden justify-center mt-3 mb-2">
-          {getNavigationItems()}
-        </nav>
-
-        {/* Mobile Menu - Responsive overlay */}
-        {isMobileMenuOpen && (
-          <div className="lg:hidden mobile-menu-container animate-slide-down">
-            <div className="md:hidden mt-4 pb-4 border-t border-green-600 border-opacity-20 pt-4">
-              {getMobileNavigationItems()}
-            </div>
-          </div>
-        )}
       </div>
+
+      {/* Mobile Menu */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden mobile-menu bg-white border-t border-gray-200">
+          <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-3">
+            {getMobileNavigationItems()}
+          </div>
+        </div>
+      )}
     </header>
   )
 }

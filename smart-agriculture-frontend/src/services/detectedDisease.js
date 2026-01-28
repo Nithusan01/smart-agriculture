@@ -2,8 +2,16 @@ import {api} from './api';
 
 export const addDetectedDisease = async (diseaseData) => {
 
+    try {
         const res = await api.post('detectedDisease/', diseaseData)
         return res;
+        
+        
+    } catch (error) {
+        throw error 
+        
+    }
+        
         
 }
 export const getDetectionByCultivationPlan = async(id)=> {

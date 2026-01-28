@@ -1,5 +1,6 @@
-const { DetectedDisease, Disease, CultivationPlan } = require('../models/index');
+const { DetectedDisease, Disease, CultivationPlan} = require('../models/index');
 const { get } = require('../routes/device');
+const {Op} = require("sequelize")
 
 // =================== ADD DETECTED DISEASE ===================
 const addDetectedDisease = async (req, res) => {
@@ -9,8 +10,8 @@ const addDetectedDisease = async (req, res) => {
     if (!cultivationPlanId) {
       return res.status(400).json({ message: "cultivationPlanId is required" });
     }
-    const exsistingDisease = await DetectedDisease.findAll({
-      where:{cultivationPlanId:cultivationPlanId,diseaseId:diseaseId}
+    const exsistingDisease = await DetectedDisease.findOne({
+      where:{cultivationPlanId,diseaseId}
     })
     if(exsistingDisease){
       return res.status(400).json({
@@ -35,7 +36,12 @@ const addDetectedDisease = async (req, res) => {
     });
   } catch (error) {
     console.error("Error adding detected disease:", error);
-    return res.status(500).json({ message: "Server error", error: message });
+   return res.status(500).json({
+  success: false,
+  message: "Server error",
+  error: error.message
+});
+
   }
 };
 

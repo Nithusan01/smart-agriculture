@@ -1,5 +1,5 @@
 const express = require('express')
-const { createCultivationPlan,getPlans,updatePlan,deletePlan,getPlanById, getPlanByDeviceId } = require('../controllers/cultivationPlanController');
+const { createCultivationPlan,getPlans,updatePlan,deletePlan,getPlanById, getPlanByDeviceId,removeDeviceFromPlan } = require('../controllers/cultivationPlanController');
 const { protect } = require('../middlewares/auth');
 const { body } = require("express-validator");
 
@@ -12,5 +12,6 @@ router.put('/:id',protect,updatePlan)
 router.delete('/:id',protect,deletePlan)
 router.get('/:id',protect,getPlanById);
 router.get('/device/:deviceId',protect,getPlanByDeviceId)
+router.patch('/device/:id',protect,removeDeviceFromPlan)
 
 module.exports = router;

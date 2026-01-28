@@ -47,3 +47,13 @@ export const removePlan = async(id) => {
     }
     
 }
+export const removeDevice =async (id) =>{
+    try {
+        const res = await api.patch(`cultivationPlan/device/${id}`)
+        return res;
+        
+    } catch (error) {
+        
+        throw error;
+    }
+}

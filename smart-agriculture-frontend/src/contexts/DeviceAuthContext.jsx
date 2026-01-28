@@ -271,6 +271,7 @@ export const DeviceAuthProvider = ({ children }) => {
           if (!selectedDevice) return null;
           return devices.find(d => d.deviceId === selectedDevice) || null;
         };
+        
       
     
 

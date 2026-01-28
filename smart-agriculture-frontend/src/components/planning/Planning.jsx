@@ -44,15 +44,15 @@ import {
   faClock,
   faInfoCircle
 } from "@fortawesome/free-solid-svg-icons";
+import { removeDevice } from "../../services/planApi";
 
 const Planning = () => {
-  const { plans, loading, addPlan, editPlan, deletePlan, status, setStatus } = useCultivationPlan();
+  const { plans, loading, addPlan, editPlan, deletePlan, status, setStatus,error,setError } = useCultivationPlan();
   const { crops, loading: cropsLoading, error: cropsError } = useCrops();
   const { devices,loading:devicesLoading } = useDeviceAuth();
   const { fetchWeatherForPlan } = useWeather();
   const [activeTab, setActiveTab] = useState("crop-plan");
   const [location, setLocation] = useState({ lat: null, lng: null });
-  const [error, setError] = useState("");
   const [showPlanForm, setShowPlanForm] = useState(false);
   const [formData, setFormData] = useState({
     sectorName: "",
@@ -78,6 +78,11 @@ const Planning = () => {
 
   // Get selected crop details
   const selectedCrop = crops.find(crop => crop.id === formData.cropId);
+
+const availableDevices = devices.filter(
+  device => !plans.some(plan => plan.deviceId === device.id)
+);
+
 
   // Update cropName and calculate harvest date when cropId changes
   useEffect(() => {
@@ -297,6 +302,7 @@ const Planning = () => {
       }
     }
   };
+ 
 
   // Helper function to get emoji for crop type
   const getCropEmoji = (cropType) => {
@@ -328,13 +334,23 @@ const Planning = () => {
 
     return diffDays;
   };
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500 mx-auto mb-3"></div>
+          <h3 className="text-base font-semibold text-gray-700">Loading Plans</h3>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 py-8">
+    <div className="min-h-screen bg-gray-100 py-8">
       <section id="planning" className="container mx-auto px-4 max-w-7xl">
         {/* Header Section */}
         <div className="text-start mt-12 pt-4">
-          <h2 className="text-5xl font-bold text-green-600 mb-2">
+          <h2 className="text-3xl font-bold text-black mb-2 pt-3">
             Cultivation Planning
           </h2>
           <p className="text-start text-gray-600 mb-8">
@@ -448,479 +464,344 @@ const Planning = () => {
 )}
 
  {showPlanForm && (
-                <form onSubmit={handleSubmit} className="space-y-8">
-                  <div className="space-y-8">
-                    {/* Basic Information Section */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                      {/* Sector Name */}
-                      <div className="group relative bg-white/80 backdrop-blur-lg rounded-2xl border border-white/50 p-6 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-1">
-                        <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-blue-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                        <label className="relative block text-lg font-bold text-gray-800 mb-4 flex items-center gap-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-xl flex items-center justify-center shadow-lg">
-                            <FontAwesomeIcon icon={faMapMarkerAlt} className="text-white text-lg" />
-                          </div>
-                          <div>
-                            Sector Name
-                            <span className="block text-sm font-normal text-gray-500 mt-1">Unique identifier for this sector</span>
-                          </div>
-                        </label>
-                        <input
-                          type="text"
-                          name="sectorName"
-                          value={formData.sectorName.toUpperCase()}
-                          onChange={handleInputChange}
-                          placeholder="e.g., NORTH-FIELD-A"
-                          className="relative w-full p-4 bg-white/50 border-2 border-cyan-100 rounded-xl focus:outline-none focus:border-cyan-500 focus:ring-4 focus:ring-cyan-100/50 transition-all duration-300 text-lg font-semibold text-gray-800 placeholder-gray-400"
-                          required
-                        />
-                      </div>
+                // Compact Cultivation Plan Form
+<form onSubmit={handleSubmit} className="space-y-6">
+  <div className="space-y-6">
+    {/* Basic Information Section */}
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      {/* Sector Name */}
+      <div className="bg-white rounded-xl border border-gray-200 p-4 hover:border-cyan-300 transition-all">
+        <label className="block text-sm font-bold text-gray-800 mb-2 flex items-center gap-2">
+          <div className="w-8 h-8 bg-cyan-500 rounded-lg flex items-center justify-center">
+            <FontAwesomeIcon icon={faMapMarkerAlt} className="text-white text-sm" />
+          </div>
+          <span>Sector Name</span>
+        </label>
+        <input
+          type="text"
+          name="sectorName"
+          value={formData.sectorName.toUpperCase()}
+          onChange={handleInputChange}
+          placeholder="e.g., NORTH-FIELD-A"
+          className="w-full p-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 transition-all text-sm font-semibold"
+          required
+        />
+      </div>
 
-                      {/* Crop Selection - FIXED */}
-                      <div className="group relative bg-white/80 backdrop-blur-lg rounded-2xl border border-white/50 p-6 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-1">
-                        <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-emerald-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                        <label className="relative block text-lg font-bold text-gray-800 mb-4 flex items-center gap-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center shadow-lg">
-                            <FontAwesomeIcon icon={faSeedling} className="text-white text-lg" />
-                          </div>
-                          <div>
-                            Crop Selection
-                            <span className="block text-sm font-normal text-gray-500 mt-1">Choose from available crops</span>
-                          </div>
-                        </label>
+      {/* Crop Selection */}
+      <div className="bg-white rounded-xl border border-gray-200 p-4 hover:border-green-300 transition-all">
+        <label className="block text-sm font-bold text-gray-800 mb-2 flex items-center gap-2">
+          <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+            <FontAwesomeIcon icon={faSeedling} className="text-white text-sm" />
+          </div>
+          <span>Crop Selection</span>
+        </label>
 
-                        {cropsLoading ? (
-                          <div className="relative w-full p-4 bg-white/50 border-2 border-green-100 rounded-xl flex items-center justify-center">
-                            <div className="flex items-center gap-3 text-green-600">
-                              <FontAwesomeIcon icon={faSpinner} className="animate-spin" />
-                              <span className="text-sm font-medium">Loading crops...</span>
-                            </div>
-                          </div>
-                        ) : (
-                          <select
-                            name="cropId"
-                            value={formData.cropId}
-                            onChange={handleInputChange}
-                            className="relative w-full p-4 bg-white/50 border-2 border-green-100 rounded-xl focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-100/50 transition-all duration-300 text-lg text-gray-800 appearance-none cursor-pointer"
-                            required
-                            disabled={crops.length === 0}
-                          >
-                            <option value="">{crops.length === 0 ? 'No crops available' : `${crops.length} crops available Select a crop...`}</option>
-                            {crops.map((crop) => (
-                              <option key={crop.id} value={crop.id} className="text-gray-700">
-                                {getCropEmoji(crop.cropType)} {crop.cropName} - {crop.cropType}
-                                {crop.durationDays && ` (${crop.durationDays} days)`}
-                                {crop.waterRequirement && ` - 💧${crop.waterRequirement}`}
-                              </option>
-                            ))}
-                          </select>
-                        )}
+        {cropsLoading ? (
+          <div className="w-full p-3 bg-gray-50 border border-gray-300 rounded-lg flex items-center justify-center">
+            <div className="flex items-center gap-2 text-green-600">
+              <FontAwesomeIcon icon={faSpinner} className="animate-spin text-sm" />
+              <span className="text-xs font-medium">Loading crops...</span>
+            </div>
+          </div>
+        ) : (
+          <>
+            <select
+              name="cropId"
+              value={formData.cropId}
+              onChange={handleInputChange}
+              className="w-full p-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all text-sm cursor-pointer"
+              required
+              disabled={crops.length === 0}
+            >
+              <option value="">
+                {crops.length === 0 ? 'No crops available' : `Select crop (${crops.length} available)`}
+              </option>
+              {crops.map((crop) => (
+                <option key={crop.id} value={crop.id}>
+                  {getCropEmoji(crop.cropType)} {crop.cropName} - {crop.cropType}
+                  {crop.durationDays && ` (${crop.durationDays} days)`}
+                </option>
+              ))}
+            </select>
 
-                        {/* Selected crop info */}
-                        {formData.cropId && selectedCrop && (
-                          <div className="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
-                            <div className="text-sm text-green-800">
-                              <strong>Selected:</strong> {selectedCrop.cropName}
-                              {selectedCrop.durationDays && ` • ${selectedCrop.durationDays} days`}
-                              {selectedCrop.waterRequirement && ` • Water: ${selectedCrop.waterRequirement}`}
-                            </div>
-                          </div>
-                        )}
+            {formData.cropId && selectedCrop && (
+              <div className="mt-2 p-2 bg-green-50 rounded-lg border border-green-200">
+                <p className="text-xs text-green-800">
+                  <strong>{selectedCrop.cropName}</strong>
+                  {selectedCrop.durationDays && ` • ${selectedCrop.durationDays} days`}
+                  {selectedCrop.waterRequirement && ` • ${selectedCrop.waterRequirement}`}
+                </p>
+              </div>
+            )}
 
-                        {/* Crop count info */}
-                        {!cropsLoading && crops.length > 0 && (
-                          <div className="mt-3 text-xs text-green-600 font-medium">
-                            {crops.length} available crops in database
-                          </div>
-                        )}
+            {crops.length === 0 && (
+              <p className="mt-2 text-xs text-amber-600">No crops available. Add crops first.</p>
+            )}
+          </>
+        )}
+      </div>
 
-                        {!cropsLoading && crops.length === 0 && (
-                          <div className="mt-3 text-xs text-amber-600 font-medium">
-                            No crops available. Please add crops first in the admin panel.
-                          </div>
-                        )}
-                      </div>
+      {/* Area Input */}
+      <div className="bg-white rounded-xl border border-gray-200 p-4 hover:border-blue-300 transition-all">
+        <label className="block text-sm font-bold text-gray-800 mb-2 flex items-center gap-2">
+          <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+            <FontAwesomeIcon icon={faRulerCombined} className="text-white text-sm" />
+          </div>
+          <span>Land Area</span>
+        </label>
+        <div className="relative">
+          <input
+            type="number"
+            name="area"
+            value={formData.area}
+            onChange={handleInputChange}
+            placeholder="0.00"
+            className="w-full p-3 pr-20 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-sm"
+            min="0"
+            step="0.1"
+          />
+          <span className="absolute right-3 top-1/2 transform -translate-y-1/2 bg-blue-500 text-white px-2 py-1 rounded text-xs font-bold">
+            hectares
+          </span>
+        </div>
+      </div>
 
-                      {/* Area Input */}
-                      <div className="group relative bg-white/80 backdrop-blur-lg rounded-2xl border border-white/50 p-6 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-1">
-                        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-indigo-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                        <label className="relative block text-lg font-bold text-gray-800 mb-4 flex items-center gap-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center shadow-lg">
-                            <FontAwesomeIcon icon={faRulerCombined} className="text-white text-lg" />
-                          </div>
-                          <div>
-                            Land Area
-                            <span className="block text-sm font-normal text-gray-500 mt-1">Total cultivation area</span>
-                          </div>
-                        </label>
-                        <div className="relative">
-                          <input
-                            type="number"
-                            name="area"
-                            value={formData.area}
-                            onChange={handleInputChange}
-                            placeholder="0.00"
-                            className="relative w-full p-4 pr-20 bg-white/50 border-2 border-blue-100 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100/50 transition-all duration-300 text-lg text-gray-800"
-                            min="0"
-                            step="0.1"
-                          />
-                          <span className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-3 py-2 rounded-lg font-bold text-sm shadow-lg">
-                            hectares
-                          </span>
-                        </div>
-                      </div>
+      {/* Soil Type */}
+      <div className="bg-white rounded-xl border border-gray-200 p-4 hover:border-amber-300 transition-all">
+        <label className="block text-sm font-bold text-gray-800 mb-2 flex items-center gap-2">
+          <div className="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center">
+            <FontAwesomeIcon icon={faMountain} className="text-white text-sm" />
+          </div>
+          <span>Soil Type</span>
+        </label>
+        <select
+          name="farmSoilType"
+          value={formData.farmSoilType}
+          onChange={handleInputChange}
+          className="w-full p-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200 transition-all text-sm cursor-pointer"
+        >
+          <option value="">Select soil type...</option>
+          <option value="Loamy">🌱 Loamy - Balanced soil</option>
+          <option value="Sandy">🏖️ Sandy - Good drainage</option>
+          <option value="Clay">🧱 Clay - Rich in nutrients</option>
+          <option value="Silt">💧 Silt - Fine particles</option>
+          <option value="Peaty">🌿 Peaty - Organic matter</option>
+          <option value="Chalky">⚪ Chalky - Alkaline</option>
+        </select>
 
-                      {/* Soil Type */}
-                      <div className="group relative bg-white/80 backdrop-blur-lg rounded-2xl border border-white/50 p-6 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-1">
-                        <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-orange-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                        <label className="relative block text-lg font-bold text-gray-800 mb-4 flex items-center gap-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl flex items-center justify-center shadow-lg">
-                            <FontAwesomeIcon icon={faMountain} className="text-white text-lg" />
-                          </div>
-                          <div>
-                            Soil Type
-                            <span className="block text-sm font-normal text-gray-500 mt-1">Primary soil composition</span>
-                          </div>
-                        </label>
-                        <select                                        
-                          name="farmSoilType"
-                          value={formData.farmSoilType}
-                          onChange={handleInputChange}
-                          className="relative w-full p-4 bg-white/50 border-2 border-amber-100 rounded-xl focus:outline-none focus:border-amber-500 focus:ring-4 focus:ring-amber-100/50 transition-all duration-300 text-lg text-gray-800 appearance-none cursor-pointer"
-                        >
-                          <option value="" className="text-gray-400">Select soil type...</option>
-                          <option value="Loamy" className="text-gray-700">
-                            <FontAwesomeIcon icon={faLayerGroup} className="mr-2 w-4 h-4" />
-                            Loamy - Balanced soil
-                          </option>
-                          <option value="Sandy" className="text-gray-700">
-                            <FontAwesomeIcon icon={faTintSlash} className="mr-2 w-4 h-4" />
-                            Sandy - Good drainage
-                          </option>
-                          <option value="Clay" className="text-gray-700">
-                            <FontAwesomeIcon icon={faCube} className="mr-2 w-4 h-4" />
-                            Clay - Rich in nutrients
-                          </option>
-                          <option value="Silt" className="text-gray-700">
-                            <FontAwesomeIcon icon={faWater} className="mr-2 w-4 h-4" />
-                            Silt - Fine particles
-                          </option>
-                          <option value="Peaty" className="text-gray-700">
-                            <FontAwesomeIcon icon={faWater} className="mr-2 w-4 h-4" />
-                            Peaty - Fine particles
-                          </option>
-                          <option value="Chalky" className="text-gray-700">
-                            <FontAwesomeIcon icon={faWater} className="mr-2 w-4 h-4" />
-                            Chalky - Fine particles
-                          </option>
-              
-                        </select>
-                     {selectedCrop &&  formData.farmSoilType !== selectedCrop?.recommendedSoil && (
-                          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-                              <div className="flex items-center gap-2 text-amber-800 text-sm">
-                                <FontAwesomeIcon icon={faCheckCircle} className="text-amber-600" />
-                                <span>
-                                  <strong>Recommened Soil : </strong>
-                                  <span>
-                                    {`${selectedCrop?.recommendedSoil} soil recommended for   ${selectedCrop?.cropName}`}
-                                  </span>
-                                </span>
-                              </div>
-                            </div>
-                          )}
-                           
-                      </div>
-                    </div>
+        {selectedCrop && formData.farmSoilType !== selectedCrop?.recommendedSoil && formData.farmSoilType && (
+          <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded-lg">
+            <p className="text-xs text-amber-800">
+              <FontAwesomeIcon icon={faCheckCircle} className="mr-1" />
+              <strong>Recommended:</strong> {selectedCrop?.recommendedSoil} soil for {selectedCrop?.cropName}
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
 
-                    {/* Dates Section */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                      {/* Planting Date */}
-                      <div className="group relative bg-white/80 backdrop-blur-lg rounded-2xl border border-white/50 p-6 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-1">
-                        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-cyan-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                        <label className="relative block text-lg font-bold text-gray-800 mb-4 flex items-center gap-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg">
-                            <FontAwesomeIcon icon={faCalendarPlus} className="text-white text-lg" />
-                          </div>
-                          <div>
-                            Planting Date
-                            <span className="block text-sm font-normal text-gray-500 mt-1">When to start cultivation</span>
-                          </div>
-                        </label>
-                        <input
-                          type="date"
-                          name="plantingDate"
-                          value={formData.plantingDate}
-                          onChange={handleInputChange}
-                          className="relative w-full p-4 bg-white/50 border-2 border-blue-100 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100/50 transition-all duration-300 text-lg text-gray-800 cursor-pointer"
-                        />
-                      </div>
+    {/* Dates Section */}
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      {/* Planting Date */}
+      <div className="bg-white rounded-xl border border-gray-200 p-4 hover:border-blue-300 transition-all">
+        <label className="block text-sm font-bold text-gray-800 mb-2 flex items-center gap-2">
+          <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+            <FontAwesomeIcon icon={faCalendarPlus} className="text-white text-sm" />
+          </div>
+          <span>Planting Date</span>
+        </label>
+        <input
+          type="date"
+          name="plantingDate"
+          value={formData.plantingDate}
+          onChange={handleInputChange}
+          className="w-full p-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-sm cursor-pointer"
+        />
+      </div>
 
-                      
-                      <div className="group relative bg-white/80 backdrop-blur-lg rounded-2xl border border-white/50 p-6 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-1">
-                        <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-amber-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                        <label className="relative block text-lg font-bold text-gray-800 mb-4 flex items-center gap-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl flex items-center justify-center shadow-lg">
-                            <FontAwesomeIcon icon={faHourglassEnd} className="text-white text-lg" />
-                          </div>
-                          <div>
-                            Expected Harvest
-                            <span className="block text-sm font-normal text-gray-500 mt-1">
-                              {selectedCrop?.durationDays
-                                ? `Automatically calculated: ${selectedCrop.durationDays} days from planting`
-                                : 'Estimated completion date'
-                              }
-                            </span>
-                          </div>
-                        </label>
-                        <div className="space-y-3">
-                          <input
-                            type="date"
-                            name="expectedHarvestDate"
-                            value={formData.expectedHarvestDate}
-                            onChange={handleInputChange}
-                            className="relative w-full p-4 bg-white/50 border-2 border-orange-100 rounded-xl focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-100/50 transition-all duration-300 text-lg text-gray-800 cursor-pointer"
-                            readOnly={!!selectedCrop?.durationDays} // Make read-only if crop has duration
-                          />
+      {/* Expected Harvest Date */}
+      <div className="bg-white rounded-xl border border-gray-200 p-4 hover:border-orange-300 transition-all">
+        <label className="block text-sm font-bold text-gray-800 mb-2 flex items-center gap-2">
+          <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
+            <FontAwesomeIcon icon={faHourglassEnd} className="text-white text-sm" />
+          </div>
+          <span>Expected Harvest</span>
+        </label>
+        <div className="space-y-2">
+          <input
+            type="date"
+            name="expectedHarvestDate"
+            value={formData.expectedHarvestDate}
+            onChange={handleInputChange}
+            className="w-full p-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all text-sm cursor-pointer"
+            readOnly={!!selectedCrop?.durationDays}
+          />
 
-                          {formData.expectedHarvestDate && selectedCrop?.durationDays && (
-                            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-                              <div className="flex items-center gap-2 text-amber-800 text-sm">
-                                <FontAwesomeIcon icon={faCheckCircle} className="text-amber-600" />
-                                <span>
-                                  <strong>Auto-calculated:</strong> {selectedCrop.durationDays} days from planting date
-                                  {getDaysUntilHarvest() && (
-                                    <span className="ml-2">
-                                      • <strong>{getDaysUntilHarvest()} days</strong> from today
-                                    </span>
-                                  )}
-                                </span>
-                              </div>
-                            </div>
-                          )}
+          {formData.expectedHarvestDate && selectedCrop?.durationDays && (
+            <div className="p-2 bg-amber-50 border border-amber-200 rounded-lg">
+              <p className="text-xs text-amber-800">
+                <FontAwesomeIcon icon={faCheckCircle} className="mr-1" />
+                Auto-calculated: {selectedCrop.durationDays} days
+                {getDaysUntilHarvest() && ` • ${getDaysUntilHarvest()} days from today`}
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
 
-                          {!selectedCrop?.durationDays && formData.expectedHarvestDate && (
-                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                              <div className="flex items-center gap-2 text-blue-800 text-sm">
-                                <FontAwesomeIcon icon={faInfoCircle} className="text-blue-600" />
-                                <span>Manual harvest date selected</span>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
+    {/* Status Selection - Only in Edit Mode */}
+    {isEditing && (
+      <div className="bg-white rounded-xl border border-gray-200 p-4 hover:border-purple-300 transition-all">
+        <label className="block text-sm font-bold text-gray-800 mb-2 flex items-center gap-2">
+          <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
+            <FontAwesomeIcon icon={faChartLine} className="text-white text-sm" />
+          </div>
+          <span>Plan Status</span>
+        </label>
+        <select
+          name="status"
+          value={formData.status}
+          onChange={handleInputChange}
+          className="w-full p-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all text-sm cursor-pointer"
+        >
+          <option value="planned">📋 Planned - Ready to start</option>
+          <option value="planted">🌱 Planted - Growth phase</option>
+          <option value="harvested">✅ Harvested - Completed</option>
+          <option value="cancelled">❌ Cancelled - Discontinued</option>
+        </select>
+      </div>
+    )}
 
-                    </div>
+    {/* Location Picker */}
+    <div className="bg-white rounded-xl border border-gray-200 p-4 hover:border-purple-300 transition-all">
+      <label className="block text-sm font-bold text-gray-800 mb-2 flex items-center gap-2">
+        <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
+          <FontAwesomeIcon icon={faLocationDot} className="text-white text-sm" />
+        </div>
+        <span>Farm Location</span>
+      </label>
+      <div className="space-y-3">
+        <div className="w-full h-[300px] rounded-lg overflow-hidden border border-gray-300">
+          <LocationPicker location={location} setLocation={setLocation} />
+        </div>
+        {location.lat && location.lng && (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+            <div className="flex items-center gap-2 mb-1">
+              <FontAwesomeIcon icon={faCheck} className="text-green-600 text-sm" />
+              <span className="text-sm text-green-800 font-bold">Location Selected</span>
+            </div>
+            {isLoadingAddress ? (
+              <div className="flex items-center gap-2 text-green-600">
+                <div className="w-4 h-4 border-2 border-green-500 border-t-transparent rounded-full animate-spin"></div>
+                <span className="text-xs">Loading address...</span>
+              </div>
+            ) : (
+              <p className="text-xs text-green-700">{locationAddress}</p>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
 
-                    {/* Status Selection - Only in Edit Mode */}
-                    {isEditing && (
-                      <div className="group relative bg-white/80 backdrop-blur-lg rounded-2xl border border-white/50 p-6 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-1">
-                        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                        <label className="relative block text-lg font-bold text-gray-800 mb-4 flex items-center gap-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
-                            <FontAwesomeIcon icon={faChartLine} className="text-white text-lg" />
-                          </div>
-                          <div>
-                            Plan Status
-                            <span className="block text-sm font-normal text-gray-500 mt-1">Current progress stage</span>
-                          </div>
-                        </label>
-                        <select
-                          name="status"
-                          value={formData.status}
-                          onChange={handleInputChange}
-                          className="relative w-full p-4 bg-white/50 border-2 border-purple-100 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-100/50 transition-all duration-300 text-lg text-gray-800 appearance-none cursor-pointer"
-                        >
-                          <option value="planned" className="text-gray-700">
-                            <FontAwesomeIcon icon={faClipboardList} className="mr-2 w-4 h-4" />
-                            Planned - Ready to start
-                          </option>
-                          <option value="planted" className="text-gray-700">
-                            <FontAwesomeIcon icon={faSeedling} className="mr-2 w-4 h-4" />
-                            Planted - Growth phase
-                          </option>
-                          <option value="harvested" className="text-gray-700">
-                            <FontAwesomeIcon icon={faCheckCircle} className="mr-2 w-4 h-4" />
-                            Harvested - Completed
-                          </option>
-                          <option value="cancelled" className="text-gray-700">
-                            <FontAwesomeIcon icon={faTimesCircle} className="mr-2 w-4 h-4" />
-                            Cancelled - Discontinued
-                          </option>
-                        </select>
-                      </div>
-                    )}
+    {/* Device Selection */}
+    <div className="bg-white rounded-xl border border-gray-200 p-4 hover:border-green-300 transition-all">
+      <label className="block text-sm font-bold text-gray-800 mb-2 flex items-center gap-2">
+        <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+          <FontAwesomeIcon icon={faSeedling} className="text-white text-sm" />
+        </div>
+        <span>Device Selection</span>
+      </label>
 
-                    
+      {devicesLoading ? (
+        <div className="w-full p-3 bg-gray-50 border border-gray-300 rounded-lg flex items-center justify-center">
+          <div className="flex items-center gap-2 text-green-600">
+            <FontAwesomeIcon icon={faSpinner} className="animate-spin text-sm" />
+            <span className="text-xs font-medium">Loading devices...</span>
+          </div>
+        </div>
+      ) : (
+        <>
+          <select
+            name="deviceId"
+            value={formData.deviceId}
+            onChange={handleInputChange}
+            className="w-full p-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all text-sm cursor-pointer"
+            disabled={availableDevices.length === 0}
+          >
+            <option value="">
+              {availableDevices.length === 0 ? 'No devices available' : `Select device (${availableDevices.length} available)`}
+            </option>
+            {availableDevices.map((device) => (
+              <option key={device.id} value={device.id}>
+                {device.deviceName} - {device.deviceId}
+              </option>
+            ))}
+          </select>
 
+          {availableDevices.length === 0 && (
+            <p className="mt-2 text-xs text-amber-600">No devices available. Add device first.</p>
+          )}
+        </>
+      )}
+    </div>
 
-                    {/* Location Picker - Full width at the end */}
-                    <div className="group relative bg-white/80 backdrop-blur-lg rounded-2xl border border-white/50 p-6 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-1">
-                      <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-indigo-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                      <label className="relative block text-lg font-bold text-gray-800 mb-4 flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-xl flex items-center justify-center shadow-lg">
-                          <FontAwesomeIcon icon={faLocationDot} className="text-white text-lg" />
-                        </div>
-                        <div>
-                          Farm Location
-                          <span className="block text-sm font-normal text-gray-500 mt-1">Click on the map to select your farm location</span>
-                        </div>
-                      </label>
-                      <div className="space-y-4">
-                        {/* Full width map container */}
-                        <div className="w-full h-[400px] lg:h-[300px] rounded-xl overflow-hidden border-2 border-gray-200 shadow-lg">
-                          <LocationPicker location={location} setLocation={setLocation} />
-                        </div>
-                        {location.lat && location.lng && (
-                          <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4 backdrop-blur-sm">
-                            <div className="flex items-center gap-3 mb-3">
-                              <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center shadow-md">
-                                <FontAwesomeIcon icon={faCheck} className="text-white text-sm" />
-                              </div>
-                              <span className="text-green-800 font-bold">Location Selected</span>
-                            </div>
-                            {isLoadingAddress ? (
-                              <div className="flex items-center gap-3 text-green-600">
-                                <div className="w-5 h-5 border-2 border-green-500 border-t-transparent rounded-full animate-spin"></div>
-                                <span className="text-sm font-medium">Loading address details...</span>
-                              </div>
-                            ) : (
-                              <p className="text-sm text-green-700 leading-relaxed font-medium">{locationAddress}</p>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    
+    {/* Plan Summary - Compact Grid */}
+    <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-green-200 p-4">
+      <h3 className="text-base font-bold text-gray-800 mb-3 flex items-center gap-2">
+        <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+          <FontAwesomeIcon icon={faClipboardCheck} className="text-white text-sm" />
+        </div>
+        <span>Plan Summary</span>
+      </h3>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {[
+          { label: "Crop", value: formData.cropName || 'Not set', icon: faSeedling },
+          { label: "Area", value: formData.area ? `${formData.area} ha` : '0 ha', icon: faRulerCombined },
+          { label: "Status", value: formData.status ? formData.status.charAt(0).toUpperCase() + formData.status.slice(1) : 'Planned', icon: faChartLine },
+          { label: "Soil", value: formData.farmSoilType || 'Not set', icon: faMountain },
+          { label: "Sector", value: formData.sectorName || 'Not set', icon: faMapMarkerAlt },
+          { label: "Planting", value: formData.plantingDate || 'Not set', icon: faCalendarAlt },
+          { label: "Duration", value: selectedCrop ? `${selectedCrop.durationDays} days` : 'Manual', icon: faClock },
+          { label: "Harvest", value: formData.expectedHarvestDate || 'Not set', icon: faClock },
+        ].map((item, index) => (
+          <div key={index} className="bg-white rounded-lg p-3 border border-gray-200">
+            <div className="text-center">
+              <FontAwesomeIcon icon={item.icon} className="text-green-600 text-lg mb-1" />
+              <p className="text-xs font-semibold text-gray-500 mb-1">{item.label}</p>
+              <p className="text-xs font-bold text-gray-800 truncate" title={item.value}>
+                {item.value}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
 
-                    {/* device Selection - FIXED */}
-                      <div className="group relative bg-white/80 backdrop-blur-lg rounded-2xl border border-white/50 p-6 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-1">
-                        <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-emerald-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                        <label className="relative block text-lg font-bold text-gray-800 mb-4 flex items-center gap-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center shadow-lg">
-                            <FontAwesomeIcon icon={faSeedling} className="text-white text-lg" />
-                          </div>
-                          <div>
-                            Device Selection
-                            <span className="block text-sm font-normal text-gray-500 mt-1">Choose from available devices</span>
-                          </div>
-                        </label>
-
-                        {devicesLoading ? (
-                          <div className="relative w-full p-4 bg-white/50 border-2 border-green-100 rounded-xl flex items-center justify-center">
-                            <div className="flex items-center gap-3 text-green-600">
-                              <FontAwesomeIcon icon={faSpinner} className="animate-spin" />
-                              <span className="text-sm font-medium">Loading devicess...</span>
-                            </div>
-                          </div>
-                        ) : (
-                          <select
-                            name="deviceId"
-                            value={formData.deviceId}
-                            onChange={handleInputChange}
-                            className="relative w-full p-4 bg-white/50 border-2 border-green-100 rounded-xl focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-100/50 transition-all duration-300 text-lg text-gray-800 appearance-none cursor-pointer"
-
-                            disabled={devices.length === 0}
-                          >
-                            <option value='' >{devices.length === 0 ? 'No devices available' : `${devices.length} devices available Select a device...`}</option>
-                            {devices.map((device) => (
-                              <option key={device.id} value={device.id} className="text-gray-700">
-                                {device.deviceName && ` (${device.deviceName} )`}
-                                {device.deviceId && ` -  ${device.deviceId}`}
-                              </option>
-                            ))}
-                          </select>
-                        )}
-
-
-                        {/* Crop count info */}
-                        {!devicesLoading && devices.length > 0 && (
-                          <div className="mt-3 text-xs text-green-600 font-medium">
-                            {devices.length} available devices in database
-                          </div>
-                        )}
-
-                        {!devicesLoading && devices.length === 0 && (
-                          <div className="mt-3 text-xs text-amber-600 font-medium">
-                            No devices available. Please add device first.
-                          </div>
-                        )}
-                      </div>
-
-                    
-                    
-
-                    {/* Plan Summary */}
-                    <div className="group relative bg-gradient-to-br from-green-50/80 to-emerald-50/80 backdrop-blur-lg rounded-2xl border border-green-200 p-8 shadow-2xl hover:shadow-3xl transition-all duration-500">
-                      <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-emerald-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                      <h3 className="relative text-2xl font-black text-gray-800 mb-6 flex items-center gap-4">
-                        <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg">
-                          <FontAwesomeIcon icon={faClipboardCheck} className="text-white text-xl" />
-                        </div>
-                        <div>
-                          Plan Summary
-                          <span className="block text-sm font-normal text-gray-600 mt-1">Overview of your cultivation plan</span>
-                        </div>
-                      </h3>
-                      <div className="relative grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {[
-                          { label: "Crop Type", value: formData.cropName || 'Not set', color: "from-green-500 to-emerald-500", icon: faSeedling },
-                          { label: "Area", value: formData.area ? `${formData.area} ha` : '0 ha', color: "from-blue-500 to-cyan-500", icon: faRulerCombined },
-                          { label: "Status", value: formData.status ? formData.status.charAt(0).toUpperCase() + formData.status.slice(1) : 'Planned', color: "from-purple-500 to-pink-500", icon: faChartLine },
-                          { label: "Soil Type", value: formData.farmSoilType || 'Not set', color: "from-pink-500 to-red-500", icon: faMountain },
-                          { label: "Sector", value: formData.sectorName || 'Not set', color: "from-emerald-500 to-green-500", icon: faMapMarkerAlt },
-                          { label: "Planting", value: formData.plantingDate || 'Not set', color: "from-cyan-500 to-blue-500", icon: faCalendarAlt },
-                          { label: "Duration", value: selectedCrop ? `${selectedCrop.durationDays} days` : 'Manual', color: "from-purple-500 to-pink-500",icon: faClock},
-                          { label: "Harvested date", value: formData.expectedHarvestDate ? `${formData.expectedHarvestDate}` : 'Not set', color: "from-red-500 to-pink-500",icon: faClock},
-
-                        ].map((item, index) => (
-                          <div key={index} className="group/card bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-white/50 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                            <div className="text-center">
-                              <div className={`w-12 h-12 bg-gradient-to-br ${item.color} rounded-xl flex items-center justify-center mx-auto mb-3 shadow-md`}>
-                                <FontAwesomeIcon icon={item.icon} className="text-white text-lg" />
-                              </div>
-                              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{item.label}</p>
-                              <p className={`text-sm font-black bg-gradient-to-br ${item.color} bg-clip-text text-transparent`}>
-                                {item.value}
-                              </p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                  </div>
-
-                  {/* Submit Button */}
-                  <div className="flex justify-center pt-6">
-                    <button
-                      type="submit"
-                      disabled={isSubmitting || loading}
-                      className="group relative bg-gradient-to-r from-green-500 to-emerald-600 text-white px-20 py-6 rounded-2xl font-black text-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-500 transform hover:-translate-y-2 hover:shadow-3xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none min-w-[280px] overflow-hidden"
-                    >
-                      {/* Shimmer effect */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 transform translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
-
-                      {isSubmitting ? (
-                        <div className="relative flex items-center justify-center gap-4">
-                          <div className="w-7 h-7 border-3 border-white border-t-transparent rounded-full animate-spin"></div>
-                          <span className="font-bold text-lg">
-                            {isEditing ? 'Updating Plan...' : 'Creating Plan...'}
-                          </span>
-                        </div>
-                      ) : (
-                        <div className="relative flex items-center justify-center gap-4">
-                          <FontAwesomeIcon icon={isEditing ? faSave : faPlusCircle} className="text-2xl" />
-                          <span className="font-bold text-lg">
-                            {isEditing ? 'Update Plan' : 'Create Plan'}
-                          </span>
-                          <FontAwesomeIcon
-                            icon={faArrowRight}
-                            className="group-hover:translate-x-2 transition-transform duration-300 text-xl"
-                          />
-                        </div>
-                      )}
-                    </button>
-                  </div>
-                </form>
+  {/* Submit Button - Compact */}
+  <div className="flex justify-center pt-4">
+    <button
+      type="submit"
+      disabled={isSubmitting || loading}
+      className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-12 py-3 rounded-xl font-bold text-base hover:from-green-600 hover:to-emerald-700 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none min-w-[240px]"
+    >
+      {isSubmitting ? (
+        <div className="flex items-center justify-center gap-2">
+          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+          <span>{isEditing ? 'Updating...' : 'Creating...'}</span>
+        </div>
+      ) : (
+        <div className="flex items-center justify-center gap-2">
+          <FontAwesomeIcon icon={isEditing ? faSave : faPlusCircle} />
+          <span>{isEditing ? 'Update Plan' : 'Create Plan'}</span>
+          <FontAwesomeIcon icon={faArrowRight} />
+        </div>
+      )}
+    </button>
+  </div>
+</form>
 )}
 
                 {/* Existing Plans List */}

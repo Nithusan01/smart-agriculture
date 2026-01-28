@@ -1,7 +1,7 @@
 // src/contexts/CultivationPlanContext.js
 import { createContext, useState, useContext } from "react";
 import { useEffect } from "react";
-import { createPlan,getPlans,updatePlan,removePlan} from "../services/planApi";
+import { createPlan,getPlans,updatePlan,removePlan,removeDevice} from "../services/planApi";
 import { useAuth } from "./AuthContext";
 
 const CultivationPlanContext = createContext();
@@ -13,6 +13,7 @@ export const CultivationPlanProvider = ({ children }) => {
   const [changePlan,setChangePlan]= useState(false)
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
+  const [error,setError] = useState("")
   const {currentUser} = useAuth();
   
 
@@ -24,6 +25,7 @@ export const CultivationPlanProvider = ({ children }) => {
       setStatus("Plan added successfully!")
       return { success: true }
     } catch (error) {
+      setError("plan add failed server error")
        return {
         success: false,
         error: error.response?.data?.message || 'plan add failed server error'
@@ -66,7 +68,7 @@ export const CultivationPlanProvider = ({ children }) => {
         abortController.abort();
       };
 
- },[currentUser,plans.length,plans.status,plans.sectorName,changePlan]);
+ },[currentUser,plans.length,plans.status,plans.sectorName,changePlan,status]);
 
 
 // In your CultivationPlanContext.jsx
@@ -81,7 +83,7 @@ const editPlan = async (id, updates) => {
     return { success: true };
   } catch (error) {
     const errorMessage = error.response?.data?.message || 'Failed to update plan';
-    setStatus(errorMessage);
+    setError(errorMessage);
     return {
       success: false,
       error: errorMessage
@@ -99,7 +101,24 @@ const deletePlan = async(id) => {
   } catch (error) {
 
     const errorMessage = error.response?.data?.message || 'Failed to delete plan';
-    setStatus(errorMessage);
+    setError(errorMessage);
+    return {
+      success: false,
+      error: errorMessage
+    };
+    
+  }
+}
+const deleteDevice = async(id)=>{
+  try {
+    const res = await removeDevice(id);
+    setPlans((prev) =>prev.map((p) => (p.id === id ? res.data : p)));
+     setStatus("removed device from plan successfully!");
+     return{success:true}
+    
+  } catch (error) {
+     const errorMessage = error.response?.data?.message || 'Failed to removedevice from plan';
+    setError(errorMessage);
     return {
       success: false,
       error: errorMessage
@@ -119,10 +138,13 @@ const deletePlan = async(id) => {
         loading,
         setLoading,
         status,
+        error,
+        setError,
         setStatus,
         addPlan,
         editPlan,
        deletePlan,
+       deleteDevice
       }}
     >
       {children}
