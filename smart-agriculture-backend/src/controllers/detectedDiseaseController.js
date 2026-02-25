@@ -13,7 +13,7 @@ const addDetectedDisease = async (req, res) => {
     const exsistingDisease = await DetectedDisease.findOne({
       where:{cultivationPlanId,diseaseId}
     })
-    if(exsistingDisease){
+    if(exsistingDisease.status !== "resolved"){
       return res.status(400).json({
         success:false,
         message:"disease already detected"
@@ -51,7 +51,7 @@ const getAllDetectedDiseases = async (req, res) => {
     const detections = await DetectedDisease.findAll({
         where:{userId:req.user.id},
       include: [
-        { model: Disease, as: "disease", attributes: ["diseaseName", "severity"] },
+        { model: Disease, as: "disease", attributes: ["diseaseName", "severity", "imageUrl"] },
         { model: CultivationPlan, as: "plan", attributes: ["sectorName", "cropName"] },
       ],
       order: [["created_at", "DESC"]],
@@ -64,27 +64,27 @@ const getAllDetectedDiseases = async (req, res) => {
   }
 };
 
-// =================== UPDATE STATUS (e.g., resolved) ===================
-const updateDetectedStatus = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { status, notes } = req.body;
+// // =================== UPDATE STATUS (e.g., resolved) ===================
+// const updateDetectedStatus = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     const { status, notes } = req.body;
 
-    const detection = await DetectedDisease.findByPk(id);
-    if (!detection) {
-      return res.status(404).json({ message: "Detected disease not found" });
-    }
+//     const detection = await DetectedDisease.findByPk(id);
+//     if (!detection) {
+//       return res.status(404).json({ message: "Detected disease not found" });
+//     }
 
-    detection.status = status || detection.status;
-    detection.notes = notes || detection.notes;
-    await detection.save();
+//     detection.status = status || detection.status;
+//     detection.notes = notes || detection.notes;
+//     await detection.save();
 
-    return res.json({ message: "Detected disease updated successfully", detection });
-  } catch (error) {
-    console.error("Error updating detected disease:", error);
-    return res.status(500).json({ message: "Server error" });
-  }
-};
+//     return res.json({ message: "Detected disease updated successfully", detection });
+//   } catch (error) {
+//     console.error("Error updating detected disease:", error);
+//     return res.status(500).json({ message: "Server error" });
+//   }
+// };
 
 // =================== DELETE DETECTION ===================
 const deleteDetectedDisease = async (req, res) => {
@@ -116,7 +116,7 @@ const getDetectionsByCultivationPlan = async (req, res) => {
     const detections = await DetectedDisease.findAll({
       where: { cultivationPlanId, userId: req.user.id },
       include: [
-        { model: Disease, as: "disease", attributes: ["diseaseName", "severity","symptoms","treatment"] },
+        { model: Disease, as: "disease", attributes: ["diseaseName", "severity","symptoms","treatment","imageUrl"] },
         { model: CultivationPlan, as: "plan", attributes: ["sectorName", "cropName"] },
       ],
       order: [["created_at", "DESC"]],
@@ -128,11 +128,32 @@ const getDetectionsByCultivationPlan = async (req, res) => {
     return res.status(500).json({ success:false,message: "Server error" });
   }
 };
+const updateDetectedDiseaseStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const detection = await DetectedDisease.findByPk(id);
+    if (!detection) {
+      return res.status(404).json({ success: false, message: "Detected disease not found" });
+    }
+
+    detection.status = status;
+    detection.resolvedDate = detection?.status === "resolved" ? new Date(): null;
+    await detection.save();
+
+    return res.status(200).json({ success: true, data: detection });
+  } catch (error) {
+    console.error("Error updating detected disease status:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
 
 module.exports = {
   addDetectedDisease,
   getAllDetectedDiseases,
-  updateDetectedStatus,
   deleteDetectedDisease,
   getDetectionsByCultivationPlan,
+  updateDetectedDiseaseStatus
 }

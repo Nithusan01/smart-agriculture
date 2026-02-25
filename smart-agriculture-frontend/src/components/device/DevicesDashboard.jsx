@@ -25,6 +25,7 @@ const DevicesDashboard = () => {
   const { connected, latest } = useDeviceRealtime(selectedDevice);
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [formData, setFormData] = useState({ deviceId: '' });
+  const [isLoading, setIsLoading] = useState(true);
 
   const handleDeviceSelect = (deviceId) => {
     setFormData({...formData, deviceId});
@@ -37,9 +38,10 @@ const DevicesDashboard = () => {
       const device = devices.find(d => d.id === formData.deviceId);
       setSelectedDevice(device.deviceId);
     }
+    setTimeout(() => setIsLoading(false), 500);
   }, [devices]);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="text-center">

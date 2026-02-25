@@ -15,6 +15,7 @@ export const CultivationPlanProvider = ({ children }) => {
   const [status, setStatus] = useState("");
   const [error,setError] = useState("")
   const {currentUser} = useAuth();
+  const [isLoading,setIsLoading] = useState(true);
   
 
   // ✅ Create new plan
@@ -53,15 +54,21 @@ export const CultivationPlanProvider = ({ children }) => {
     } finally {
          if (!abortController.signal.aborted) {
         setLoading(false);
+        setTimeout(() => setIsLoading(false), 1000);
       }    } 
       };
+        
+
+      
 
      // Reset plans when no user or fetch when user exists
   if (!currentUser) {
     setPlans([]);
     setLoading(false);
   } else {
+    setTimeout(() => setIsLoading(false), 500);
     fetchPlans();
+
   }
 
       return () => {
@@ -144,7 +151,9 @@ const deleteDevice = async(id)=>{
         addPlan,
         editPlan,
        deletePlan,
-       deleteDevice
+       deleteDevice,
+       isLoading,
+       setIsLoading
       }}
     >
       {children}

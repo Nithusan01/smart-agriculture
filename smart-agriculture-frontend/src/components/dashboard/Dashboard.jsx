@@ -137,7 +137,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchUser();
-    setTimeout(() => setIsLoading(false), 1000);
+    setTimeout(() => setIsLoading(false), 500);
   }, []);
 
   const clearPlayedAlerts = () => {

@@ -11,6 +11,7 @@ const ChatHistoryModel = require('./chatHistory.js');
 const DeviceModel = require('./device.js');
 const SensorDataModel = require('./sensorData');
 const CropScheduleRuleModel = require("./CropScheduleRule");
+const SoilModel = require("./soil.js");
 
 // Determine environment
 const env = process.env.NODE_ENV || 'development';
@@ -40,6 +41,7 @@ const ChatHistory = ChatHistoryModel(sequelize,DataTypes);
 const Device = DeviceModel(sequelize,DataTypes);
 const SensorData = SensorDataModel(sequelize,DataTypes)
 const CropScheduleRule = CropScheduleRuleModel(sequelize,DataTypes);
+const Soil = SoilModel(sequelize,DataTypes)
 //
 // ✅ Define Associations
 //
@@ -154,12 +156,14 @@ CultivationPlan.hasOne(Device, {
   onDelete: 'SET NULL'
 });
 
+
 //
 // ✅ Export all models
 //
 const models = {
   User,
   Crop,
+  Soil,
   CultivationPlan,
   Disease,
   DetectedDisease,

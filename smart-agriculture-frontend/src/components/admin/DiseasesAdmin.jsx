@@ -441,7 +441,7 @@ const DiseasesAdmin = ({ refreshTrigger }) => {
                     value={newDisease.cropId}
                     onChange={handleInputChange}
                     className="w-full p-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-100 transition-all duration-200 appearance-none cursor-pointer"
-                    required
+                  
                   >
                     <option value="">
                       {crops.length === 0 ? "No crops available - Add crops first" : "Select affected crop..."}

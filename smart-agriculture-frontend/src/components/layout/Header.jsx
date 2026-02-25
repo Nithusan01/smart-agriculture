@@ -91,10 +91,11 @@ const Header = () => {
 
 
 
-  const isActive = (path) => {
-    return location.pathname === path ? 'bg-green-100 text-green-700' : 'text-gray-700'
-  }
-
+ const isActive = (path) => {
+  return location.pathname === path
+    ? 'text-green-600 after:scale-x-100'
+    : 'text-gray-700 after:scale-x-0 hover:text-green-600 hover:after:scale-x-100';
+};
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false)
   }
@@ -148,32 +149,25 @@ const Header = () => {
       )
     } else if (currentUser) {
       return (
-        <div className="flex gap-3">
-          <Link 
-            to="/dashboard" 
-            className={`px-5 py-2.5 rounded-lg font-semibold text-xl transition-colors hover:bg-gray-100 ${isActive('/dashboard')}`}
-          >
-            Dashboard
-          </Link>
-          <Link 
-            to="/planning" 
-            className={`px-5 py-2.5 rounded-lg font-semibold text-xl transition-colors hover:bg-gray-100 ${isActive('/planning')}`}
-          >
-            Planning
-          </Link>
-          <Link 
-            to="/device-management" 
-            className={`px-5 py-2.5 rounded-lg font-semibold text-xl transition-colors hover:bg-gray-100 ${isActive('/device-management')}`}
-          >
-            Devices
-          </Link>
-          <Link 
-            to="/chatbot" 
-            className={`px-5 py-2.5 rounded-lg font-semibold text-xl transition-colors hover:bg-gray-100 ${isActive('/chatbot')}`}
-          >
-            Diseases
-          </Link>
-        </div>
+       <div className="flex gap-3">
+  {[
+    { to: '/dashboard', label: 'Dashboard' },
+    { to: '/planning', label: 'Planning' },
+    { to: '/device-management', label: 'Devices' },
+    { to: '/chatbot', label: 'Diseases' },
+  ].map(({ to, label }) => (
+    <Link
+      key={to}
+      to={to}
+      className={`relative pb-1 px-2.5 py-2.5 font-semibold text-xl transition-colors duration-200
+        after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-green-500
+        after:transition-transform after:duration-300 after:ease-in-out after:origin-center
+        ${isActive(to)}`}
+    >
+      {label}
+    </Link>
+  ))}
+</div>
       )
     }
     return null;
@@ -267,18 +261,27 @@ const Header = () => {
   }
 
   return (
-    <header className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-      isScrolled || isMobileMenuOpen || isOnAuthPage() || location.pathname === "/device-management" || location.pathname === "/" || location.pathname === "/planning" || location.pathname === "/chatbot" ||  location.pathname === "/dashboard"
-        ? 'bg-white shadow-md border-b border-gray-200' 
-        : 'bg-gary-100 backdrop-blur-sm'
-    }`}>
-      
-      <div className="max-w-7xl mx-auto px-4">
+   <header className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
+  isScrolled
+    ? 'bg-transparent pointer-events-none'
+    : isOnAuthPage() || ["/", "/planning", "/chatbot", "/dashboard", "/device-management"].includes(location.pathname)
+      ? 'bg-white shadow-md border-b border-gray-200'
+      : 'bg-gray-100 backdrop-blur-sm'
+}`}>
+  <div className={`transition-all duration-300 ${
+    isScrolled
+      ? 'mx-auto mt-3 max-w-fit px-2 py-0 rounded-3xl bg-white shadow-lg border border-gray-200 pointer-events-auto'
+      : ''
+  }`}>
+    {/* your nav content here */}
+    <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-2 pr-3">
             <i className="fas fa-leaf text-green-600 text-5xl"></i>
+            {!isScrolled && (
             <span className="text-4xl font-bold text-gray-900">AgriSmart</span>
+            )}
           </Link>
           
           {/* Desktop Navigation */}
@@ -290,6 +293,7 @@ const Header = () => {
           <div className="hidden md:flex items-center gap-3">
             {currentUser ? (
               <>
+              {!isScrolled &&(
               <button 
             onClick={handleLogout} 
             className="px-5 py-3.5 text-red-600 hover:bg-red-50 rounded-lg font-semibold text-base flex items-center gap-2"
@@ -297,7 +301,7 @@ const Header = () => {
             <FontAwesomeIcon icon={faSignOutAlt} />
             Logout
           </button>
-              
+              ) }
               
               <UserMenu />
               </>
@@ -335,7 +339,7 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Mobile Menu */}
+       {/* Mobile Menu */}
       {isMobileMenuOpen && (
         <div className="md:hidden mobile-menu bg-white border-t border-gray-200">
           <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-3">
@@ -343,6 +347,9 @@ const Header = () => {
           </div>
         </div>
       )}
+
+  </div>
+     
     </header>
   )
 }

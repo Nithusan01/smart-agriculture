@@ -169,14 +169,20 @@ const updatePlan = async (req, res) => {
                 
 
                 }
+                if(updateData.status === "harvested" || updateData.status === "cancelled"){
+                    updateData.deviceId = null; // Unassign device if plan is harvested or cancelled
+                    
+                }
                 
             
         }
 
-        
 
         if (!plan) {
             return res.status(404).json({ success: false, message: 'Plan not found' });
+        }
+        if(plan.status === "harvested" || plan.status === "cancelled"){
+            return res.status(400).json({ success: false, message: `Cannot update a ${plan.status} plan` });
         }
 
         await plan.update(updateData);

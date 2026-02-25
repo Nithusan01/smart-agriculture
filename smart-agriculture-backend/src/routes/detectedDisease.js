@@ -1,14 +1,16 @@
 const express = require('express')
-const {addDetectedDisease,getAllDetectedDiseases,updateDetectedStatus,deleteDetectedDisease,getDetectionsByCultivationPlan} = require('../controllers/detectedDiseaseController')
+const {addDetectedDisease,getAllDetectedDiseases,deleteDetectedDisease,getDetectionsByCultivationPlan,updateDetectedDiseaseStatus} = require('../controllers/detectedDiseaseController')
 const router =express.Router();
 const {protect} = require('../middlewares/auth');
 const { route } = require('./device');
+const role = require("../middlewares/roleMiddleware")
 
 
-router.post('/', protect,addDetectedDisease);
-router.get('/', protect,getAllDetectedDiseases);
-router.put('/:id',protect,updateDetectedStatus);
-router.delete('/:id', protect,deleteDetectedDisease);
-router.get('/plan/:cultivationPlanId',protect,getDetectionsByCultivationPlan);
+
+router.post('/', protect,role(['farmer']),addDetectedDisease);
+router.get('/', protect,role(['farmer']),getAllDetectedDiseases);
+router.put('/:id/status',protect,role(['farmer']),updateDetectedDiseaseStatus);
+router.delete('/:id', protect,role(['farmer']),deleteDetectedDisease);
+router.get('/plan/:cultivationPlanId',protect,role(['farmer']),getDetectionsByCultivationPlan);
 
 module.exports = router;

@@ -14,6 +14,7 @@ const detectedDiseaseRoutes = require('./routes/detectedDisease')
 const chatRoutes = require('./routes/chat');
 const DeviceRoutes = require('./routes/device');
 const sensorDataRoutes = require('./routes/sensorData');
+const soilRoutes = require('./routes/soil');
 
 const app = express();
 
@@ -56,6 +57,7 @@ app.use('/api/detectedDisease',detectedDiseaseRoutes)
 app.use('/api/chat', chatRoutes);
 app.use('/api/device',DeviceRoutes);
 app.use('/api/sensor',sensorDataRoutes);
+app.use('/api/soil',soilRoutes);
 
 
 // Protected route example

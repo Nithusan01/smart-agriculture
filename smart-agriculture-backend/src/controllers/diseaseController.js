@@ -1,51 +1,90 @@
+const crop = require('../models/crop');
 const {Disease,Crop} = require('../models/index');
 
-// create disease
-const createDisease = async (req,res) => {
+const isValidUUID = (uuid) => {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(uuid);
+};
 
-    if(req.user.role !== 'admin'){
-        return res.status(403).json({success:false,message:'Access not denied '})
+/// create disease
+const createDisease = async (req, res) => {
+
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({
+      success: false,
+      message: 'Access denied'
+    });
+  }
+
+  try {
+    const {
+      cropId,
+      diseaseName,
+      cause,
+      symptoms,
+      treatment,
+      severity,
+      prevention,
+      imageUrl,
+      spreadRate
+    } = req.body;
+
+    if (!diseaseName) {
+      return res.status(400).json({
+        success: false,
+        message: "diseaseName is required"
+      });
     }
 
-    try {
-        const {cropId,diseaseName,cause,symptoms,treatment,severity,prevention,imageUrl,spreadRate} =req.body;
+    const finalCropId =
+      cropId && cropId.trim() !== "" ? cropId : null;
 
-        if (!cropId || !diseaseName) {
-      return res.status(400).json({ message: "cropId and diseaseName are required" });
+    //  Validate UUID only if cropId exists
+    if (finalCropId && !isValidUUID(finalCropId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid crop ID format'
+      });
     }
 
-      //check if disease exsists
-      const exsistingDisease = await Disease.findOne({
-        where:{
-            diseaseName
-        }
-      })
-      if(exsistingDisease){
-        return res.status(400).json({success:false,message:"disease name already exsist"});
+    // check if disease exists
+    const existingDisease = await Disease.findOne({
+      where: { diseaseName }
+    });
 
-      }
-
-      const newDisease = await Disease.create({
-        cropId,
-        diseaseName,
-        cause,
-        symptoms,
-        treatment,
-        severity,
-        prevention,
-        spreadRate,
-        imageUrl
-        
-      })
-      res.status(200).json({success:true,message:'disease add successfully',data:newDisease})
-        
-    } catch (error) {
-
-        console.error("Error adding disease",error)
-        res.status(500).json({sucess:false,error: error.message})
+    if (existingDisease) {
+      return res.status(400).json({
+        success: false,
+        message: "Disease name already exists"
+      });
     }
 
-}
+    const newDisease = await Disease.create({
+      cropId: finalCropId,
+      diseaseName,
+      cause,
+      symptoms,
+      treatment,
+      severity,
+      prevention,
+      spreadRate,
+      imageUrl
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Disease added successfully',
+      data: newDisease
+    });
+
+  } catch (error) {
+    console.error("Error adding disease", error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+};
 
 //get all diseases 
 
@@ -89,6 +128,19 @@ const getDiseaseById = async (req,res) => {
 
     if (!disease) {
       return res.status(404).json({ message: "Disease not found" });
+    }
+
+     // Handle empty device_id - convert to null
+    if (req.body.cropId === '' || req.body.cropId === undefined) {
+      req.body.cropId = null;
+    }
+
+    // Validate UUID format if provided
+    if (req.body.cropId && !isValidUUID(req.body.cropId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid crop ID format'
+      });
     }
 
     await disease.update(req.body);

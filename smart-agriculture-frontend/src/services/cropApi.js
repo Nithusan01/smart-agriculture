@@ -1,40 +1,25 @@
 import { api } from "./api.js"
 
 export const createCrop = async(data) => {
-    try {
         const res = await api.post("crop/",data)
-        return res
-    } catch (error) {
-        throw error
-    }
+        return res;
 }
 export const getCrops = async() => {
-    try {
         const res = await api.get("crop/") 
-        return res
-    } catch (error) {
-        throw error
-    }   
+        return res;  
 }
 
 export const getCropById = async (id) => {
-    try {
+    
         const res = await api.get(`crop/${id}`);
         return res;
-    } catch (error) {
-        console.error('Error fetching crop by ID:', error);
-        throw error;
-    }
 }
 
 
 export const getCropByName = async(cropName) => {
-    try {
+
         const res = await api.get(`crop/${cropName}`)
         return res
-    } catch (error) {
-        throw error 
-    }
 }      
 
 export const updateCrop = async (id, data) => {

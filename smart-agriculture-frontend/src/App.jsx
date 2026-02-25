@@ -13,20 +13,21 @@ import ProtectedAdminRoute from './components/auth/ProtectedAdminRoute'
 import { CropProvider } from './contexts/CropContext'
 import { DiseaseProvider } from './contexts/DiseaseContext'
 import {DetectedDiseaseProvider} from './contexts/DetectedDiseaseContext'
+import { SoilProvider } from './contexts/SoilContext'
 
 
 import './index.css'
+import Planning from './components/planning/planning'
 import Footer from './components/layout/Footer'
 import AgriSmartSection from './components/agriSmartSection/AgriSmartSection'
-import Planning from './components/planning/Planning'
 import DiseaseManagement from './components/diseaseManagement/DiseaseManagement'
 import { DeviceAuthProvider } from './contexts/DeviceAuthContext'
 import DevicesDashboard from './components/device/DevicesDashboard'
-
 function App() {
 
   return (
     <AuthProvider>
+      <SoilProvider>
       <CropProvider>
         <DiseaseProvider>
           <DetectedDiseaseProvider>
@@ -96,6 +97,7 @@ function App() {
           </DetectedDiseaseProvider>
         </DiseaseProvider>
       </CropProvider>
+      </SoilProvider>
     </AuthProvider>
 
 

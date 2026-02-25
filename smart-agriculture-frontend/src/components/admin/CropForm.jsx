@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { createCrop } from "../../services/cropApi.js";
 import { useCrops } from "../../contexts/CropContext.jsx";
+import { useSoil } from "../../contexts/SoilContext.jsx";
 
 const CropForm = () => {
 
   const {addCrop} = useCrops();
+  const {soilData} = useSoil();
   const [formData, setFormData] = useState({
     cropName: "",
     cropType: "",
@@ -115,13 +116,24 @@ const CropForm = () => {
           className="w-full p-2 border mb-3 rounded"
           required
         >
-          <option value="">Select Recommended Soil...</option>
-          <option value="Clay">Clay</option>
-          <option value="Sandy">Sandy</option>
-          <option value="Loamy">Loamy</option>
-          <option value="Silty">Silty</option>
-          <option value="Peaty">Peaty</option>
-          <option value="Chalky">Chalky</option>
+          {soilData.length > 0 ? (
+            <>
+              <option value="">Select Recommended Soil...</option>
+              {soilData.map((soil) => (
+                <option key={soil.id} value={soil.soilType}>
+                  {soil.soilType
+                    
+                    ? soil.soilType.charAt(0).toUpperCase() + soil.soilType.slice(1)
+                    : "Unknown Soil Type"}
+                </option>
+              ))}
+            </>
+          ) : (
+             <> 
+
+            <option value="">No soil data available</option>
+            </>
+          )}
         </select>
 
         <button

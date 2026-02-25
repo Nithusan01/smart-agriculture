@@ -1,20 +1,13 @@
 import {api} from "./api.js"
 
 export const createDisease = async(data) => {
-    try {
+
         const res = await api.post("disease/",data)
-        return res
-    } catch (error) {
-        throw error
-    }
+        return res;
 }
 export const getDiseases= async() => {
-    try {
         const res = await api.get("disease/") 
-        return res
-    } catch (error) {
-        throw error
-    }   
+        return res;
 }
 
 // export const getDiseaseById = async (id) => {
@@ -29,12 +22,9 @@ export const getDiseases= async() => {
 
 
 export const getDiseaseByCropName = async(cropName) => {
-    try {
+    
         const res = await api.get(`disease/${cropName}`)
-        return res
-    } catch (error) {
-        throw error 
-    }
+        return res;
 }      
 
 export const updateDisease = async (id, data) => {

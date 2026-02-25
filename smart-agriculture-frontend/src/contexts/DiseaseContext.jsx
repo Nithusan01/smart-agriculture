@@ -123,9 +123,6 @@ export  const DiseaseProvider = ({children}) => {
                 throw new Error('Disease ID is required');
             }
     
-            if (!updates || typeof updates !== 'object') {
-                throw new Error('Valid update data is required');
-            }
     
             const response = await updateDisease(id, updates);
             

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCrops } from "../../contexts/CropContext";
 import { useDiseases } from "../../contexts/DiseaseContext";
+import SoilAdmin from "./SoilAdmin"
 import {
     Users,
     Sprout,
@@ -77,6 +78,12 @@ const AdminPage = () => {
             icon: <Wifi size={20} />,
             description: 'Manage registered IoT devices'
         },
+        {
+            id: 'soil',
+            name: 'Soil Management',
+            icon: <Database size={20} />,
+            description: 'Manage soil data and analysis'
+        }
     ];
 
     // Stats data for dashboard
@@ -302,6 +309,13 @@ const AdminPage = () => {
                 return (
                     <div className="space-y-6">
                         <DeviceAdminPage refreshTrigger={refreshTriggers.devices} />
+                    </div>
+                );
+
+            case 'soil':
+                return (
+                    <div className="space-y-6">
+                        <SoilAdmin />
                     </div>
                 );
 

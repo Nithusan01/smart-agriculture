@@ -8,7 +8,7 @@ module.exports = (sequelize) => {
       primaryKey: true,
       field: 'disease_id'
     },
-   
+
     diseaseName: {
       type: DataTypes.STRING(100),
       allowNull: false,
@@ -44,15 +44,15 @@ module.exports = (sequelize) => {
       defaultValue: 'Moderate',
       field: 'spread_rate'
     },
-     cropId: {
+    cropId: {
       type: DataTypes.UUID,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: 'crops',
         key: 'crop_id'
-      },
-      field: 'crop_id'
+      }
     }
+
   }, {
     tableName: 'diseases',
     timestamps: true,

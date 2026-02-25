@@ -47,11 +47,11 @@ import {
 import { removeDevice } from "../../services/planApi";
 
 const Planning = () => {
-  const { plans, loading, addPlan, editPlan, deletePlan, status, setStatus,error,setError } = useCultivationPlan();
+  const { plans, loading, addPlan, editPlan, deletePlan, status, setStatus,error,setError,isLoading } = useCultivationPlan();
   const { crops, loading: cropsLoading, error: cropsError } = useCrops();
   const { devices,loading:devicesLoading } = useDeviceAuth();
   const { fetchWeatherForPlan } = useWeather();
-  const [activeTab, setActiveTab] = useState("crop-plan");
+  const [activeTab, setActiveTab] = useState("active crops");
   const [location, setLocation] = useState({ lat: null, lng: null });
   const [showPlanForm, setShowPlanForm] = useState(false);
   const [formData, setFormData] = useState({
@@ -69,6 +69,7 @@ const Planning = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [ expandedPlan, setExpandedPlan] = useState(false);
+  
 
   // ✅ Custom reusable hooks
   const planLocations = usePlanLocations(plans);
@@ -91,6 +92,8 @@ const availableDevices = devices.filter(
         ...prev,
         cropName: selectedCrop.cropName
       }));
+          
+
 
       // If planting date is set, automatically calculate harvest date
       if (formData.plantingDate && selectedCrop.durationDays) {
@@ -334,7 +337,7 @@ const availableDevices = devices.filter(
 
     return diffDays;
   };
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="text-center">
@@ -809,7 +812,7 @@ const availableDevices = devices.filter(
                   const plannedPlans = plans.filter(plan => plan.status === 'planned');
 
                   return plannedPlans.length > 0 ? (
-                    <div className="grid gap-6">
+                    <div className="grid gap-6 border-t border-gray-300 pt-6">
                       {plannedPlans.map((plan) => (
                         <PlanCard
                           key={plan.id}
@@ -829,12 +832,12 @@ const availableDevices = devices.filter(
                       </div>
                       <h3 className="text-xl font-semibold text-gray-600 mb-2">No planned cultivation plans</h3>
                       <p className="text-gray-500 mb-6">Create a new plan to get started with cultivation planning</p>
-                      <button
+                      {/* <button
                         onClick={() => setActiveTab("crop-plan")}
                         className="bg-green-500 text-white px-6 py-3 rounded-xl hover:bg-green-600 transition-colors font-semibold"
                       >
                         Create New Plan
-                      </button>
+                      </button> */}
                     </div>
                   );
                 })()}
@@ -955,5 +958,4 @@ const availableDevices = devices.filter(
     </div>
   );
 };
-
 export default Planning;   

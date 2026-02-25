@@ -57,13 +57,18 @@ module.exports = (sequelize) => {
     },
 
     status: {
-      type: DataTypes.ENUM('active', 'resolved',"detected"),
+      type: DataTypes.ENUM('resolved',"detected"),
       defaultValue: 'detected',
     },
 
     notes: {
       type: DataTypes.TEXT,
       allowNull: true,
+    },
+    resolvedDate: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      field: 'resolved_date',
     },
   }, {
     tableName: 'detected_diseases',

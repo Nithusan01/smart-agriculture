@@ -1,8 +1,26 @@
 import { useMemo } from 'react';
 import { useDateUtils } from "../hooks/useDateUtils";
+import  useDeviceRealtime  from './useDeviceRealtime';
+import { useDeviceAuth } from '../../contexts/DeviceAuthContext';
+
 
 export const usePlanAlerts = (plans, planWeather) => {
   const { isDateWithinDays } = useDateUtils();
+  const { devices} = useDeviceAuth();
+        const device = devices.find(d => d.id === plans.deviceId);
+        // const { latest } = useDeviceRealtime(selectedDevice);
+        // Use array of device IDs for multiple device support
+        const deviceIds = useMemo(() => {
+          if (!device?.deviceId) return [];
+          return [device.deviceId];
+        }, [device?.deviceId]);
+      
+        // Use the hook with device IDs array
+        const { data, connected, getDeviceData } = useDeviceRealtime(deviceIds);
+      
+        // Get data for this specific device
+        const deviceData = device?.deviceId ? getDeviceData(device.deviceId) : { latest: null, history: [] };
+        const latest = deviceData.latest;
   
   const alerts = useMemo(() => {
     const alertList = [];
@@ -10,6 +28,8 @@ export const usePlanAlerts = (plans, planWeather) => {
     
     plans.forEach(plan => {
       const weather = planWeather[plan.id];
+
+      
       
       if (!weather) return; // Skip if no weather data
 
@@ -17,6 +37,27 @@ export const usePlanAlerts = (plans, planWeather) => {
       const today = new Date();
       const diffTime = Math.abs(today - planDate);
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      if(latest?.temperature > 30){
+        alertList.push({
+          id: `${plan.id}-temp`,
+          type: 'high-temp',
+          message: `High temperature (${Math.round(latest.temperature)}°C) alert at section (${plan.sectorName}) - Ensure adequate irrigation`,
+          plan: plan,
+          severity: 'high'
+        });
+      }
+      if(latest?.humidity < 30){
+        alertList.push({
+          id: `${plan.id}-humidity`,
+          type: 'low-humidity',
+          message: `Low humidity (${latest.humidity}%) alert at section (${plan.sectorName}) - Monitor soil moisture`,
+          plan: plan,
+          severity: 'medium'
+        });
+      }
+
+      
 
       // Upcoming activity alert
       if (diffDays <= 3 && plan.status === 'planned') {

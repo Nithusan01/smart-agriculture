@@ -2,17 +2,8 @@ import {api} from './api';
 
 export const addDetectedDisease = async (diseaseData) => {
 
-    try {
         const res = await api.post('detectedDisease/', diseaseData)
         return res;
-        
-        
-    } catch (error) {
-        throw error 
-        
-    }
-        
-        
 }
 export const getDetectionByCultivationPlan = async(id)=> {
     try {
@@ -33,3 +24,16 @@ export const getDetectionByCultivationPlan = async(id)=> {
     }
 
 }
+export const updateDetectionStatus = async (id, status) => {
+    try {
+        if (!id) {
+            throw new Error('detection ID is required');
+        }
+        const res = await api.put(`detectedDisease/${id}/status`, { status });
+        return res;
+    } catch (error) {
+        console.error('Update detection status API error:', error);
+
+        throw error;
+    }
+};
